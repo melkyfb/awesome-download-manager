@@ -21,7 +21,7 @@ function makeStore(items = {}) {
 
 function wrapper(store: ReturnType<typeof makeStore>) {
   return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(Provider, { store }, children)
+    React.createElement(Provider, { store, children })
 }
 
 const activeDownload = {
