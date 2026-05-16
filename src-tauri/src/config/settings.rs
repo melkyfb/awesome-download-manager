@@ -9,6 +9,12 @@ pub struct Settings {
     pub ai_provider: Option<String>,
     pub search_provider: Option<String>,
     pub ai_enabled: bool,    // true only when AI api key is present in keyring
+    #[serde(default)]
+    pub theme_id: String,
+    #[serde(default)]
+    pub font_id: String,
+    #[serde(default)]
+    pub language: String,
 }
 
 impl Default for Settings {
@@ -20,6 +26,9 @@ impl Default for Settings {
             ai_provider: None,
             search_provider: None,
             ai_enabled: false,
+            theme_id: "dark-glass".to_string(),
+            font_id: "inter".to_string(),
+            language: "pt".to_string(),
         }
     }
 }
@@ -48,6 +57,9 @@ pub fn load_settings(repo: &Repository<'_>) -> Settings {
     }
     if let Ok(Some(v)) = repo.get_setting("ai_provider") { s.ai_provider = Some(v); }
     if let Ok(Some(v)) = repo.get_setting("search_provider") { s.search_provider = Some(v); }
+    if let Ok(Some(v)) = repo.get_setting("theme_id") { s.theme_id = v; }
+    if let Ok(Some(v)) = repo.get_setting("font_id") { s.font_id = v; }
+    if let Ok(Some(v)) = repo.get_setting("language") { s.language = v; }
 
     // Check keyring for AI key existence — value never exposed to frontend
     s.ai_enabled = get_ai_key().is_some();
@@ -64,6 +76,9 @@ pub fn save_settings(repo: &Repository<'_>, settings: &Settings) -> rusqlite::Re
     if let Some(ref p) = settings.search_provider {
         repo.set_setting("search_provider", p)?;
     }
+    repo.set_setting("theme_id", &settings.theme_id)?;
+    repo.set_setting("font_id", &settings.font_id)?;
+    repo.set_setting("language", &settings.language)?;
     Ok(())
 }
 
@@ -124,6 +139,9 @@ mod tests {
             ai_provider: Some("claude".to_string()),
             search_provider: Some("brave".to_string()),
             ai_enabled: false,
+            theme_id: "brasil".to_string(),
+            font_id: "pacifico".to_string(),
+            language: "en".to_string(),
         };
         save_settings(&repo, &s).unwrap();
         let loaded = load_settings(&repo);
@@ -132,6 +150,9 @@ mod tests {
         assert_eq!(loaded.dest_folder, "/tmp/downloads");
         assert_eq!(loaded.ai_provider.as_deref(), Some("claude"));
         assert_eq!(loaded.search_provider.as_deref(), Some("brave"));
+        assert_eq!(loaded.theme_id, "brasil");
+        assert_eq!(loaded.font_id, "pacifico");
+        assert_eq!(loaded.language, "en");
     }
 
     #[test]

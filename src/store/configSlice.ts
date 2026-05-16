@@ -8,6 +8,9 @@ const initialState: Config = {
   ai_provider: null,
   search_provider: null,
   ai_enabled: false,
+  theme_id: 'dark-glass',
+  font_id: 'inter',
+  language: 'pt',
 }
 
 const configSlice = createSlice({

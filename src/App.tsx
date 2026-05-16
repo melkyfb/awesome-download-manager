@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
 import type { RootState, AppDispatch } from './store'
 import { setConfig } from './store/configSlice'
+import { setAppearance } from './store/appearanceSlice'
 import { upsertDownload } from './store/downloadsSlice'
 import { useTauriEvents } from './hooks/useTauriEvents'
 import { useForegroundService } from './hooks/useForegroundService'
@@ -29,6 +30,11 @@ export default function App() {
           invoke<Download[]>('list_downloads'),
         ])
         dispatch(setConfig(settings))
+        dispatch(setAppearance({
+          themeId: settings.theme_id,
+          fontId: settings.font_id,
+          language: settings.language,
+        }))
         existingDownloads.forEach(dl => dispatch(upsertDownload(dl)))
         await invoke('restart_active_downloads')
       } catch (e) {

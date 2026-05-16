@@ -37,4 +37,7 @@ export interface Config {
   ai_provider: string | null
   search_provider: string | null
   ai_enabled: boolean
+  theme_id: string
+  font_id: string
+  language: string
 }
