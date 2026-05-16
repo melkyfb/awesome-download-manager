@@ -354,6 +354,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
+ "tauri-plugin-fs",
  "thiserror 1.0.69",
  "tokio",
  "tokio-test",
