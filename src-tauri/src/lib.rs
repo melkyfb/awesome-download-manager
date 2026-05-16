@@ -35,8 +35,10 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let db_path = get_db_path(&app.handle());
-            std::fs::create_dir_all(db_path.parent().unwrap())
-                .map_err(|e| e.to_string())?;
+            std::fs::create_dir_all(
+                db_path.parent().ok_or("db path has no parent directory")?
+            )
+            .map_err(|e| e.to_string())?;
             let conn = db::open_db(&db_path).map_err(|e| e.to_string())?;
             let state = AppState {
                 db: Arc::new(Mutex::new(conn)),
