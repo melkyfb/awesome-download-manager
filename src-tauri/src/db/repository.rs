@@ -60,6 +60,7 @@ impl<'a> Repository<'a> {
         Self { conn }
     }
 
+    // Note: rec.created_at is intentionally ignored — the DB sets it via datetime('now').
     pub fn insert_download(&self, rec: &DownloadRecord) -> Result<()> {
         self.conn.execute(
             "INSERT INTO downloads (id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at)
