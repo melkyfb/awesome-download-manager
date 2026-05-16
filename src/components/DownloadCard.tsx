@@ -39,8 +39,12 @@ export function DownloadCard({ download }: { download: Download }) {
   }
 
   async function handleCancel() {
-    await invoke('cancel_download', { id: download.id })
-    dispatch(removeDownload(download.id))
+    try {
+      await invoke('cancel_download', { id: download.id })
+      dispatch(removeDownload(download.id))
+    } catch (e) {
+      console.error('cancel_download failed', e)
+    }
   }
 
   return (

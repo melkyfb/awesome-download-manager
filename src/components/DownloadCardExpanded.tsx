@@ -25,7 +25,7 @@ export function DownloadCardExpanded({ download }: { download: Download }) {
   const aiEnabled = useSelector((s: RootState) => s.config.ai_enabled)
 
   function copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text)
+    navigator.clipboard.writeText(text).catch(console.error)
   }
 
   return (
