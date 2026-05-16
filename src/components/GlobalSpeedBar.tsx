@@ -15,7 +15,11 @@ export function GlobalSpeedBar() {
     const bps = kbps * 1024
     dispatch(setMaxSpeed(bps))
     const newConfig = { ...config, max_speed: bps }
-    await invoke('save_settings_cmd', { settings: newConfig })
+    try {
+      await invoke('save_settings_cmd', { settings: newConfig })
+    } catch (err) {
+      console.error('save_settings_cmd failed', err)
+    }
   }
 
   const kbps = Math.round(config.max_speed / 1024)

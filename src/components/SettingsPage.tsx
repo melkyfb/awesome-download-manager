@@ -18,6 +18,7 @@ export function SettingsPage() {
   const [searchProvider, setSearchProvider] = useState(config.search_provider ?? '')
   const [vtKey, setVtKey] = useState('')
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [aiKeyStatus, setAiKeyStatus] = useState<'idle' | 'saving' | 'saved' | 'deleted'>('idle')
 
   async function pickFolder() {
@@ -27,6 +28,7 @@ export function SettingsPage() {
 
   async function saveAll() {
     setSaving(true)
+    setSaveError(null)
     try {
       const newConfig = {
         ...config,
@@ -39,7 +41,7 @@ export function SettingsPage() {
       await invoke('save_settings_cmd', { settings: newConfig })
       dispatch(setConfig({ ...newConfig, ai_enabled: config.ai_enabled }))
     } catch (e) {
-      console.error('save_settings_cmd failed', e)
+      setSaveError(e instanceof Error ? e.message : String(e))
     } finally {
       setSaving(false)
     }
@@ -142,6 +144,12 @@ export function SettingsPage() {
             placeholder="Optional - enables automatic submission"
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
         </section>
+
+        {saveError && (
+          <p className="text-xs text-red-700 bg-red-50 border-l-4 border-red-400 px-3 py-2 rounded mb-3">
+            <strong>Error:</strong> {saveError}
+          </p>
+        )}
 
         <div className="flex gap-3 justify-end pt-2">
           <button onClick={() => dispatch(closeSettings())}
