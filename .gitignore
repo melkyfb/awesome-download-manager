@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Android signing — NEVER commit these
+*.keystore
+*.jks
+src-tauri/gen/android/keystore.properties
