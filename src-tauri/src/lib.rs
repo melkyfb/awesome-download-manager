@@ -1,6 +1,6 @@
 pub mod db;
-// pub mod config;    ← added in Task 3
-// pub mod download;  ← added in Task 4
+pub mod config;
+pub mod download;  // ← added in Task 4
 
 use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
