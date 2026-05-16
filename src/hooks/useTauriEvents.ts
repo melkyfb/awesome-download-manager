@@ -10,6 +10,7 @@ interface ProgressPayload {
   total_bytes: number | null
   speed_bps: number
   eta_seconds: number | null
+  chunk_speeds: number[]
 }
 
 interface CompletePayload {
@@ -33,6 +34,7 @@ export function useTauriEvents() {
           downloaded_bytes: event.payload.downloaded_bytes,
           speed_bps: event.payload.speed_bps,
           eta_seconds: event.payload.eta_seconds,
+          chunk_speeds: event.payload.chunk_speeds,
         }))
       }),
       listen<CompletePayload>('download:complete', (event) => {

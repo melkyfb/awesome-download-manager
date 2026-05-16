@@ -28,6 +28,7 @@ export default function App() {
         ])
         dispatch(setConfig(settings))
         existingDownloads.forEach(dl => dispatch(upsertDownload(dl)))
+        await invoke('restart_active_downloads')
       } catch (e) {
         console.error('App init failed', e)
       }

@@ -26,6 +26,7 @@ pub struct ProgressEvent {
     pub total_bytes: Option<u64>,
     pub speed_bps: u64,
     pub eta_seconds: Option<u64>,
+    pub chunk_speeds: Vec<u64>,
 }
 
 pub type CancelToken = Arc<AtomicBool>;
@@ -53,7 +54,7 @@ impl DownloadEngine {
         num_chunks: u8,
         speed_limit: Arc<AtomicU64>,
         cancel: CancelToken,
-        progress_cb: impl Fn(u64, Option<u64>) + Send + Sync + 'static,
+        progress_cb: impl Fn(u64, Option<u64>, Vec<u64>) + Send + Sync + 'static,
     ) -> Result<String, DownloadError> {
         if url.starts_with("ftp://") || url.starts_with("ftps://") {
             return self.download_ftp(url, dest_path, cancel, progress_cb).await;
@@ -68,7 +69,7 @@ impl DownloadEngine {
         num_chunks: u8,
         speed_limit: Arc<AtomicU64>,
         cancel: CancelToken,
-        progress_cb: impl Fn(u64, Option<u64>) + Send + Sync + 'static,
+        progress_cb: impl Fn(u64, Option<u64>, Vec<u64>) + Send + Sync + 'static,
     ) -> Result<String, DownloadError> {
         let head = self.client.head(url).send().await
             .map_err(|e| DownloadError::Network(e.to_string()))?;
@@ -83,13 +84,17 @@ impl DownloadEngine {
             .map(|v| v.to_str().unwrap_or("none") != "none")
             .unwrap_or(false);
 
+        eprintln!("[ADM] HEAD {} → content-length={:?} accept-ranges={}", url, total, accepts_range);
+
         let progress_cb = Arc::new(progress_cb);
         let downloaded = Arc::new(AtomicU64::new(0));
 
         if accepts_range && total.is_some() && num_chunks > 1 {
+            eprintln!("[ADM] mode=CHUNKED chunks={} total={}", num_chunks, total.unwrap());
             self.chunked_download(url, dest_path, total.unwrap(), num_chunks,
                 speed_limit, cancel, downloaded, progress_cb).await
         } else {
+            eprintln!("[ADM] mode=STREAM (accepts_range={} total={:?} chunks={})", accepts_range, total, num_chunks);
             self.stream_download(url, dest_path, total, speed_limit, cancel, downloaded, progress_cb).await
         }
     }
@@ -102,7 +107,7 @@ impl DownloadEngine {
         speed_limit: Arc<AtomicU64>,
         cancel: CancelToken,
         downloaded: Arc<AtomicU64>,
-        progress_cb: Arc<impl Fn(u64, Option<u64>) + Send + Sync>,
+        progress_cb: Arc<impl Fn(u64, Option<u64>, Vec<u64>) + Send + Sync>,
     ) -> Result<String, DownloadError> {
         let resp = self.client.get(url).send().await
             .map_err(|e| DownloadError::Network(e.to_string()))?;
@@ -123,7 +128,7 @@ impl DownloadEngine {
             bucket.consume(bytes.len() as u64).await;
             file.write_all(&bytes).await?;
             let n = downloaded.fetch_add(bytes.len() as u64, Ordering::Relaxed) + bytes.len() as u64;
-            progress_cb(n, total);
+            progress_cb(n, total, vec![]);
         }
 
         file.flush().await?;
@@ -139,7 +144,7 @@ impl DownloadEngine {
         speed_limit: Arc<AtomicU64>,
         cancel: CancelToken,
         downloaded: Arc<AtomicU64>,
-        progress_cb: Arc<impl Fn(u64, Option<u64>) + Send + Sync + 'static>,
+        progress_cb: Arc<impl Fn(u64, Option<u64>, Vec<u64>) + Send + Sync + 'static>,
     ) -> Result<String, DownloadError> {
         // Pre-allocate file to avoid fragmentation
         {
@@ -149,6 +154,10 @@ impl DownloadEngine {
 
         let chunk_size = total / num_chunks as u64;
         let mut handles = vec![];
+
+        let chunk_speeds = Arc::new(
+            (0..num_chunks).map(|_| AtomicU64::new(0)).collect::<Vec<_>>()
+        );
 
         for i in 0..num_chunks as u64 {
             let start = i * chunk_size;
@@ -160,27 +169,49 @@ impl DownloadEngine {
             let downloaded = downloaded.clone();
             let progress_cb = progress_cb.clone();
             let rate = speed_limit.load(Ordering::Relaxed);
+            let chunk_speeds = chunk_speeds.clone();
 
             let handle = tokio::spawn(async move {
+                eprintln!("[ADM] chunk {} started: bytes={}-{}", i, start, end);
                 let mut bucket = crate::download::speed::TokenBucket::new(rate);
+                let chunk_start_time = std::time::Instant::now();
                 let resp = client.get(&url)
                     .header("Range", format!("bytes={start}-{end}"))
                     .send().await
                     .map_err(|e| DownloadError::Network(e.to_string()))?;
+
+                let status = resp.status().as_u16();
+                eprintln!("[ADM] chunk {} response: HTTP {}", i, status);
+                if status != 206 {
+                    return Err(DownloadError::Http { status, url: url.clone() });
+                }
 
                 let mut file = OpenOptions::new().write(true).open(&dest).await?;
                 use tokio::io::AsyncSeekExt;
                 file.seek(std::io::SeekFrom::Start(start)).await?;
 
                 let mut stream = resp.bytes_stream();
+                let mut chunk_bytes: u64 = 0;
                 while let Some(chunk) = stream.next().await {
                     if cancel.load(Ordering::Relaxed) { return Err(DownloadError::Cancelled); }
                     let bytes = chunk.map_err(|e| DownloadError::Network(e.to_string()))?;
                     bucket.consume(bytes.len() as u64).await;
                     file.write_all(&bytes).await?;
+                    chunk_bytes += bytes.len() as u64;
                     let n = downloaded.fetch_add(bytes.len() as u64, Ordering::Relaxed) + bytes.len() as u64;
-                    progress_cb(n, Some(total));
+
+                    let chunk_elapsed = chunk_start_time.elapsed().as_secs_f64();
+                    let chunk_speed = if chunk_elapsed > 0.1 {
+                        (chunk_bytes as f64 / chunk_elapsed) as u64
+                    } else {
+                        0
+                    };
+                    chunk_speeds[i as usize].store(chunk_speed, Ordering::Relaxed);
+
+                    let speeds: Vec<u64> = chunk_speeds.iter().map(|a| a.load(Ordering::Relaxed)).collect();
+                    progress_cb(n, Some(total), speeds);
                 }
+                eprintln!("[ADM] chunk {} done: wrote {} bytes", i, chunk_bytes);
                 Ok::<(), DownloadError>(())
             });
             handles.push(handle);
@@ -200,7 +231,7 @@ impl DownloadEngine {
         url: &str,
         dest_path: &Path,
         cancel: CancelToken,
-        progress_cb: impl Fn(u64, Option<u64>) + Send + Sync,
+        progress_cb: impl Fn(u64, Option<u64>, Vec<u64>) + Send + Sync,
     ) -> Result<String, DownloadError> {
         use suppaftp::AsyncFtpStream;
         use futures_util::AsyncReadExt;
@@ -237,7 +268,7 @@ impl DownloadEngine {
         if cancel.load(Ordering::Relaxed) { return Err(DownloadError::Cancelled); }
 
         let total = data.len() as u64;
-        progress_cb(total, size);
+        progress_cb(total, size, vec![]);
         tokio::fs::write(dest_path, &data).await?;
 
         Ok(format!("{:x}", Sha256::digest(&data)))
@@ -263,7 +294,7 @@ mod tests {
             1,
             speed,
             cancel,
-            |_, _| {},
+            |_, _, _| {},
         ).await;
 
         assert!(sha.is_ok(), "Download failed: {:?}", sha);

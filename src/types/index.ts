@@ -14,6 +14,7 @@ export interface Download {
   completed_at: string | null
   speed_bps?: number
   eta_seconds?: number | null
+  chunk_speeds?: number[]
 }
 
 export interface AiResult {

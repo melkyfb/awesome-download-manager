@@ -27,6 +27,8 @@ fn main() {
             awesome_download_manager::download::commands::start_download,
             awesome_download_manager::download::commands::pause_download,
             awesome_download_manager::download::commands::cancel_download,
+            awesome_download_manager::download::commands::resume_download,
+            awesome_download_manager::download::commands::restart_active_downloads,
             awesome_download_manager::download::commands::list_downloads,
             awesome_download_manager::config::commands::get_settings,
             awesome_download_manager::config::commands::save_settings_cmd,

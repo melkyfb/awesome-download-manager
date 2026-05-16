@@ -2,6 +2,13 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '../store'
 import type { Download } from '../types'
 
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`
+}
+
 function AiButton({ label, disabled }: { label: string; disabled: boolean }) {
   return (
     <button
@@ -47,6 +54,20 @@ export function DownloadCardExpanded({ download }: { download: Download }) {
             >
               VirusTotal →
             </a>
+          </div>
+        </div>
+      )}
+
+      {/* Chunk Speeds */}
+      {download.chunk_speeds && download.chunk_speeds.length > 0 && (
+        <div className="mb-3">
+          <span className="text-xs text-gray-500 font-medium uppercase tracking-wide">Chunk Speeds</span>
+          <div className="grid grid-cols-4 gap-x-3 gap-y-1 mt-1">
+            {download.chunk_speeds.map((speed, i) => (
+              <span key={i} className="text-xs text-gray-600">
+                #{i}: {formatBytes(speed)}/s
+              </span>
+            ))}
           </div>
         </div>
       )}

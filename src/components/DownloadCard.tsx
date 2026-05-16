@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
 import type { RootState, AppDispatch } from '../store'
 import { setExpandedCard } from '../store/uiSlice'
-import { removeDownload } from '../store/downloadsSlice'
+import { upsertDownload, removeDownload } from '../store/downloadsSlice'
 import type { Download } from '../types'
 import { DownloadCardExpanded } from './DownloadCardExpanded'
 
@@ -47,6 +47,15 @@ export function DownloadCard({ download }: { download: Download }) {
     }
   }
 
+  async function handleResume() {
+    try {
+      await invoke('resume_download', { id: download.id })
+      dispatch(upsertDownload({ ...download, status: 'active', speed_bps: 0, eta_seconds: null, chunk_speeds: [] }))
+    } catch (e) {
+      console.error('resume_download failed', e)
+    }
+  }
+
   return (
     <div
       className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
@@ -80,6 +89,12 @@ export function DownloadCard({ download }: { download: Download }) {
         {download.status === 'active' && (
           <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
             <button onClick={handlePause} className="text-yellow-600 hover:text-yellow-800">Pause</button>
+            <button onClick={handleCancel} className="text-red-500 hover:text-red-700">Cancel</button>
+          </div>
+        )}
+        {download.status === 'paused' && (
+          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+            <button onClick={handleResume} className="text-green-600 hover:text-green-800">Resume</button>
             <button onClick={handleCancel} className="text-red-500 hover:text-red-700">Cancel</button>
           </div>
         )}
