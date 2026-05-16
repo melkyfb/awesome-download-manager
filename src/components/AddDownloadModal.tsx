@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import type { RootState, AppDispatch } from '../store'
-import { closeAddModal } from '../store/uiSlice'
+import { closeAddModal, openSettings } from '../store/uiSlice'
 import { upsertDownload } from '../store/downloadsSlice'
 import type { Download } from '../types'
 
@@ -13,6 +13,7 @@ export function AddDownloadModal() {
   const [url, setUrl] = useState('')
   const [destFolder, setDestFolder] = useState(config.dest_folder)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function pickFolder() {
     const selected = await open({ directory: true, defaultPath: destFolder })
@@ -22,6 +23,7 @@ export function AddDownloadModal() {
   async function startDownload() {
     if (!url.trim()) return
     setLoading(true)
+    setError(null)
     try {
       const id = await invoke<string>('start_download', {
         url: url.trim(),
@@ -43,7 +45,7 @@ export function AddDownloadModal() {
       dispatch(upsertDownload(dl))
       dispatch(closeAddModal())
     } catch (e) {
-      console.error('start_download failed', e)
+      setError(e instanceof Error ? e.message : String(e))
     } finally {
       setLoading(false)
     }
@@ -104,10 +106,16 @@ export function AddDownloadModal() {
           </button>
         </div>
 
+        {error && (
+          <p className="text-xs text-red-700 mt-3 bg-red-50 border-l-4 border-red-400 px-3 py-2 rounded">
+            <strong>Error:</strong> {error}
+          </p>
+        )}
+
         {!config.ai_enabled && (
           <p className="text-xs text-amber-700 mt-3 bg-amber-50 border-l-4 border-amber-400 px-3 py-2 rounded">
             <strong>!</strong> AI analysis not configured.{' '}
-            <button className="underline text-blue-600">Configure credentials</button>
+            <button onClick={() => dispatch(openSettings())} className="underline text-blue-600">Configure credentials</button>
           </p>
         )}
       </div>
