@@ -5,6 +5,7 @@ import type { RootState, AppDispatch } from './store'
 import { setConfig } from './store/configSlice'
 import { upsertDownload } from './store/downloadsSlice'
 import { useTauriEvents } from './hooks/useTauriEvents'
+import { useForegroundService } from './hooks/useForegroundService'
 import { GlobalSpeedBar } from './components/GlobalSpeedBar'
 import { DownloadCard } from './components/DownloadCard'
 import { AddDownloadModal } from './components/AddDownloadModal'
@@ -18,6 +19,7 @@ export default function App() {
   const settingsOpen = useSelector((s: RootState) => s.ui.settingsOpen)
 
   useTauriEvents()
+  useForegroundService()
 
   useEffect(() => {
     async function init() {
