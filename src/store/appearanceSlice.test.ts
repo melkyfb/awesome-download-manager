@@ -29,4 +29,18 @@ describe('appearanceSlice', () => {
     expect(s.themeId).toBe('poke')
     expect(s.fontId).toBe('inter') // unchanged
   })
+
+  it('setAppearance updates multiple fields independently', () => {
+    const s = reducer(undefined, setAppearance({ fontId: 'pacifico', language: 'en' }))
+    expect(s.fontId).toBe('pacifico')
+    expect(s.language).toBe('en')
+    expect(s.themeId).toBe('dark-glass') // unchanged
+  })
+
+  it('setAppearance with empty payload changes nothing', () => {
+    const s = reducer(undefined, setAppearance({}))
+    expect(s.themeId).toBe('dark-glass')
+    expect(s.fontId).toBe('inter')
+    expect(s.language).toBe('pt')
+  })
 })

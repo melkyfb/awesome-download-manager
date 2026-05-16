@@ -26,9 +26,9 @@ export const appearanceSlice = createSlice({
       state.language = action.payload
     },
     setAppearance: (state, action: PayloadAction<Partial<AppearanceState>>) => {
-      if (action.payload.themeId) state.themeId = action.payload.themeId
-      if (action.payload.fontId) state.fontId = action.payload.fontId
-      if (action.payload.language) state.language = action.payload.language
+      if (action.payload.themeId !== undefined) state.themeId = action.payload.themeId
+      if (action.payload.fontId !== undefined) state.fontId = action.payload.fontId
+      if (action.payload.language !== undefined) state.language = action.payload.language
     },
   },
 })
