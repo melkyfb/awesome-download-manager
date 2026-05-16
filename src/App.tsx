@@ -1,51 +1,60 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { invoke } from '@tauri-apps/api/core'
+import type { RootState, AppDispatch } from './store'
+import { setConfig } from './store/configSlice'
+import { upsertDownload } from './store/downloadsSlice'
+import { useTauriEvents } from './hooks/useTauriEvents'
+import { GlobalSpeedBar } from './components/GlobalSpeedBar'
+import { DownloadCard } from './components/DownloadCard'
+import { AddDownloadModal } from './components/AddDownloadModal'
+import { SettingsPage } from './components/SettingsPage'
+import type { Config, Download } from './types'
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+export default function App() {
+  const dispatch = useDispatch<AppDispatch>()
+  const downloads = useSelector((s: RootState) => Object.values(s.downloads.items))
+  const addModalOpen = useSelector((s: RootState) => s.ui.addModalOpen)
+  const settingsOpen = useSelector((s: RootState) => s.ui.settingsOpen)
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  useTauriEvents()
+
+  useEffect(() => {
+    async function init() {
+      try {
+        const [settings, existingDownloads] = await Promise.all([
+          invoke<Config>('get_settings'),
+          invoke<Download[]>('list_downloads'),
+        ])
+        dispatch(setConfig(settings))
+        existingDownloads.forEach(dl => dispatch(upsertDownload(dl)))
+      } catch (e) {
+        console.error('App init failed', e)
+      }
+    }
+    init()
+  }, [dispatch])
+
+  const sorted = [...downloads].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  )
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    <div className="h-screen flex flex-col bg-gray-50">
+      <GlobalSpeedBar />
 
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
+      <main className="flex-1 overflow-y-auto p-4 space-y-3">
+        {sorted.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-gray-400">
+            <p className="text-lg">No downloads yet</p>
+            <p className="text-sm">Click "+ New Download" to get started</p>
+          </div>
+        )}
+        {sorted.map(dl => <DownloadCard key={dl.id} download={dl} />)}
+      </main>
 
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
-  );
+      {addModalOpen && <AddDownloadModal />}
+      {settingsOpen && <SettingsPage />}
+    </div>
+  )
 }
-
-export default App;
