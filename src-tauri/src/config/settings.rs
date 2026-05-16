@@ -24,6 +24,12 @@ impl Default for Settings {
     }
 }
 
+#[cfg(target_os = "android")]
+fn default_download_dir() -> String {
+    "$DOWNLOAD".to_string()
+}
+
+#[cfg(not(target_os = "android"))]
 fn default_download_dir() -> String {
     dirs::download_dir()
         .unwrap_or_else(|| std::path::PathBuf::from("/tmp"))
