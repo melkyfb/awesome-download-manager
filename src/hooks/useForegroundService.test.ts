@@ -35,6 +35,7 @@ const activeDownload = {
   speed_bps: 500,
   eta_seconds: 10,
   chunk_speeds: [],
+  chunks_json: null,
   sha256: null,
   created_at: new Date().toISOString(),
   completed_at: null,
