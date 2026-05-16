@@ -51,13 +51,9 @@ pub async fn start_download(
 
     let cancel = Arc::new(AtomicBool::new(false));
     let speed_limit = state.global_speed_limit.clone();
-    // Clone db and app for use inside the spawned task
-    let db_for_task = state.db.clone();
-    let db_for_match = state.db.clone();
-    let app_for_cb = app.clone();
-    let app_for_match = app.clone();
-    let id_for_cb = id.clone();
-    let id_for_match = id.clone();
+    let db_arc = state.db.clone();
+    let app_arc = app.clone();
+    let id_spawn = id.clone();
 
     let abort_handle = tokio::spawn(async move {
         let result = with_retry(3, || {
@@ -66,9 +62,9 @@ pub async fn start_download(
             let dest_path = dest_path.clone();
             let speed_limit = speed_limit.clone();
             let cancel = cancel.clone();
-            let app = app_for_cb.clone();
-            let id = id_for_cb.clone();
-            let db = db_for_task.clone();
+            let app = app_arc.clone();
+            let id = id_spawn.clone();
+            let db = db_arc.clone();
             async move {
                 let id_for_progress = id.clone();
                 let id_for_db_cb = id.clone();
@@ -105,23 +101,23 @@ pub async fn start_download(
 
         match result {
             Ok(sha256) => {
-                if let Ok(db) = db_for_match.lock() {
+                if let Ok(db) = db_arc.lock() {
                     let repo = Repository::new(&db);
-                    let _ = repo.complete_download(&id_for_match, &sha256);
+                    let _ = repo.complete_download(&id_spawn, &sha256);
                 }
-                let _ = app_for_match.emit(
+                let _ = app_arc.emit(
                     "download:complete",
-                    serde_json::json!({ "id": id_for_match, "sha256": sha256 }),
+                    serde_json::json!({ "id": id_spawn, "sha256": sha256 }),
                 );
             }
             Err(e) => {
-                if let Ok(db) = db_for_match.lock() {
+                if let Ok(db) = db_arc.lock() {
                     let repo = Repository::new(&db);
-                    let _ = repo.update_status(&id_for_match, &DownloadStatus::Error);
+                    let _ = repo.update_status(&id_spawn, &DownloadStatus::Error);
                 }
-                let _ = app_for_match.emit(
+                let _ = app_arc.emit(
                     "download:error",
-                    serde_json::json!({ "id": id_for_match, "error": e }),
+                    serde_json::json!({ "id": id_spawn, "error": e }),
                 );
             }
         }
@@ -134,6 +130,8 @@ pub async fn start_download(
 
 #[tauri::command]
 pub async fn pause_download(id: String, state: State<'_, AppState>) -> Result<(), String> {
+    // TODO: progress since last callback is lost on abort; AppState should hold per-download
+    // AtomicU64 so pause can persist the current byte offset before aborting.
     if let Some(handle) = state.downloads.write().await.remove(&id) {
         handle.abort();
     }
