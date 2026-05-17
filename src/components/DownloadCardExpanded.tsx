@@ -12,10 +12,11 @@ function formatBytes(bytes: number): string {
 }
 
 function AiButton({ label, disabled }: { label: string; disabled: boolean }) {
+  const { t: tAi } = useTranslation()
   return (
     <button
       disabled={disabled}
-      title={disabled ? 'Configure AI API key in Settings' : undefined}
+      title={disabled ? tAi('aiButtons.disabled') : undefined}
       style={{
         fontSize: '12px',
         padding: '4px 12px',
@@ -78,7 +79,7 @@ export function DownloadCardExpanded({ download }: { download: Download }) {
               onClick={() => copyToClipboard(download.sha256!)}
               style={{ fontSize: '11px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}
             >
-              Copy
+              {t('card.copy')}
             </button>
             <a
               href={`https://www.virustotal.com/gui/file/${download.sha256}`}
@@ -86,7 +87,7 @@ export function DownloadCardExpanded({ download }: { download: Download }) {
               rel="noopener noreferrer"
               style={{ fontSize: '11px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}
             >
-              VirusTotal →
+              {t('card.virustotal')}
             </a>
           </div>
         </div>

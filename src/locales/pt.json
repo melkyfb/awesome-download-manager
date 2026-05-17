@@ -1,7 +1,7 @@
 {
   "nav": { "newDownload": "+ Novo Download", "settings": "Configurações" },
   "status": { "active": "ativo", "paused": "pausado", "complete": "completo", "error": "erro", "cancelled": "cancelado" },
-  "card": { "pause": "Pausar", "resume": "Retomar", "delete": "Excluir", "eta": "ETA {{time}}", "chunkSpeeds": "Velocidade por Chunk", "sha256": "SHA256" },
+  "card": { "pause": "Pausar", "resume": "Retomar", "delete": "Excluir", "eta": "ETA {{time}}", "chunkSpeeds": "Velocidade por Chunk", "sha256": "SHA256", "copy": "Copiar", "virustotal": "VirusTotal →" },
   "empty": { "title": "Nenhum download ainda", "subtitle": "Clique em \"+ Novo Download\" para começar" },
   "settings": {
     "title": "Configurações",

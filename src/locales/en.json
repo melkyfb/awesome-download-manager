@@ -1,7 +1,7 @@
 {
   "nav": { "newDownload": "+ New Download", "settings": "Settings" },
   "status": { "active": "active", "paused": "paused", "complete": "complete", "error": "error", "cancelled": "cancelled" },
-  "card": { "pause": "Pause", "resume": "Resume", "delete": "Delete", "eta": "ETA {{time}}", "chunkSpeeds": "Chunk Speeds", "sha256": "SHA256" },
+  "card": { "pause": "Pause", "resume": "Resume", "delete": "Delete", "eta": "ETA {{time}}", "chunkSpeeds": "Chunk Speeds", "sha256": "SHA256", "copy": "Copy", "virustotal": "VirusTotal →" },
   "empty": { "title": "No downloads yet", "subtitle": "Click \"+ New Download\" to get started" },
   "settings": {
     "title": "Settings",
