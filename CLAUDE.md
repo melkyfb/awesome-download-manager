@@ -46,6 +46,30 @@ Tauri v2 app: Rust backend (`src-tauri/src/`) + React frontend (`src/`).
 
 **Communication:** Frontend calls `invoke()` for actions, listens to `download:progress` / `download:complete` / `download:error` events from Rust.
 
+## Release process
+
+After every batch of commits that represents a shippable change, **always**:
+
+1. Create an annotated git tag with a compiled release note:
+   ```bash
+   git tag -a vX.Y.Z -m "$(cat <<'EOF'
+   vX.Y.Z
+
+   ## What's new
+   - <bullet per feature/fix derived from commit messages since last tag>
+   EOF
+   )"
+   git push origin vX.Y.Z
+   ```
+2. The GitHub Actions workflows (`release-desktop.yml`, `release-android.yml`) trigger automatically on the new tag and publish the release with signed binaries.
+
+Tag versioning convention: `vMAJOR.MINOR.PATCH`
+- PATCH — bug fixes, small improvements
+- MINOR — new features
+- MAJOR — breaking changes
+
+The last published tag is always the source of truth for what version the app reports at runtime.
+
 ## Plan 2
 
 AI features (file analysis, mirror search, malware check) are implemented in:
