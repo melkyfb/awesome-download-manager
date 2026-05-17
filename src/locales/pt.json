@@ -1,0 +1,17 @@
+{
+  "nav": { "newDownload": "+ Novo Download", "settings": "Configurações" },
+  "status": { "active": "ativo", "paused": "pausado", "complete": "completo", "error": "erro", "cancelled": "cancelado" },
+  "card": { "pause": "Pausar", "resume": "Retomar", "delete": "Excluir", "eta": "ETA {{time}}", "chunkSpeeds": "Velocidade por Chunk", "sha256": "SHA256" },
+  "empty": { "title": "Nenhum download ainda", "subtitle": "Clique em \"+ Novo Download\" para começar" },
+  "settings": {
+    "title": "Configurações",
+    "save": "Salvar", "cancel": "Cancelar",
+    "tabs": { "general": "🌐 Geral", "download": "⬇ Download", "appearance": "🎨 Personalização", "ai": "🤖 IA" },
+    "general": { "language": "Idioma", "startWithSystem": "Iniciar com o sistema", "minimizeToTray": "Minimizar na bandeja", "notifications": "Notificações ao completar" },
+    "download": { "destFolder": "Pasta de destino", "browse": "Alterar", "maxSpeed": "Velocidade máxima (KB/s, 0 = ilimitado)", "chunks": "Chunks paralelos (1–16)", "retries": "Tentativas em caso de erro", "sha256": "Verificar SHA256 ao completar" },
+    "appearance": { "theme": "Tema", "font": "Fonte", "viewAll": "ver todas ({{count}})", "groups": { "dark": "Escuros", "mid": "Intermediários", "light": "Claros", "country": "Países", "special": "Especiais" } },
+    "ai": { "provider": "Provedor de IA", "apiKey": "API Key", "configured": "(configurada)", "saveKey": "Salvar", "deleteKey": "Excluir", "searchProvider": "Provedor de Busca", "vtKey": "VirusTotal API Key (opcional)" }
+  },
+  "modal": { "title": "Novo Download", "urlLabel": "URL", "urlPlaceholder": "https://...", "destLabel": "Destino", "browse": "Selecionar", "start": "Iniciar Download", "cancel": "Cancelar" },
+  "aiButtons": { "summary": "AI Summary", "malware": "Check Malware", "mirrors": "Find Mirrors", "disabled": "Configure uma API key de IA nas Configurações", "banner": "Funções de IA desativadas.", "configure": "Configurar →" }
+}
