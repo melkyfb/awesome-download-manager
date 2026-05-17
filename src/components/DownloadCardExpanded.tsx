@@ -51,7 +51,6 @@ export function DownloadCardExpanded({ download }: { download: Download }) {
   return (
     <div
       style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--glass-border)' }}
-      onClick={(e) => e.stopPropagation()}
     >
       {/* SHA256 */}
       {download.sha256 && (

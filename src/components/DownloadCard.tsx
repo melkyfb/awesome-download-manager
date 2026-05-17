@@ -78,80 +78,85 @@ export function DownloadCard({ download }: { download: Download }) {
         WebkitBackdropFilter: 'blur(12px)',
         borderRadius: '12px',
         padding: '16px',
-        cursor: 'pointer',
         transition: 'border-color 0.2s',
       }}
-      onClick={() => dispatch(setExpandedCard(isExpanded ? null : download.id))}
     >
-      <div className="flex items-center justify-between mb-2">
-        <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }} className="truncate max-w-xs">
-          {download.filename}
-        </span>
-        <div className="flex items-center gap-2">
-          {download.total_bytes && (
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-              {formatBytes(download.total_bytes)}
-            </span>
-          )}
-          <span
-            style={{
-              background: 'color-mix(in srgb, var(--accent) 25%, transparent)',
-              color: 'var(--accent)',
-              fontSize: '11px',
-              padding: '2px 10px',
-              borderRadius: '12px',
-              border: '1px solid color-mix(in srgb, var(--accent) 40%, transparent)',
-            }}
-          >
-            {t(`status.${download.status}`)}
+      {/* Clickable summary — toggle expand on click */}
+      <div
+        style={{ cursor: 'pointer' }}
+        onClick={() => dispatch(setExpandedCard(isExpanded ? null : download.id))}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }} className="truncate max-w-xs">
+            {download.filename}
           </span>
+          <div className="flex items-center gap-2">
+            {download.total_bytes && (
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                {formatBytes(download.total_bytes)}
+              </span>
+            )}
+            <span
+              style={{
+                background: 'color-mix(in srgb, var(--accent) 25%, transparent)',
+                color: 'var(--accent)',
+                fontSize: '11px',
+                padding: '2px 10px',
+                borderRadius: '12px',
+                border: '1px solid color-mix(in srgb, var(--accent) 40%, transparent)',
+              }}
+            >
+              {t(`status.${download.status}`)}
+            </span>
+          </div>
+        </div>
+
+        <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '4px', height: '4px', marginBottom: '8px' }}>
+          <div
+            style={{
+              background: 'var(--accent)',
+              width: `${percent}%`,
+              height: '4px',
+              borderRadius: '4px',
+              transition: 'width 0.3s',
+            }}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+            {percent}% · {formatBytes(download.downloaded_bytes)}
+            {download.speed_bps ? ` · ${formatSpeed(download.speed_bps)}` : ''}
+            {download.eta_seconds ? ` · ${t('card.eta', { time: formatEta(download.eta_seconds) })}` : ''}
+          </span>
+          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+            {download.status === 'active' && (
+              <button
+                onClick={handlePause}
+                style={{ color: '#fbbf24', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                {t('card.pause')}
+              </button>
+            )}
+            {download.status === 'paused' && (
+              <button
+                onClick={handleResume}
+                style={{ color: '#4ade80', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                {t('card.resume')}
+              </button>
+            )}
+            <button
+              onClick={handleDelete}
+              style={{ color: '#f87171', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              {t('card.delete')}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '4px', height: '4px', marginBottom: '8px' }}>
-        <div
-          style={{
-            background: 'var(--accent)',
-            width: `${percent}%`,
-            height: '4px',
-            borderRadius: '4px',
-            transition: 'width 0.3s',
-          }}
-        />
-      </div>
-
-      <div className="flex items-center justify-between">
-        <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-          {percent}% · {formatBytes(download.downloaded_bytes)}
-          {download.speed_bps ? ` · ${formatSpeed(download.speed_bps)}` : ''}
-          {download.eta_seconds ? ` · ${t('card.eta', { time: formatEta(download.eta_seconds) })}` : ''}
-        </span>
-        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-          {download.status === 'active' && (
-            <button
-              onClick={handlePause}
-              style={{ color: '#fbbf24', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              {t('card.pause')}
-            </button>
-          )}
-          {download.status === 'paused' && (
-            <button
-              onClick={handleResume}
-              style={{ color: '#4ade80', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              {t('card.resume')}
-            </button>
-          )}
-          <button
-            onClick={handleDelete}
-            style={{ color: '#f87171', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            {t('card.delete')}
-          </button>
-        </div>
-      </div>
-
+      {/* Expanded detail — outside the toggle area, no propagation concerns */}
       {isExpanded && <DownloadCardExpanded download={download} />}
     </div>
   )
