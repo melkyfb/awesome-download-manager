@@ -72,6 +72,6 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'Awesome Download Manager ${{ github.ref_name }}'
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           target: ${{ matrix.target }}

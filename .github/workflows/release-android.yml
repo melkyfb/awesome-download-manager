@@ -93,7 +93,7 @@ jobs:
       - name: Upload AAB to release
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
+          draft: false
           files: src-tauri/gen/android/app/build/outputs/bundle/release/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
