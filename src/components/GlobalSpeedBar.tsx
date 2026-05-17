@@ -1,10 +1,12 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
+import { useTranslation } from 'react-i18next'
 import type { RootState, AppDispatch } from '../store'
 import { setMaxSpeed } from '../store/configSlice'
 import { openAddModal, openSettings } from '../store/uiSlice'
 
 export function GlobalSpeedBar() {
+  const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const config = useSelector((s: RootState) => s.config)
   const downloads = useSelector((s: RootState) => s.downloads.items)
@@ -25,34 +27,71 @@ export function GlobalSpeedBar() {
   const kbps = Math.round(config.max_speed / 1024)
 
   return (
-    <div className="flex items-center gap-4 px-4 py-2 bg-gray-900 text-white text-sm">
-      <span className="font-semibold text-blue-400">ADM</span>
+    <div style={{
+      background: 'var(--glass-bg)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      borderBottom: '1px solid var(--glass-border)',
+      padding: '10px 16px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+    }}>
+      <span style={{ fontWeight: 700, fontSize: '15px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
+        ADM
+      </span>
 
       <button
         onClick={() => dispatch(openAddModal())}
-        className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs font-medium"
+        style={{
+          background: 'var(--accent)',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '8px',
+          padding: '6px 14px',
+          fontSize: '12px',
+          fontWeight: 600,
+          cursor: 'pointer',
+        }}
       >
-        + New Download
+        {t('nav.newDownload')}
       </button>
 
       <div className="flex items-center gap-2 ml-auto">
-        <span className="text-gray-400 text-xs">{activeCount} active</span>
-        <label className="text-gray-400 text-xs">Max speed:</label>
+        <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{activeCount} active</span>
+        <label style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Max speed:</label>
         <input
           type="number"
           value={kbps}
           min={0}
           onChange={handleSpeedChange}
-          className="w-20 bg-gray-800 border border-gray-600 rounded px-2 py-1 text-xs text-white"
+          style={{
+            width: '80px',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid var(--glass-border)',
+            borderRadius: '6px',
+            padding: '4px 8px',
+            fontSize: '12px',
+            color: 'var(--text-primary)',
+            outline: 'none',
+          }}
         />
-        <span className="text-gray-400 text-xs">KB/s (0=unlimited)</span>
+        <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>KB/s</span>
       </div>
 
       <button
         onClick={() => dispatch(openSettings())}
-        className="text-gray-400 hover:text-white text-xs"
+        style={{
+          background: 'rgba(255,255,255,0.1)',
+          border: '1px solid var(--glass-border)',
+          borderRadius: '8px',
+          padding: '6px 14px',
+          fontSize: '12px',
+          color: 'var(--text-primary)',
+          cursor: 'pointer',
+        }}
       >
-        Settings
+        {t('nav.settings')}
       </button>
     </div>
   )

@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
+import { useTranslation } from 'react-i18next'
 import type { RootState, AppDispatch } from '../store'
 import { closeAddModal, openSettings } from '../store/uiSlice'
 import { upsertDownload } from '../store/downloadsSlice'
 import type { Download } from '../types'
 
 export function AddDownloadModal() {
+  const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const config = useSelector((s: RootState) => s.config)
   const [url, setUrl] = useState('')
@@ -52,33 +54,48 @@ export function AddDownloadModal() {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">New Download</h2>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+      <div style={{
+        background: 'var(--glass-bg)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid var(--glass-border)',
+        borderRadius: '16px',
+        padding: '24px',
+        width: '100%',
+        maxWidth: '480px',
+      }}>
+        <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
+          {t('modal.title')}
+        </h2>
 
-        <label className="block text-sm text-gray-600 mb-1">URL</label>
+        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+          {t('modal.urlLabel')}
+        </label>
         <input
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://example.com/file.zip"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder={t('modal.urlPlaceholder')}
           autoFocus
+          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '8px 12px', color: 'var(--text-primary)', width: '100%', outline: 'none', fontSize: '14px', marginBottom: '16px', boxSizing: 'border-box' }}
         />
 
-        <label className="block text-sm text-gray-600 mb-1">Destination Folder</label>
+        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+          {t('modal.destLabel')}
+        </label>
         <div className="flex gap-2 mb-5">
           <input
             type="text"
             value={destFolder}
             onChange={(e) => setDestFolder(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            style={{ flex: 1, background: 'rgba(255,255,255,0.08)', border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '8px 12px', color: 'var(--text-primary)', outline: 'none', fontSize: '14px' }}
           />
           <button
             onClick={pickFolder}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+            style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '8px 14px', fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer' }}
           >
-            Browse
+            {t('modal.browse')}
           </button>
         </div>
 
@@ -86,36 +103,30 @@ export function AddDownloadModal() {
           <button
             onClick={startDownload}
             disabled={loading || !url.trim()}
-            className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ flex: 1, background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 18px', fontWeight: 600, cursor: loading || !url.trim() ? 'not-allowed' : 'pointer', opacity: loading || !url.trim() ? 0.5 : 1, fontSize: '14px' }}
           >
-            {loading ? 'Starting...' : 'Download Now'}
-          </button>
-          <button
-            disabled
-            title={!config.ai_enabled ? 'Configure uma API key de IA nas Configurações para usar esta função' : undefined}
-            className="flex-1 flex items-center justify-center gap-1 border border-gray-300 rounded-lg py-2 text-sm opacity-40 cursor-not-allowed bg-gray-50 text-gray-400"
-          >
-            Analyze First
-            {!config.ai_enabled && <span className="text-amber-500 font-bold">!</span>}
+            {loading ? '...' : t('modal.start')}
           </button>
           <button
             onClick={() => dispatch(closeAddModal())}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+            style={{ background: 'transparent', border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '9px 18px', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '14px' }}
           >
-            Cancel
+            {t('modal.cancel')}
           </button>
         </div>
 
         {error && (
-          <p className="text-xs text-red-700 mt-3 bg-red-50 border-l-4 border-red-400 px-3 py-2 rounded">
+          <p style={{ fontSize: '12px', color: '#f87171', marginTop: '12px', background: 'rgba(248,113,113,0.1)', borderLeft: '3px solid #f87171', padding: '8px 12px', borderRadius: '6px' }}>
             <strong>Error:</strong> {error}
           </p>
         )}
 
         {!config.ai_enabled && (
-          <p className="text-xs text-amber-700 mt-3 bg-amber-50 border-l-4 border-amber-400 px-3 py-2 rounded">
-            <strong>!</strong> AI analysis not configured.{' '}
-            <button onClick={() => dispatch(openSettings())} className="underline text-blue-600">Configure credentials</button>
+          <p style={{ fontSize: '12px', color: '#fbbf24', marginTop: '12px', background: 'rgba(251,191,36,0.1)', borderLeft: '3px solid #fbbf24', padding: '8px 12px', borderRadius: '6px' }}>
+            <strong>!</strong> {t('aiButtons.banner')}{' '}
+            <button onClick={() => dispatch(openSettings())} style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '12px' }}>
+              {t('aiButtons.configure')}
+            </button>
           </p>
         )}
       </div>
