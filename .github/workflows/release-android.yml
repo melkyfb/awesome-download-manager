@@ -72,6 +72,23 @@ jobs:
           key: gradle-${{ hashFiles('src-tauri/gen/android/**/*.gradle*', 'src-tauri/gen/android/**/gradle-wrapper.properties') }}
           restore-keys: gradle-
 
+      - name: Set version from git tag
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const v = process.env.BUILD_VERSION.replace(/^v/, '');
+            const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+            conf.version = v;
+            fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2));
+            let cargo = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
+            cargo = cargo.replace(/^version = \"[^\"]+\"/m, 'version = \"' + v + '\"');
+            fs.writeFileSync('src-tauri/Cargo.toml', cargo);
+            console.log('Version set to', v);
+          "
+        env:
+          BUILD_VERSION: ${{ github.ref_name }}
+
       - name: Decode keystore
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$HOME/awesome-dm.keystore"
@@ -90,10 +107,18 @@ jobs:
           NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/25.2.9519653
         run: npm run tauri android build -- --aab
 
-      - name: Upload AAB to release
+      - name: Build Android APK
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/25.2.9519653
+        run: npm run tauri android build -- --apk
+
+      - name: Upload AAB and APK to release
         uses: softprops/action-gh-release@v2
         with:
           draft: false
-          files: src-tauri/gen/android/app/build/outputs/bundle/release/*.aab
+          files: |
+            src-tauri/gen/android/app/build/outputs/bundle/universalRelease/*.aab
+            src-tauri/gen/android/app/build/outputs/apk/**/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
