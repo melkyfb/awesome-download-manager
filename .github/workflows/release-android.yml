@@ -23,15 +23,35 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Cache Android SDK components
+        id: cache-android-sdk
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk/25.2.9519653
+            /usr/local/lib/android/sdk/build-tools/36.0.0
+            /usr/local/lib/android/sdk/platforms/android-36
+          key: android-sdk-ndk25.2.9519653-bt36.0.0-p36
+
       - name: Install Android NDK and build tools
-        run: |
-          sdkmanager "ndk;25.2.9519653" "build-tools;36.0.0" "platforms;android-36"
+        if: steps.cache-android-sdk.outputs.cache-hit != 'true'
+        run: sdkmanager "ndk;25.2.9519653" "build-tools;36.0.0" "platforms;android-36"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+
+      - name: Cache node_modules
+        id: cache-node
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install npm dependencies
+        if: steps.cache-node.outputs.cache-hit != 'true'
+        run: npm ci
 
       - name: Install Rust with Android targets
         uses: dtolnay/rust-toolchain@stable
@@ -43,8 +63,14 @@ jobs:
         with:
           workspaces: src-tauri
 
-      - name: Install npm dependencies
-        run: npm ci
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('src-tauri/gen/android/**/*.gradle*', 'src-tauri/gen/android/**/gradle-wrapper.properties') }}
+          restore-keys: gradle-
 
       - name: Decode keystore
         run: |
