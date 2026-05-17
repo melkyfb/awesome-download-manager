@@ -629,21 +629,10 @@
   <div class="container">
     <p class="section-label">Screenshots</p>
     <h2 class="section-title">See it in action</h2>
-    <div class="shots-grid">
-      <div class="shot-card" id="shot-1">
-        <span style="font-size:32px">⬇</span>
-        <span class="shot-label">Main Window</span>
-        <span style="font-size:11px;opacity:0.5">docs/screenshots/main.png</span>
-      </div>
-      <div class="shot-card" id="shot-2">
-        <span style="font-size:32px">🎨</span>
-        <span class="shot-label">Theme Picker</span>
-        <span style="font-size:11px;opacity:0.5">docs/screenshots/themes.png</span>
-      </div>
-      <div class="shot-card" id="shot-3">
-        <span style="font-size:32px">⚙️</span>
-        <span class="shot-label">Settings</span>
-        <span style="font-size:11px;opacity:0.5">docs/screenshots/settings.png</span>
+    <div class="shots-grid" id="shots-grid">
+      <div class="shot-card" style="grid-column:1/-1;justify-content:center">
+        <span style="font-size:28px;opacity:0.4">⬇</span>
+        <span style="font-size:13px;opacity:0.4">Loading screenshots…</span>
       </div>
     </div>
   </div>
@@ -825,24 +814,58 @@
     }
   }
 
-  /* ── Screenshot lazy-load ── */
-  function tryLoadScreenshot(id, src, altText) {
-    const img = new Image();
-    img.onload = () => {
-      const card = document.getElementById(id);
-      if (card) { card.innerHTML = ''; card.appendChild(img); img.alt = altText; }
-    };
-    img.src = src;
+  /* ── Screenshots — loaded dynamically from GitHub Contents API ── */
+  async function loadScreenshots() {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${REPO}/contents/docs/screenshots`);
+      if (!res.ok) return;
+      const files = await res.json();
+      if (!Array.isArray(files)) return;
+
+      const images = files.filter(f => /\.(png|jpe?g|gif|webp)$/i.test(f.name));
+      if (!images.length) return;
+
+      // hero* files first, then alphabetical
+      images.sort((a, b) => {
+        const ah = /^hero/i.test(a.name) ? 0 : 1;
+        const bh = /^hero/i.test(b.name) ? 0 : 1;
+        return ah !== bh ? ah - bh : a.name.localeCompare(b.name);
+      });
+
+      // Hero frame — first image
+      const heroFrame = document.getElementById('hero-screenshot');
+      if (heroFrame) {
+        const hi = new Image();
+        hi.alt = 'App screenshot';
+        hi.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+        hi.onload = () => { heroFrame.innerHTML = ''; heroFrame.appendChild(hi); };
+        hi.src = images[0].download_url;
+      }
+
+      // Gallery grid — all images
+      const grid = document.getElementById('shots-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      images.forEach(file => {
+        const name = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+        const card = document.createElement('div');
+        card.className = 'shot-card';
+        card.innerHTML = `<span style="font-size:28px;opacity:0.4">⬇</span><span class="shot-label">${name}</span>`;
+
+        const img = new Image();
+        img.alt = name;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+        img.onload = () => { card.innerHTML = ''; card.appendChild(img); };
+        img.src = file.download_url;
+
+        grid.appendChild(card);
+      });
+    } catch (_) { /* silent — gallery stays as loading state */ }
   }
 
   /* ── Init ── */
   loadGitHub();
-
-  // Try loading screenshots (silently skip if files don't exist yet)
-  tryLoadScreenshot('hero-screenshot', 'screenshots/hero.png', 'App main window');
-  tryLoadScreenshot('shot-1',  'screenshots/main.png',     'Main window');
-  tryLoadScreenshot('shot-2',  'screenshots/themes.png',   'Theme picker');
-  tryLoadScreenshot('shot-3',  'screenshots/settings.png', 'Settings');
+  loadScreenshots();
 </script>
 
 </body>
