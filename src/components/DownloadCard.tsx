@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
+import { useTranslation } from 'react-i18next'
 import type { RootState, AppDispatch } from '../store'
 import { setExpandedCard } from '../store/uiSlice'
 import { upsertDownload, removeDownload } from '../store/downloadsSlice'
@@ -8,42 +9,54 @@ import { DownloadCardExpanded } from './DownloadCardExpanded'
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
-  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`
+  if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`
+  if (bytes < 1024 ** 4) return `${(bytes / 1024 ** 3).toFixed(2)} GB`
+  return `${(bytes / 1024 ** 4).toFixed(2)} TB`
 }
 
 function formatSpeed(bps: number): string {
   return `${formatBytes(bps)}/s`
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  active: 'bg-blue-500',
-  paused: 'bg-yellow-500',
-  complete: 'bg-green-500',
-  error: 'bg-red-500',
-  cancelled: 'bg-gray-400',
+function formatEta(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`
+  if (seconds < 3600) return `${Math.round(seconds / 60)}min`
+  if (seconds < 86400) {
+    const h = Math.floor(seconds / 3600)
+    const m = Math.round((seconds % 3600) / 60)
+    return m > 0 ? `${h}h ${m}min` : `${h}h`
+  }
+  if (seconds < 2592000) return `${Math.round(seconds / 86400)}d`
+  if (seconds < 31536000) return `${Math.round(seconds / 2592000)} meses`
+  return `${(seconds / 31536000).toFixed(1)} anos`
 }
 
 export function DownloadCard({ download }: { download: Download }) {
   const dispatch = useDispatch<AppDispatch>()
   const expandedId = useSelector((s: RootState) => s.ui.expandedCardId)
   const isExpanded = expandedId === download.id
+  const { t } = useTranslation()
 
   const percent = download.total_bytes
     ? Math.min(100, Math.round((download.downloaded_bytes / download.total_bytes) * 100))
     : 0
 
   async function handlePause() {
-    await invoke('pause_download', { id: download.id })
+    try {
+      await invoke('pause_download', { id: download.id })
+      dispatch(upsertDownload({ ...download, status: 'paused', speed_bps: 0, eta_seconds: null, chunk_speeds: [] }))
+    } catch (e) {
+      console.error('pause_download failed', e)
+    }
   }
 
-  async function handleCancel() {
+  async function handleDelete() {
     try {
-      await invoke('cancel_download', { id: download.id })
+      await invoke('delete_download', { id: download.id })
       dispatch(removeDownload(download.id))
     } catch (e) {
-      console.error('cancel_download failed', e)
+      console.error('delete_download failed', e)
     }
   }
 
@@ -58,46 +71,85 @@ export function DownloadCard({ download }: { download: Download }) {
 
   return (
     <div
-      className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
+      style={{
+        background: 'var(--glass-bg)',
+        border: '1px solid var(--glass-border)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '12px',
+        padding: '16px',
+        cursor: 'pointer',
+        transition: 'border-color 0.2s',
+      }}
       onClick={() => dispatch(setExpandedCard(isExpanded ? null : download.id))}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="font-medium text-gray-900 truncate max-w-xs">{download.filename}</span>
+        <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }} className="truncate max-w-xs">
+          {download.filename}
+        </span>
         <div className="flex items-center gap-2">
           {download.total_bytes && (
-            <span className="text-xs text-gray-500">{formatBytes(download.total_bytes)}</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+              {formatBytes(download.total_bytes)}
+            </span>
           )}
-          <span className={`text-xs text-white px-2 py-0.5 rounded-full ${STATUS_COLORS[download.status] ?? 'bg-gray-400'}`}>
-            {download.status}
+          <span
+            style={{
+              background: 'color-mix(in srgb, var(--accent) 25%, transparent)',
+              color: 'var(--accent)',
+              fontSize: '11px',
+              padding: '2px 10px',
+              borderRadius: '12px',
+              border: '1px solid color-mix(in srgb, var(--accent) 40%, transparent)',
+            }}
+          >
+            {t(`status.${download.status}`)}
           </span>
         </div>
       </div>
 
-      <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
+      <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '4px', height: '4px', marginBottom: '8px' }}>
         <div
-          className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-          style={{ width: `${percent}%` }}
+          style={{
+            background: 'var(--accent)',
+            width: `${percent}%`,
+            height: '4px',
+            borderRadius: '4px',
+            transition: 'width 0.3s',
+          }}
         />
       </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-500">
-        <span>
+      <div className="flex items-center justify-between">
+        <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
           {percent}% · {formatBytes(download.downloaded_bytes)}
           {download.speed_bps ? ` · ${formatSpeed(download.speed_bps)}` : ''}
-          {download.eta_seconds ? ` · ETA ${download.eta_seconds}s` : ''}
+          {download.eta_seconds ? ` · ${t('card.eta', { time: formatEta(download.eta_seconds) })}` : ''}
         </span>
-        {download.status === 'active' && (
-          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-            <button onClick={handlePause} className="text-yellow-600 hover:text-yellow-800">Pause</button>
-            <button onClick={handleCancel} className="text-red-500 hover:text-red-700">Cancel</button>
-          </div>
-        )}
-        {download.status === 'paused' && (
-          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-            <button onClick={handleResume} className="text-green-600 hover:text-green-800">Resume</button>
-            <button onClick={handleCancel} className="text-red-500 hover:text-red-700">Cancel</button>
-          </div>
-        )}
+        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+          {download.status === 'active' && (
+            <button
+              onClick={handlePause}
+              style={{ color: '#fbbf24', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              {t('card.pause')}
+            </button>
+          )}
+          {download.status === 'paused' && (
+            <button
+              onClick={handleResume}
+              style={{ color: '#4ade80', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              {t('card.resume')}
+            </button>
+          )}
+          <button
+            onClick={handleDelete}
+            style={{ color: '#f87171', fontSize: '12px', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            {t('card.delete')}
+          </button>
+        </div>
       </div>
 
       {isExpanded && <DownloadCardExpanded download={download} />}
