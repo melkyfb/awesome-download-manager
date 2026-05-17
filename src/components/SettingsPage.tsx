@@ -2,14 +2,46 @@ import { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
+import { useTranslation } from 'react-i18next'
 import type { RootState, AppDispatch } from '../store'
 import { setConfig, setAiEnabled } from '../store/configSlice'
+import { setTheme, setFont, setLanguage } from '../store/appearanceSlice'
 import { closeSettings } from '../store/uiSlice'
+import { THEMES, GROUP_LABELS, type ThemeGroup } from '../themes'
+import { FONTS } from '../fonts'
+
+const LANGUAGES = [
+  { code: 'pt', flag: '🇧🇷', label: 'Português' },
+  { code: 'en', flag: '🇬🇧', label: 'English' },
+  { code: 'zh', flag: '🇨🇳', label: '中文' },
+  { code: 'es', flag: '🇪🇸', label: 'Español' },
+  { code: 'fr', flag: '🇫🇷', label: 'Français' },
+  { code: 'ar', flag: '🇸🇦', label: 'العربية' },
+  { code: 'hi', flag: '🇮🇳', label: 'हिन्दी' },
+  { code: 'ru', flag: '🇷🇺', label: 'Русский' },
+  { code: 'bn', flag: '🇧🇩', label: 'বাংলা' },
+  { code: 'id', flag: '🇮🇩', label: 'Indonesia' },
+]
+
+type Tab = 'general' | 'download' | 'appearance' | 'ai'
+
+const glassInput: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.08)',
+  border: '1px solid var(--glass-border)',
+  borderRadius: '8px',
+  padding: '8px 12px',
+  color: 'var(--text-primary)',
+  fontSize: '13px',
+  width: '100%',
+}
 
 export function SettingsPage() {
+  const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const config = useSelector((s: RootState) => s.config)
+  const appearance = useSelector((s: RootState) => s.appearance)
 
+  const [activeTab, setActiveTab] = useState<Tab>('appearance')
   const [destFolder, setDestFolder] = useState(config.dest_folder)
   const [maxSpeedKbps, setMaxSpeedKbps] = useState(Math.round(config.max_speed / 1024))
   const [chunks, setChunks] = useState(config.chunks)
@@ -20,6 +52,11 @@ export function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [aiKeyStatus, setAiKeyStatus] = useState<'idle' | 'saving' | 'saved' | 'deleted'>('idle')
+  const [themeGroup, setThemeGroup] = useState<ThemeGroup>('dark')
+  const [showAllFonts, setShowAllFonts] = useState(false)
+
+  const FONT_PREVIEW_COUNT = 6
+  const visibleFonts = showAllFonts ? FONTS : FONTS.slice(0, FONT_PREVIEW_COUNT)
 
   async function pickFolder() {
     const selected = await open({ directory: true, defaultPath: destFolder })
@@ -37,6 +74,9 @@ export function SettingsPage() {
         chunks: Math.min(16, Math.max(1, chunks)),
         ai_provider: aiProvider || null,
         search_provider: searchProvider || null,
+        theme_id: appearance.themeId,
+        font_id: appearance.fontId,
+        language: appearance.language,
       }
       await invoke('save_settings_cmd', { settings: newConfig })
       dispatch(setConfig({ ...newConfig, ai_enabled: config.ai_enabled }))
@@ -71,92 +111,313 @@ export function SettingsPage() {
     }
   }
 
+  const panelStyle: React.CSSProperties = {
+    background: 'var(--glass-bg)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid var(--glass-border)',
+    borderRadius: '16px',
+    width: '100%',
+    maxWidth: '520px',
+    maxHeight: '90vh',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+  }
+
+  const tabStyle = (active: boolean): React.CSSProperties => ({
+    padding: '10px 16px',
+    fontSize: '12px',
+    fontWeight: active ? 600 : 400,
+    color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    borderBottom: active ? `2px solid var(--accent)` : '2px solid transparent',
+    whiteSpace: 'nowrap' as const,
+  })
+
+  const sectionLabel: React.CSSProperties = {
+    fontSize: '10px',
+    fontWeight: 600,
+    letterSpacing: '0.8px',
+    textTransform: 'uppercase',
+    color: 'var(--text-secondary)',
+    marginBottom: '8px',
+    marginTop: '16px',
+  }
+
+  const groupThemes = THEMES.filter(theme => theme.group === themeGroup)
+
+  // Reference GROUP_LABELS to satisfy the import
+  void GROUP_LABELS
+
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold text-gray-900">Settings</h2>
-          <button onClick={() => dispatch(closeSettings())} className="text-gray-400 hover:text-gray-600">X</button>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+      <div style={panelStyle}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 0', borderBottom: '1px solid var(--glass-border)' }}>
+          <span style={{ fontWeight: 700, fontSize: '15px', color: 'var(--text-primary)' }}>{t('settings.title')}</span>
+          <button onClick={() => dispatch(closeSettings())} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '18px' }}>✕</button>
         </div>
 
-        <section className="mb-5">
-          <h3 className="text-sm font-medium text-gray-700 uppercase tracking-wide mb-3">Downloads</h3>
-
-          <label className="block text-sm text-gray-600 mb-1">Default Destination Folder</label>
-          <div className="flex gap-2 mb-3">
-            <input type="text" value={destFolder} onChange={(e) => setDestFolder(e.target.value)}
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            <button onClick={pickFolder} className="px-3 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Browse</button>
-          </div>
-
-          <label className="block text-sm text-gray-600 mb-1">Max Speed (KB/s, 0 = unlimited)</label>
-          <input type="number" value={maxSpeedKbps} min={0}
-            onChange={(e) => setMaxSpeedKbps(Number(e.target.value))}
-            className="w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3" />
-
-          <label className="block text-sm text-gray-600 mb-1">Parallel Chunks (1-16)</label>
-          <input type="number" value={chunks} min={1} max={16}
-            onChange={(e) => setChunks(Number(e.target.value))}
-            className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-        </section>
-
-        <section className="mb-5 border-t pt-4">
-          <h3 className="text-sm font-medium text-gray-700 uppercase tracking-wide mb-3">AI Configuration</h3>
-
-          <label className="block text-sm text-gray-600 mb-1">AI Provider</label>
-          <select value={aiProvider} onChange={(e) => setAiProvider(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3">
-            <option value="">Select provider</option>
-            <option value="claude">Claude (Anthropic)</option>
-            <option value="openai">OpenAI (GPT-4o)</option>
-            <option value="openai-compatible">OpenAI-compatible</option>
-          </select>
-
-          <label className="block text-sm text-gray-600 mb-1">
-            API Key {config.ai_enabled && <span className="text-green-600 ml-1">(configured)</span>}
-          </label>
-          <div className="flex gap-2 mb-2">
-            <input type="password" value={aiKey} onChange={(e) => setAiKey(e.target.value)}
-              placeholder={config.ai_enabled ? '(already set)' : 'sk-...'}
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            <button onClick={saveAiKey} disabled={!aiKey.trim() || !aiProvider}
-              className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-40">
-              {aiKeyStatus === 'saving' ? 'Saving...' : 'Save'}
+        {/* Tab Bar */}
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--glass-border)', padding: '0 20px' }}>
+          {(['general', 'download', 'appearance', 'ai'] as Tab[]).map(tab => (
+            <button key={tab} style={tabStyle(activeTab === tab)} onClick={() => setActiveTab(tab)}>
+              {t(`settings.tabs.${tab}`)}
             </button>
-            {config.ai_enabled && (
-              <button onClick={deleteAiKey}
-                className="px-3 py-2 border border-red-300 text-red-600 rounded-lg text-sm hover:bg-red-50">
-                Delete
-              </button>
-            )}
-          </div>
+          ))}
+        </div>
 
-          <label className="block text-sm text-gray-600 mb-1">Search API Provider</label>
-          <select value={searchProvider} onChange={(e) => setSearchProvider(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-3">
-            <option value="">Select provider</option>
-            <option value="brave">Brave Search</option>
-            <option value="serpapi">SerpAPI</option>
-          </select>
+        {/* Tab Content */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
 
-          <label className="block text-sm text-gray-600 mb-1">VirusTotal API Key (optional)</label>
-          <input type="password" value={vtKey} onChange={(e) => setVtKey(e.target.value)}
-            placeholder="Optional - enables automatic submission"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-        </section>
+          {/* GENERAL TAB */}
+          {activeTab === 'general' && (
+            <div>
+              <div style={sectionLabel}>{t('settings.general.language')}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                {LANGUAGES.map(lang => (
+                  <button
+                    key={lang.code}
+                    onClick={() => dispatch(setLanguage(lang.code))}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      background: appearance.language === lang.code
+                        ? 'color-mix(in srgb, var(--accent) 20%, transparent)'
+                        : 'rgba(255,255,255,0.06)',
+                      border: appearance.language === lang.code
+                        ? '1px solid color-mix(in srgb, var(--accent) 50%, transparent)'
+                        : '1px solid var(--glass-border)',
+                      color: 'var(--text-primary)',
+                      fontSize: '12px',
+                    }}
+                  >
+                    <span style={{ fontSize: '16px' }}>{lang.flag}</span>
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-        {saveError && (
-          <p className="text-xs text-red-700 bg-red-50 border-l-4 border-red-400 px-3 py-2 rounded mb-3">
-            <strong>Error:</strong> {saveError}
-          </p>
-        )}
+          {/* DOWNLOAD TAB */}
+          {activeTab === 'download' && (
+            <div>
+              <div style={sectionLabel}>{t('settings.download.destFolder')}</div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                <input value={destFolder} onChange={e => setDestFolder(e.target.value)} style={glassInput} />
+                <button onClick={pickFolder} style={{ ...glassInput, width: 'auto', cursor: 'pointer', whiteSpace: 'nowrap' as const }}>
+                  {t('settings.download.browse')}
+                </button>
+              </div>
 
-        <div className="flex gap-3 justify-end pt-2">
-          <button onClick={() => dispatch(closeSettings())}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm">Cancel</button>
-          <button onClick={saveAll} disabled={saving}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
-            {saving ? 'Saving...' : 'Save Settings'}
+              <div style={sectionLabel}>{t('settings.download.maxSpeed')}</div>
+              <input
+                type="number"
+                value={maxSpeedKbps}
+                min={0}
+                onChange={e => setMaxSpeedKbps(Number(e.target.value))}
+                style={{ ...glassInput, width: '120px', marginBottom: '12px' }}
+              />
+
+              <div style={sectionLabel}>{t('settings.download.chunks')}</div>
+              <input
+                type="number"
+                value={chunks}
+                min={1}
+                max={16}
+                onChange={e => setChunks(Number(e.target.value))}
+                style={{ ...glassInput, width: '80px' }}
+              />
+            </div>
+          )}
+
+          {/* APPEARANCE TAB */}
+          {activeTab === 'appearance' && (
+            <div>
+              {/* Theme group filter */}
+              <div style={sectionLabel}>{t('settings.appearance.theme')}</div>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                {(['dark', 'mid', 'light', 'country', 'special'] as ThemeGroup[]).map(g => (
+                  <button
+                    key={g}
+                    onClick={() => setThemeGroup(g)}
+                    style={{
+                      padding: '4px 12px',
+                      borderRadius: '6px',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                      background: themeGroup === g
+                        ? 'color-mix(in srgb, var(--accent) 25%, transparent)'
+                        : 'rgba(255,255,255,0.07)',
+                      border: themeGroup === g
+                        ? '1px solid color-mix(in srgb, var(--accent) 50%, transparent)'
+                        : '1px solid var(--glass-border)',
+                      color: themeGroup === g ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    }}
+                  >
+                    {t(`settings.appearance.groups.${g}`)}
+                  </button>
+                ))}
+              </div>
+
+              {/* Theme color dots */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
+                {groupThemes.map(theme => (
+                  <button
+                    key={theme.id}
+                    title={theme.name}
+                    onClick={() => dispatch(setTheme(theme.id))}
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: `linear-gradient(${theme.gradient})`,
+                      border: appearance.themeId === theme.id ? '2px solid #fff' : '2px solid rgba(255,255,255,0.2)',
+                      cursor: 'pointer',
+                      transform: appearance.themeId === theme.id ? 'scale(1.15)' : 'scale(1)',
+                      transition: 'transform 0.15s, border-color 0.15s',
+                    }}
+                  />
+                ))}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                {THEMES.find(theme => theme.id === appearance.themeId)?.name ?? ''}
+              </div>
+
+              {/* Font picker */}
+              <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '14px' }}>
+                <div style={sectionLabel}>{t('settings.appearance.font')}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                  {visibleFonts.map(font => (
+                    <button
+                      key={font.id}
+                      onClick={() => dispatch(setFont(font.id))}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        background: appearance.fontId === font.id
+                          ? 'color-mix(in srgb, var(--accent) 20%, transparent)'
+                          : 'rgba(255,255,255,0.06)',
+                        border: appearance.fontId === font.id
+                          ? '1px solid color-mix(in srgb, var(--accent) 50%, transparent)'
+                          : '1px solid var(--glass-border)',
+                        fontFamily: font.family,
+                      }}
+                    >
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{font.name}</div>
+                      <div style={{ fontSize: '9px', color: 'var(--text-secondary)', fontFamily: 'Inter, sans-serif' }}>{font.category}</div>
+                    </button>
+                  ))}
+                  {!showAllFonts && (
+                    <button
+                      onClick={() => setShowAllFonts(true)}
+                      style={{
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px dashed var(--glass-border)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '11px',
+                      }}
+                    >
+                      {t('settings.appearance.viewAll', { count: FONTS.length })}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* AI TAB */}
+          {activeTab === 'ai' && (
+            <div>
+              <div style={sectionLabel}>{t('settings.ai.provider')}</div>
+              <select value={aiProvider} onChange={e => setAiProvider(e.target.value)} style={{ ...glassInput, marginBottom: '12px' }}>
+                <option value="">—</option>
+                <option value="claude">Claude (Anthropic)</option>
+                <option value="openai">OpenAI (GPT-4o)</option>
+                <option value="openai-compatible">OpenAI-compatible</option>
+              </select>
+
+              <div style={sectionLabel}>
+                {t('settings.ai.apiKey')}
+                {config.ai_enabled && <span style={{ color: '#4ade80', marginLeft: '4px' }}>{t('settings.ai.configured')}</span>}
+              </div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                <input
+                  type="password"
+                  value={aiKey}
+                  onChange={e => setAiKey(e.target.value)}
+                  placeholder={config.ai_enabled ? '(already set)' : 'sk-...'}
+                  style={glassInput}
+                />
+                <button
+                  onClick={saveAiKey}
+                  disabled={!aiKey.trim() || !aiProvider}
+                  style={{ ...glassInput, width: 'auto', background: 'var(--accent)', color: '#fff', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' as const, opacity: !aiKey.trim() || !aiProvider ? 0.5 : 1 }}
+                >
+                  {aiKeyStatus === 'saving' ? '...' : t('settings.ai.saveKey')}
+                </button>
+                {config.ai_enabled && (
+                  <button
+                    onClick={deleteAiKey}
+                    style={{ ...glassInput, width: 'auto', background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.4)', color: '#f87171', cursor: 'pointer', whiteSpace: 'nowrap' as const }}
+                  >
+                    {t('settings.ai.deleteKey')}
+                  </button>
+                )}
+              </div>
+
+              <div style={sectionLabel}>{t('settings.ai.searchProvider')}</div>
+              <select value={searchProvider} onChange={e => setSearchProvider(e.target.value)} style={{ ...glassInput, marginBottom: '12px' }}>
+                <option value="">—</option>
+                <option value="brave">Brave Search</option>
+                <option value="serpapi">SerpAPI</option>
+              </select>
+
+              <div style={sectionLabel}>{t('settings.ai.vtKey')}</div>
+              <input
+                type="password"
+                value={vtKey}
+                onChange={e => setVtKey(e.target.value)}
+                placeholder="Optional"
+                style={glassInput}
+              />
+            </div>
+          )}
+
+          {saveError && (
+            <div style={{ marginTop: '12px', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '10px 14px', fontSize: '12px', color: '#f87171' }}>
+              {saveError}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', padding: '14px 20px', borderTop: '1px solid var(--glass-border)' }}>
+          <button
+            onClick={() => dispatch(closeSettings())}
+            style={{ padding: '8px 18px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer' }}
+          >
+            {t('settings.cancel')}
+          </button>
+          <button
+            onClick={saveAll}
+            disabled={saving}
+            style={{ padding: '8px 18px', borderRadius: '8px', background: 'var(--accent)', border: 'none', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+          >
+            {saving ? '...' : t('settings.save')}
           </button>
         </div>
       </div>
