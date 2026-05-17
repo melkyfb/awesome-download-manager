@@ -7,6 +7,12 @@ use std::collections::HashMap;
 use std::sync::atomic::AtomicU64;
 use rusqlite::Connection;
 use tauri::Manager;
+use tauri_plugin_opener::OpenerExt;
+
+#[tauri::command]
+fn open_in_browser(app: tauri::AppHandle, url: String) -> Result<(), String> {
+    app.opener().open_url(&url, None::<&str>).map_err(|e| e.to_string())
+}
 
 pub struct AppState {
     pub db: Arc<Mutex<Connection>>,
@@ -51,6 +57,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            open_in_browser,
             download::commands::start_download,
             download::commands::pause_download,
             download::commands::cancel_download,

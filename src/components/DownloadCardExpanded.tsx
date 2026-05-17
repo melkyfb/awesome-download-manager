@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
-import { openUrl } from '@tauri-apps/plugin-opener'
+import { invoke } from '@tauri-apps/api/core'
 import type { RootState } from '../store'
 import type { Download } from '../types'
 
@@ -88,8 +88,10 @@ export function DownloadCardExpanded({ download }: { download: Download }) {
             </button>
             <button
               onClick={() => {
-                openUrl(`https://www.virustotal.com/gui/file/${download.sha256}`)
-                  .catch(e => console.error('[VirusTotal] openUrl failed:', e))
+                invoke('open_in_browser', { url: `https://www.virustotal.com/gui/file/${download.sha256}` })
+                  .catch(() => {
+                    window.open(`https://www.virustotal.com/gui/file/${download.sha256}`, '_blank', 'noopener')
+                  })
               }}
               style={{ fontSize: '11px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}
             >
