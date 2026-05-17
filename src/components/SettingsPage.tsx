@@ -52,7 +52,9 @@ export function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [aiKeyStatus, setAiKeyStatus] = useState<'idle' | 'saving' | 'saved' | 'deleted'>('idle')
-  const [themeGroup, setThemeGroup] = useState<ThemeGroup>('dark')
+  const [themeGroup, setThemeGroup] = useState<ThemeGroup>(
+    THEMES.find(th => th.id === appearance.themeId)?.group ?? 'dark'
+  )
   const [showAllFonts, setShowAllFonts] = useState(false)
 
   const FONT_PREVIEW_COUNT = 6
@@ -383,6 +385,7 @@ export function SettingsPage() {
                 <option value="serpapi">SerpAPI</option>
               </select>
 
+              {/* vtKey is UI-only for now; persistence needs a dedicated keyring command */}
               <div style={sectionLabel}>{t('settings.ai.vtKey')}</div>
               <input
                 type="password"
