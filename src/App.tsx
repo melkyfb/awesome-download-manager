@@ -15,6 +15,8 @@ import { GlobalSpeedBar } from './components/GlobalSpeedBar'
 import { DownloadCard } from './components/DownloadCard'
 import { AddDownloadModal } from './components/AddDownloadModal'
 import { SettingsPage } from './components/SettingsPage'
+import { ChangelogModal } from './components/ChangelogModal'
+import { useUpdateCheck } from './hooks/useUpdateCheck'
 import type { Config, Download } from './types'
 
 export default function App() {
@@ -23,6 +25,8 @@ export default function App() {
   const downloads = useSelector((s: RootState) => Object.values(s.downloads.items))
   const addModalOpen = useSelector((s: RootState) => s.ui.addModalOpen)
   const settingsOpen = useSelector((s: RootState) => s.ui.settingsOpen)
+  const changelogOpen = useSelector((s: RootState) => s.ui.changelogOpen)
+  const updateState = useUpdateCheck()
   const language = useSelector((s: RootState) => s.appearance.language)
 
   useTauriEvents()
@@ -64,7 +68,7 @@ export default function App() {
       <FontProvider>
         <AppBackground>
           <div className="h-screen flex flex-col">
-            <GlobalSpeedBar />
+            <GlobalSpeedBar currentVersion={updateState.currentVersion} hasUpdate={updateState.hasUpdate} />
             <main className="flex-1 overflow-y-auto p-4 space-y-3">
               {sorted.length === 0 && (
                 <div className="flex flex-col items-center justify-center h-full" style={{ color: 'var(--text-secondary)' }}>
@@ -76,6 +80,7 @@ export default function App() {
             </main>
             {addModalOpen && <AddDownloadModal />}
             {settingsOpen && <SettingsPage />}
+            {changelogOpen && <ChangelogModal {...updateState} />}
           </div>
         </AppBackground>
       </FontProvider>

@@ -3,9 +3,14 @@ import { invoke } from '@tauri-apps/api/core'
 import { useTranslation } from 'react-i18next'
 import type { RootState, AppDispatch } from '../store'
 import { setMaxSpeed } from '../store/configSlice'
-import { openAddModal, openSettings } from '../store/uiSlice'
+import { openAddModal, openSettings, openChangelog } from '../store/uiSlice'
 
-export function GlobalSpeedBar() {
+interface Props {
+  currentVersion: string
+  hasUpdate: boolean
+}
+
+export function GlobalSpeedBar({ currentVersion, hasUpdate }: Props) {
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const config = useSelector((s: RootState) => s.config)
@@ -40,6 +45,39 @@ export function GlobalSpeedBar() {
       <span style={{ fontWeight: 700, fontSize: '15px', color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
         ADM
       </span>
+
+      {/* Version badge — clickable, opens changelog */}
+      {currentVersion && (
+        <button
+          onClick={() => dispatch(openChangelog())}
+          title={hasUpdate ? 'Update available! Click to see what\'s new' : 'Click to see what\'s new'}
+          style={{
+            background: hasUpdate ? 'rgba(74,222,128,0.12)' : 'rgba(255,255,255,0.06)',
+            border: `1px solid ${hasUpdate ? 'rgba(74,222,128,0.35)' : 'var(--glass-border)'}`,
+            borderRadius: '20px',
+            padding: '2px 10px',
+            fontSize: '11px',
+            fontWeight: 600,
+            color: hasUpdate ? '#4ade80' : 'var(--text-secondary)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            transition: 'all 0.2s',
+          }}
+        >
+          v{currentVersion}
+          {hasUpdate && (
+            <span style={{
+              width: '6px', height: '6px',
+              borderRadius: '50%',
+              background: '#4ade80',
+              animation: 'pulse 2s ease-in-out infinite',
+              display: 'inline-block',
+            }} />
+          )}
+        </button>
+      )}
 
       <button
         onClick={() => dispatch(openAddModal())}

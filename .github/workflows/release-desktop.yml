@@ -65,6 +65,31 @@ jobs:
             librsvg2-dev \
             patchelf
 
+      - name: Set version from git tag
+        shell: bash
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          echo "Setting version to $VERSION"
+          node -e "
+            const fs = require('fs');
+            const v = process.env.BUILD_VERSION.replace(/^v/, '');
+
+            // Update tauri.conf.json
+            const conf = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+            conf.version = v;
+            fs.writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(conf, null, 2));
+            console.log('tauri.conf.json version =>', v);
+
+            // Update Cargo.toml (only the [package] version, first occurrence)
+            let cargo = fs.readFileSync('src-tauri/Cargo.toml', 'utf8');
+            cargo = cargo.replace(/^version = \"[^\"]+\"/m, 'version = \"' + v + '\"');
+            fs.writeFileSync('src-tauri/Cargo.toml', cargo);
+            console.log('Cargo.toml version =>', v);
+          "
+        env:
+          BUILD_VERSION: ${{ github.ref_name }}
+
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v0
         env:

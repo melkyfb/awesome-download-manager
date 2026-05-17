@@ -4,12 +4,14 @@ interface UiState {
   expandedCardId: string | null
   addModalOpen: boolean
   settingsOpen: boolean
+  changelogOpen: boolean
 }
 
 const initialState: UiState = {
   expandedCardId: null,
   addModalOpen: false,
   settingsOpen: false,
+  changelogOpen: false,
 }
 
 const uiSlice = createSlice({
@@ -23,8 +25,10 @@ const uiSlice = createSlice({
     closeAddModal(state) { state.addModalOpen = false },
     openSettings(state) { state.settingsOpen = true },
     closeSettings(state) { state.settingsOpen = false },
+    openChangelog(state) { state.changelogOpen = true },
+    closeChangelog(state) { state.changelogOpen = false },
   },
 })
 
-export const { setExpandedCard, openAddModal, closeAddModal, openSettings, closeSettings } = uiSlice.actions
+export const { setExpandedCard, openAddModal, closeAddModal, openSettings, closeSettings, openChangelog, closeChangelog } = uiSlice.actions
 export default uiSlice.reducer
