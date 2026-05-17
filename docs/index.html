@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Awesome Download Manager — Fast, beautiful, AI-powered</title>
+  <meta name="description" content="A modern download manager built with Tauri. Multi-chunk parallel downloads, 35 themes, 10 languages, AI-powered file analysis. Free and open source." />
+  <meta property="og:title" content="Awesome Download Manager" />
+  <meta property="og:description" content="Fast, beautiful, AI-powered downloads for Linux, Windows, macOS and Android." />
+  <meta property="og:image" content="https://melkyfb.github.io/awesome-download-manager/screenshots/hero.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⬇</text></svg>" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      --glass:     rgba(255,255,255,0.08);
+      --glass-b:   rgba(255,255,255,0.15);
+      --accent:    #7C4DFF;
+      --accent2:   #00BCD4;
+      --text:      #ffffff;
+      --muted:     rgba(255,255,255,0.55);
+      --radius:    14px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Glow orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.25;
+    }
+    .orb-1 { width: 600px; height: 600px; background: var(--accent); top: -200px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: var(--accent2); bottom: 100px; right: -100px; }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* ── Glass card ── */
+    .glass {
+      background: var(--glass);
+      border: 1px solid var(--glass-b);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--glass-b);
+      background: rgba(15,12,41,0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .nav-logo {
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--glass);
+      border: 1px solid var(--glass-b);
+      color: var(--text);
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .stat-badge:hover { background: rgba(255,255,255,0.14); }
+    .stat-badge .icon { font-size: 14px; }
+    .gh-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .gh-btn:hover { opacity: 0.85; }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 100px 0 80px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      background: rgba(124,77,255,0.2);
+      border: 1px solid rgba(124,77,255,0.4);
+      color: #c4a8ff;
+      margin-bottom: 24px;
+    }
+    .hero-title {
+      font-size: clamp(38px, 6vw, 72px);
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1.05;
+      margin-bottom: 20px;
+    }
+    .hero-title span {
+      background: linear-gradient(90deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 40px;
+    }
+
+    /* ── Download button ── */
+    .download-area { margin-bottom: 20px; }
+    .dl-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 0 40px rgba(124,77,255,0.4);
+    }
+    .dl-primary:hover { transform: translateY(-2px); box-shadow: 0 0 60px rgba(124,77,255,0.6); }
+    .dl-primary .os-icon { font-size: 20px; }
+
+    .platforms {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .platforms span { color: var(--muted); }
+    .platform-btn {
+      background: none;
+      border: 1px solid var(--glass-b);
+      border-radius: 8px;
+      padding: 5px 14px;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      text-decoration: none;
+    }
+    .platform-btn:hover { color: var(--text); border-color: var(--accent); background: rgba(124,77,255,0.1); }
+    .platform-btn.active { color: var(--text); border-color: var(--accent); background: rgba(124,77,255,0.15); }
+
+    .version-line {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .version-line a { color: var(--accent); text-decoration: none; }
+    .version-line a:hover { text-decoration: underline; }
+
+    /* ── Screenshot ── */
+    .screenshot-wrap {
+      margin: 60px auto 0;
+      max-width: 900px;
+      position: relative;
+    }
+    .screenshot-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -30px;
+      background: radial-gradient(ellipse at center, rgba(124,77,255,0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .screenshot-frame {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--glass-b);
+      box-shadow: 0 40px 120px rgba(0,0,0,0.6);
+      background: rgba(15,12,41,0.8);
+      aspect-ratio: 16/10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .screenshot-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .screenshot-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .screenshot-placeholder .app-mock {
+      font-size: 48px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+    /* ── Sections ── */
+    section { padding: 80px 0; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .section-title {
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    /* ── Features ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .feature-card {
+      padding: 24px;
+      border-radius: var(--radius);
+      background: var(--glass);
+      border: 1px solid var(--glass-b);
+      backdrop-filter: blur(12px);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .feature-card:hover { transform: translateY(-4px); border-color: rgba(124,77,255,0.4); }
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(124,77,255,0.2);
+      border: 1px solid rgba(124,77,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
+    .feature-name {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .feature-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin: 0 auto;
+      max-width: 700px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--glass-b);
+    }
+    .stat-item {
+      flex: 1;
+      padding: 24px 16px;
+      text-align: center;
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border-right: 1px solid var(--glass-b);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Screenshots gallery ── */
+    .shots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .shot-card {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--glass-b);
+      background: rgba(15,12,41,0.6);
+      aspect-ratio: 16/10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 13px;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .shot-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .shot-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* ── Tech stack ── */
+    .tech-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .tech-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--glass);
+      border: 1px solid var(--glass-b);
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .tech-pill:hover { border-color: var(--accent); background: rgba(124,77,255,0.1); }
+    .tech-pill .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ── Free banner ── */
+    .free-banner {
+      text-align: center;
+      padding: 60px 24px;
+      position: relative;
+    }
+    .free-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(124,77,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .free-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: rgba(74,222,128,0.15);
+      border: 1px solid rgba(74,222,128,0.3);
+      color: #4ade80;
+      margin-bottom: 16px;
+    }
+    .free-title {
+      font-size: clamp(24px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+    .free-sub { color: var(--muted); font-size: 16px; max-width: 500px; margin: 0 auto 32px; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--glass-b);
+      padding: 32px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .nav-right .stat-badge { display: none; }
+      .stats-bar { flex-direction: column; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--glass-b); }
+      .stat-item:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- ── Navigation ── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">⬇ ADM</a>
+    <div class="nav-right">
+      <a href="https://github.com/melkyfb/awesome-download-manager" class="stat-badge" id="stars-badge" target="_blank" rel="noopener">
+        <span class="icon">⭐</span>
+        <span id="stars-count">—</span>
+      </a>
+      <a href="https://github.com/melkyfb/awesome-download-manager/network/members" class="stat-badge" id="forks-badge" target="_blank" rel="noopener">
+        <span class="icon">🍴</span>
+        <span id="forks-count">—</span>
+      </a>
+      <a href="https://github.com/melkyfb/awesome-download-manager" class="gh-btn" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">🚀 Free &amp; Open Source</div>
+
+    <h1 class="hero-title">
+      <span>Awesome Download Manager</span>
+    </h1>
+
+    <p class="hero-sub">
+      Multi-chunk parallel downloads, 35 glassmorphism themes, 10 languages,
+      and AI-powered file analysis — for Linux, Windows, macOS and Android.
+    </p>
+
+    <!-- Download button -->
+    <div class="download-area">
+      <a id="dl-btn" href="#" class="dl-primary">
+        <span class="os-icon" id="dl-icon">⬇</span>
+        <span id="dl-label">Download</span>
+      </a>
+    </div>
+
+    <div class="platforms">
+      <span>Also for:</span>
+      <a href="#" class="platform-btn" data-os="linux" id="btn-linux">Linux</a>
+      <a href="#" class="platform-btn" data-os="windows" id="btn-windows">Windows</a>
+      <a href="#" class="platform-btn" data-os="macos" id="btn-macos">macOS</a>
+      <a href="#" class="platform-btn" data-os="android" id="btn-android">Android</a>
+    </div>
+
+    <p class="version-line">
+      <span id="version-text">Loading latest release...</span>
+      · <a href="https://github.com/melkyfb/awesome-download-manager/releases" target="_blank" rel="noopener">All releases</a>
+    </p>
+
+    <!-- App screenshot -->
+    <div class="screenshot-wrap">
+      <div class="screenshot-frame" id="hero-screenshot">
+        <div class="screenshot-placeholder">
+          <span class="app-mock">⬇</span>
+          <span>Screenshot coming soon</span>
+          <span style="font-size:11px;opacity:0.6;">Replace docs/screenshots/hero.png to update</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats ── -->
+<div class="container">
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num" id="s-stars">—</div>
+      <div class="stat-lbl">⭐ GitHub Stars</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="s-forks">—</div>
+      <div class="stat-lbl">🍴 Forks</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">35</div>
+      <div class="stat-lbl">🎨 Themes</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">10</div>
+      <div class="stat-lbl">🌍 Languages</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">Free</div>
+      <div class="stat-lbl">💚 Forever</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Features ── -->
+<section id="features">
+  <div class="container">
+    <p class="section-label">What's inside</p>
+    <h2 class="section-title">Everything you need to download faster</h2>
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-name">Parallel Chunks</div>
+        <div class="feature-desc">Split files into up to 16 simultaneous chunks and max out your connection speed.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-name">35 Themes</div>
+        <div class="feature-desc">Dark, light, country flags, special — all with live glassmorphism preview. Switch in one click.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <div class="feature-name">10 Languages</div>
+        <div class="feature-desc">Portuguese, English, Spanish, French, Chinese, Hindi, Arabic (RTL), Russian, Bengali, Indonesian.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <div class="feature-name">AI-Powered Analysis</div>
+        <div class="feature-desc">Summarize files, find faster mirror links, and run malware checks — powered by Claude or GPT-4o.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-name">SHA-256 Verification</div>
+        <div class="feature-desc">Automatic integrity check after every download. One-click copy and VirusTotal lookup.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <div class="feature-name">Android Ready</div>
+        <div class="feature-desc">The same experience on Android with a background foreground service and download notifications.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔁</div>
+        <div class="feature-name">Auto-Retry</div>
+        <div class="feature-desc">Interrupted downloads resume automatically. HTTP and FTP protocols supported out of the box.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-name">Real-time Speed</div>
+        <div class="feature-desc">Per-chunk speed bars, global speed limiter, ETA — all updating live without page refresh.</div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔑</div>
+        <div class="feature-name">Secure Key Storage</div>
+        <div class="feature-desc">API keys stored in the OS keyring (Keychain, libsecret, Windows Credential Manager) — never in plain text.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Screenshots ── -->
+<section id="screenshots">
+  <div class="container">
+    <p class="section-label">Screenshots</p>
+    <h2 class="section-title">See it in action</h2>
+    <div class="shots-grid">
+      <div class="shot-card" id="shot-1">
+        <span style="font-size:32px">⬇</span>
+        <span class="shot-label">Main Window</span>
+        <span style="font-size:11px;opacity:0.5">docs/screenshots/main.png</span>
+      </div>
+      <div class="shot-card" id="shot-2">
+        <span style="font-size:32px">🎨</span>
+        <span class="shot-label">Theme Picker</span>
+        <span style="font-size:11px;opacity:0.5">docs/screenshots/themes.png</span>
+      </div>
+      <div class="shot-card" id="shot-3">
+        <span style="font-size:32px">⚙️</span>
+        <span class="shot-label">Settings</span>
+        <span style="font-size:11px;opacity:0.5">docs/screenshots/settings.png</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Free / CTA ── -->
+<section>
+  <div class="container">
+    <div class="free-banner glass">
+      <div class="free-tag">100% Free</div>
+      <h2 class="free-title">No ads. No subscriptions. No limits.</h2>
+      <p class="free-sub">Awesome Download Manager is MIT-licensed and will always be free. Fork it, contribute, make it yours.</p>
+      <a href="https://github.com/melkyfb/awesome-download-manager" class="dl-primary" target="_blank" rel="noopener" style="display:inline-flex;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        Star on GitHub
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Tech stack ── -->
+<section id="tech">
+  <div class="container">
+    <p class="section-label">Built with</p>
+    <h2 class="section-title">Best-in-class open source stack</h2>
+    <div class="tech-grid">
+      <a href="https://tauri.app" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#24c8db"></span> Tauri v2
+      </a>
+      <a href="https://react.dev" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#61dafb"></span> React 19
+      </a>
+      <a href="https://redux-toolkit.js.org" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#764abc"></span> Redux Toolkit
+      </a>
+      <a href="https://www.i18next.com" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#26a69a"></span> react-i18next
+      </a>
+      <a href="https://tailwindcss.com" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#38bdf8"></span> Tailwind CSS
+      </a>
+      <a href="https://www.rust-lang.org" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#f74c00"></span> Rust
+      </a>
+      <a href="https://github.com/rusqlite/rusqlite" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#1e88e5"></span> rusqlite
+      </a>
+      <a href="https://github.com/seanmonstar/reqwest" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#ff6f00"></span> reqwest
+      </a>
+      <a href="https://github.com/kilork/suppaftp" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#8e24aa"></span> suppaftp
+      </a>
+      <a href="https://github.com/hwchen/keyring-rs" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#00897b"></span> keyring-rs
+      </a>
+      <a href="https://github.com/RustCrypto/hashes" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#e53935"></span> sha2
+      </a>
+      <a href="https://tokio.rs" class="tech-pill" target="_blank" rel="noopener">
+        <span class="dot" style="background:#ff6d00"></span> Tokio
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <p style="margin-bottom:8px">
+      <strong style="color:var(--text)">Awesome Download Manager</strong>
+      — MIT License
+      · <a href="https://github.com/melkyfb/awesome-download-manager" target="_blank" rel="noopener">GitHub</a>
+      · <a href="https://github.com/melkyfb/awesome-download-manager/releases" target="_blank" rel="noopener">Releases</a>
+      · <a href="https://github.com/melkyfb/awesome-download-manager/issues" target="_blank" rel="noopener">Issues</a>
+    </p>
+    <p>Made with ❤️ by <a href="https://github.com/melkyfb" target="_blank" rel="noopener">melkyfb</a></p>
+  </div>
+</footer>
+
+<script>
+  const REPO = 'melkyfb/awesome-download-manager';
+  const API  = `https://api.github.com/repos/${REPO}`;
+
+  /* ── OS detection ── */
+  function detectOS() {
+    const ua = navigator.userAgent;
+    if (/Android/i.test(ua))                     return 'android';
+    if (/Win/i.test(ua))                         return 'windows';
+    if (/Mac/i.test(ua) && !/iPhone|iPad/.test(ua)) return 'macos';
+    return 'linux';
+  }
+
+  const OS_META = {
+    windows: { icon: '🪟', label: 'Download for Windows', ext: ['.msi', 'setup.exe', '_x64'] },
+    macos:   { icon: '🍎', label: 'Download for macOS',   ext: ['.dmg', 'universal'] },
+    linux:   { icon: '🐧', label: 'Download for Linux',   ext: ['.AppImage', '.deb'] },
+    android: { icon: '🤖', label: 'Download for Android', ext: ['.apk', '.aab'] },
+  };
+
+  const OS_LABELS = { windows: 'Windows', macos: 'macOS', linux: 'Linux', android: 'Android' };
+
+  let releaseAssets = [];
+  let currentOS = detectOS();
+
+  function findAsset(os) {
+    const exts = OS_META[os].ext;
+    return releaseAssets.find(a => exts.some(e => a.name.toLowerCase().includes(e.toLowerCase())));
+  }
+
+  function setDownloadButton(os) {
+    const meta  = OS_META[os];
+    const asset = findAsset(os);
+
+    document.getElementById('dl-icon').textContent  = meta.icon;
+    document.getElementById('dl-label').textContent = meta.label;
+
+    const btn = document.getElementById('dl-btn');
+    if (asset) {
+      btn.href = asset.browser_download_url;
+      btn.removeAttribute('data-noasset');
+    } else {
+      btn.href = `https://github.com/${REPO}/releases/latest`;
+      btn.setAttribute('data-noasset', '1');
+    }
+
+    // Highlight active platform button
+    document.querySelectorAll('.platform-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.os === os);
+    });
+
+    // Hide current OS from "Also for" list
+    document.querySelectorAll('.platform-btn').forEach(b => {
+      b.style.display = b.dataset.os === os ? 'none' : '';
+    });
+
+    currentOS = os;
+  }
+
+  /* ── Platform buttons ── */
+  document.querySelectorAll('.platform-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      setDownloadButton(btn.dataset.os);
+    });
+  });
+
+  /* ── Fetch GitHub data ── */
+  async function loadGitHub() {
+    try {
+      // Repo stats
+      const repo = await fetch(`${API}`).then(r => r.json());
+      const stars = repo.stargazers_count ?? 0;
+      const forks = repo.forks_count ?? 0;
+
+      document.getElementById('stars-count').textContent = stars.toLocaleString();
+      document.getElementById('forks-count').textContent = forks.toLocaleString();
+      document.getElementById('s-stars').textContent     = stars.toLocaleString();
+      document.getElementById('s-forks').textContent     = forks.toLocaleString();
+
+      // Latest release
+      const release = await fetch(`${API}/releases/latest`).then(r => r.json());
+      releaseAssets  = release.assets ?? [];
+      const version  = release.tag_name ?? '';
+
+      if (version) {
+        document.getElementById('version-text').innerHTML =
+          `Latest: <a href="https://github.com/${REPO}/releases/tag/${version}" target="_blank" rel="noopener">${version}</a>`;
+      }
+
+      // Now wire up the download button with real URLs
+      setDownloadButton(detectOS());
+
+    } catch (err) {
+      // Graceful fallback — button still links to releases page
+      document.getElementById('version-text').innerHTML =
+        `<a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener">View all releases</a>`;
+      setDownloadButton(detectOS());
+    }
+  }
+
+  /* ── Screenshot lazy-load ── */
+  function tryLoadScreenshot(id, src, altText) {
+    const img = new Image();
+    img.onload = () => {
+      const card = document.getElementById(id);
+      if (card) { card.innerHTML = ''; card.appendChild(img); img.alt = altText; }
+    };
+    img.src = src;
+  }
+
+  /* ── Init ── */
+  loadGitHub();
+
+  // Try loading screenshots (silently skip if files don't exist yet)
+  tryLoadScreenshot('hero-screenshot', 'screenshots/hero.png', 'App main window');
+  tryLoadScreenshot('shot-1',  'screenshots/main.png',     'Main window');
+  tryLoadScreenshot('shot-2',  'screenshots/themes.png',   'Theme picker');
+  tryLoadScreenshot('shot-3',  'screenshots/settings.png', 'Settings');
+</script>
+
+</body>
+</html>
