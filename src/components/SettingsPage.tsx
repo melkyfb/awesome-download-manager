@@ -7,7 +7,7 @@ import type { RootState, AppDispatch } from '../store'
 import { setConfig, setAiEnabled } from '../store/configSlice'
 import { setTheme, setFont, setLanguage } from '../store/appearanceSlice'
 import { closeSettings } from '../store/uiSlice'
-import { THEMES, GROUP_LABELS, type ThemeGroup } from '../themes'
+import { THEMES, type ThemeGroup } from '../themes'
 import { FONTS } from '../fonts'
 
 const LANGUAGES = [
@@ -148,9 +148,6 @@ export function SettingsPage() {
   }
 
   const groupThemes = THEMES.filter(theme => theme.group === themeGroup)
-
-  // Reference GROUP_LABELS to satisfy the import
-  void GROUP_LABELS
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
