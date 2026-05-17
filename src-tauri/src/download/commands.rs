@@ -23,14 +23,16 @@ async fn spawn_download_task(
     url: String,
     dest_path: PathBuf,
     chunks: u8,
+    offset: u64,
     db_arc: Arc<std::sync::Mutex<rusqlite::Connection>>,
     speed_limit: Arc<AtomicU64>,
-    downloads: Arc<tokio::sync::RwLock<std::collections::HashMap<String, tokio::task::AbortHandle>>>,
+    downloads: Arc<tokio::sync::RwLock<std::collections::HashMap<String, (tokio::task::AbortHandle, Arc<AtomicBool>)>>>,
     app_arc: AppHandle,
 ) {
     let cancel = Arc::new(AtomicBool::new(false));
     let id_spawn = id.clone();
 
+    let cancel_for_map = cancel.clone();
     let abort_handle = tokio::spawn(async move {
         let start_time = std::time::Instant::now();
 
@@ -55,6 +57,7 @@ async fn spawn_download_task(
                         chunks,
                         Arc::new(AtomicU64::new(speed_limit.load(Ordering::Relaxed))),
                         cancel.clone(),
+                        offset,
                         move |downloaded, total, chunk_speeds| {
                             let elapsed = start_time.elapsed().as_secs_f64();
                             let speed_bps = if elapsed > 0.5 {
@@ -115,7 +118,7 @@ async fn spawn_download_task(
     })
     .abort_handle();
 
-    downloads.write().await.insert(id, abort_handle);
+    downloads.write().await.insert(id, (abort_handle, cancel_for_map));
 }
 
 #[tauri::command]
@@ -154,6 +157,7 @@ pub async fn start_download(
         url,
         dest_path,
         chunks,
+        0,
         state.db.clone(),
         state.global_speed_limit.clone(),
         state.downloads.clone(),
@@ -166,9 +170,8 @@ pub async fn start_download(
 
 #[tauri::command]
 pub async fn pause_download(id: String, state: State<'_, AppState>) -> Result<(), String> {
-    // TODO: progress since last callback is lost on abort; AppState should hold per-download
-    // AtomicU64 so pause can persist the current byte offset before aborting.
-    if let Some(handle) = state.downloads.write().await.remove(&id) {
+    if let Some((handle, cancel)) = state.downloads.write().await.remove(&id) {
+        cancel.store(true, Ordering::Relaxed);
         handle.abort();
     }
     let db = state.db.lock().map_err(|e| e.to_string())?;
@@ -179,7 +182,8 @@ pub async fn pause_download(id: String, state: State<'_, AppState>) -> Result<()
 
 #[tauri::command]
 pub async fn cancel_download(id: String, state: State<'_, AppState>) -> Result<(), String> {
-    if let Some(handle) = state.downloads.write().await.remove(&id) {
+    if let Some((handle, cancel)) = state.downloads.write().await.remove(&id) {
+        cancel.store(true, Ordering::Relaxed);
         handle.abort();
     }
     let db = state.db.lock().map_err(|e| e.to_string())?;
@@ -194,7 +198,7 @@ pub async fn resume_download(
     state: State<'_, AppState>,
     app: AppHandle,
 ) -> Result<(), String> {
-    let (url, dest_path, chunks) = {
+    let (url, dest_path, chunks, offset) = {
         let db = state.db.lock().map_err(|e| e.to_string())?;
         let repo = Repository::new(&db);
         let rec = repo
@@ -202,7 +206,8 @@ pub async fn resume_download(
             .map_err(|e| e.to_string())?
             .ok_or_else(|| format!("Download {id} not found"))?;
         let chunks = crate::config::settings::load_settings(&repo).chunks;
-        (rec.url, std::path::PathBuf::from(&rec.dest_path), chunks)
+        let offset = rec.downloaded_bytes as u64;
+        (rec.url, std::path::PathBuf::from(&rec.dest_path), chunks, offset)
     };
 
     {
@@ -217,6 +222,7 @@ pub async fn resume_download(
         url,
         dest_path,
         chunks,
+        offset,
         state.db.clone(),
         state.global_speed_limit.clone(),
         state.downloads.clone(),
@@ -246,6 +252,7 @@ pub async fn restart_active_downloads(
 
     for rec in active {
         let dest = std::path::PathBuf::from(&rec.dest_path);
+        let offset = rec.downloaded_bytes as u64;
         let chunks = {
             let db = state.db.lock().map_err(|e| e.to_string())?;
             let repo = Repository::new(&db);
@@ -256,6 +263,7 @@ pub async fn restart_active_downloads(
             rec.url,
             dest,
             chunks,
+            offset,
             state.db.clone(),
             state.global_speed_limit.clone(),
             state.downloads.clone(),
@@ -265,6 +273,17 @@ pub async fn restart_active_downloads(
     }
 
     Ok(count)
+}
+
+#[tauri::command]
+pub async fn delete_download(id: String, state: State<'_, AppState>) -> Result<(), String> {
+    if let Some((handle, cancel)) = state.downloads.write().await.remove(&id) {
+        cancel.store(true, Ordering::Relaxed);
+        handle.abort();
+    }
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    let repo = Repository::new(&db);
+    repo.delete_download(&id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]

@@ -2,6 +2,7 @@ use rusqlite::{Connection, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
 pub enum DownloadStatus {
     Active,
     Paused,
@@ -142,6 +143,11 @@ impl<'a> Repository<'a> {
             })
         })?;
         rows.collect()
+    }
+
+    pub fn delete_download(&self, id: &str) -> Result<()> {
+        self.conn.execute("DELETE FROM downloads WHERE id = ?1", rusqlite::params![id])?;
+        Ok(())
     }
 
     pub fn get_setting(&self, key: &str) -> Result<Option<String>> {

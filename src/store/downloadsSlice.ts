@@ -21,6 +21,7 @@ export const downloadsSlice = createSlice({
       action: PayloadAction<{
         id: string
         downloaded_bytes?: number
+        total_bytes?: number | null
         speed_bps?: number
         eta_seconds?: number | null
         chunk_speeds?: number[]
@@ -30,6 +31,9 @@ export const downloadsSlice = createSlice({
       if (download) {
         if (action.payload.downloaded_bytes !== undefined) {
           download.downloaded_bytes = action.payload.downloaded_bytes
+        }
+        if (action.payload.total_bytes !== undefined) {
+          download.total_bytes = action.payload.total_bytes
         }
         if (action.payload.speed_bps !== undefined) {
           download.speed_bps = action.payload.speed_bps

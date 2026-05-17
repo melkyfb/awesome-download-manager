@@ -32,6 +32,7 @@ export function useTauriEvents() {
         dispatch(updateProgress({
           id: event.payload.id,
           downloaded_bytes: event.payload.downloaded_bytes,
+          total_bytes: event.payload.total_bytes,
           speed_bps: event.payload.speed_bps,
           eta_seconds: event.payload.eta_seconds,
           chunk_speeds: event.payload.chunk_speeds,
