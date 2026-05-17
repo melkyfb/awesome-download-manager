@@ -1,3 +1,12 @@
+:root {
+  --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  --glass-bg: rgba(255, 255, 255, 0.10);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --accent: #7C4DFF;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.50);
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
