@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import type { RootState } from '../store'
 import type { Download } from '../types'
 
@@ -37,9 +39,13 @@ function AiButton({ label, disabled }: { label: string; disabled: boolean }) {
 export function DownloadCardExpanded({ download }: { download: Download }) {
   const aiEnabled = useSelector((s: RootState) => s.config.ai_enabled)
   const { t } = useTranslation()
+  const [copied, setCopied] = useState(false)
 
   function copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text).catch(console.error)
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(console.error)
   }
 
   return (
@@ -77,18 +83,16 @@ export function DownloadCardExpanded({ download }: { download: Download }) {
             </code>
             <button
               onClick={() => copyToClipboard(download.sha256!)}
-              style={{ fontSize: '11px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}
+              style={{ fontSize: '11px', color: copied ? '#4ade80' : 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
             >
-              {t('card.copy')}
+              {copied ? '✓' : t('card.copy')}
             </button>
-            <a
-              href={`https://www.virustotal.com/gui/file/${download.sha256}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => openUrl(`https://www.virustotal.com/gui/file/${download.sha256}`)}
               style={{ fontSize: '11px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}
             >
               {t('card.virustotal')}
-            </a>
+            </button>
           </div>
         </div>
       )}

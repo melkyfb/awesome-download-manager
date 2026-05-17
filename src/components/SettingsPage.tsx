@@ -82,6 +82,7 @@ export function SettingsPage() {
       }
       await invoke('save_settings_cmd', { settings: newConfig })
       dispatch(setConfig({ ...newConfig, ai_enabled: config.ai_enabled }))
+      dispatch(closeSettings())
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : String(e))
     } finally {
