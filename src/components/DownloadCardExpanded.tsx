@@ -87,7 +87,10 @@ export function DownloadCardExpanded({ download }: { download: Download }) {
               {copied ? '✓' : t('card.copy')}
             </button>
             <button
-              onClick={() => openUrl(`https://www.virustotal.com/gui/file/${download.sha256}`)}
+              onClick={() => {
+                openUrl(`https://www.virustotal.com/gui/file/${download.sha256}`)
+                  .catch(e => console.error('[VirusTotal] openUrl failed:', e))
+              }}
               style={{ fontSize: '11px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}
             >
               {t('card.virustotal')}
