@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react'
+import type { ReactNode } from 'react'
 import { useSelector } from 'react-redux'
 import type { RootState } from '../store'
 import { getFont } from '../fonts'
 
-export function FontProvider({ children }: { children: React.ReactNode }) {
+export function FontProvider({ children }: { children: ReactNode }) {
   const fontId = useSelector((s: RootState) => s.appearance.fontId)
   const linkRef = useRef<HTMLLinkElement | null>(null)
 

@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { useSelector } from 'react-redux'
 import type { RootState } from '../store'
 import { getTheme } from '../themes'
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const themeId = useSelector((s: RootState) => s.appearance.themeId)
 
   useEffect(() => {
