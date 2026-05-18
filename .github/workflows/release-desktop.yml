@@ -116,9 +116,19 @@ jobs:
           REPO="melkyfb/awesome-download-manager"
           BASE_URL="https://github.com/${REPO}/releases/download/${TAG}"
 
+          echo "=== Release assets for ${TAG} ==="
+          gh release view "${TAG}" --repo "${REPO}" --json assets --jq '.assets[].name'
+
           # Download all .sig files from the release (uploaded by tauri-action on each runner)
           mkdir -p sigs
-          gh release download "${TAG}" --repo "${REPO}" --pattern "*.sig" --dir ./sigs
+          if ! gh release download "${TAG}" --repo "${REPO}" --pattern "*.sig" --dir ./sigs; then
+            echo "::error::No .sig files found in release ${TAG}."
+            echo "Make sure TAURI_SIGNING_PRIVATE_KEY is set in repository secrets."
+            exit 1
+          fi
+
+          echo "=== Downloaded sig files ==="
+          ls -la sigs/
 
           # Read signatures (strip trailing whitespace/newlines)
           LINUX_SIG=$(cat sigs/*.AppImage.tar.gz.sig 2>/dev/null | tr -d '\n\r' || true)
