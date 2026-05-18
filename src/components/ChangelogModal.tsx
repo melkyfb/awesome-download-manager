@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { relaunch } from '@tauri-apps/plugin-process'
 import type { AppDispatch } from '../store'
 import { closeChangelog } from '../store/uiSlice'
 import type { GithubRelease } from '../hooks/useUpdateCheck'
-import { invoke } from '@tauri-apps/api/core'
-
+import type { Update } from '@tauri-apps/plugin-updater'
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
@@ -14,13 +15,37 @@ interface Props {
   hasUpdate: boolean
   releases: GithubRelease[]
   loading: boolean
+  update: Update | null
 }
 
-export function ChangelogModal({ currentVersion, latestVersion, hasUpdate, releases, loading }: Props) {
+export function ChangelogModal({ currentVersion, latestVersion, hasUpdate, releases, loading, update }: Props) {
   const dispatch = useDispatch<AppDispatch>()
+  const [downloading, setDownloading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [downloaded, setDownloaded] = useState(false)
+  const [installError, setInstallError] = useState<string | null>(null)
 
-  function openRelease(url: string) {
-    invoke('open_in_browser', { url }).catch(() => window.open(url, '_blank', 'noopener'))
+  async function startUpdate() {
+    if (!update) return
+    setDownloading(true)
+    setInstallError(null)
+    try {
+      let total = 0
+      await update.downloadAndInstall((p) => {
+        if (p.event === 'Started' && p.data.contentLength) {
+          total = p.data.contentLength
+        } else if (p.event === 'Progress' && total > 0) {
+          setProgress(Math.round((p.data.chunkLength / total) * 100))
+        } else if (p.event === 'Finished') {
+          setProgress(100)
+          setDownloaded(true)
+        }
+      })
+      await relaunch()
+    } catch (e) {
+      setInstallError(String(e))
+      setDownloading(false)
+    }
   }
 
   return (
@@ -64,33 +89,56 @@ export function ChangelogModal({ currentVersion, latestVersion, hasUpdate, relea
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            {hasUpdate && (
+            {hasUpdate && !downloading && (
               <button
-                onClick={() => openRelease('https://github.com/melkyfb/awesome-download-manager/releases/latest')}
+                onClick={startUpdate}
                 style={{
-                  background: 'var(--accent)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '6px 14px',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
+                  background: 'var(--accent)', color: '#fff', border: 'none',
+                  borderRadius: '8px', padding: '6px 14px', fontSize: '12px',
+                  fontWeight: 600, cursor: 'pointer',
                 }}
               >
                 ↓ v{latestVersion} available
               </button>
+            )}
+            {downloading && !downloaded && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{
+                  width: '120px', height: '6px',
+                  background: 'rgba(255,255,255,0.1)',
+                  borderRadius: '3px', overflow: 'hidden',
+                }}>
+                  <div style={{
+                    width: `${progress}%`, height: '100%',
+                    background: 'var(--accent)',
+                    transition: 'width 0.2s',
+                  }} />
+                </div>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{progress}%</span>
+              </div>
+            )}
+            {downloaded && (
+              <button
+                onClick={() => relaunch()}
+                style={{
+                  background: '#28c864', color: '#fff', border: 'none',
+                  borderRadius: '8px', padding: '6px 14px', fontSize: '12px',
+                  fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                Instalar e reiniciar
+              </button>
+            )}
+            {installError && (
+              <span style={{ fontSize: '11px', color: '#ff6060' }}>Erro: {installError}</span>
             )}
             <button
               onClick={() => dispatch(closeChangelog())}
               style={{
                 background: 'rgba(255,255,255,0.08)',
                 border: '1px solid var(--glass-border)',
-                borderRadius: '8px',
-                padding: '6px 10px',
-                fontSize: '14px',
-                color: 'var(--text-secondary)',
-                cursor: 'pointer',
+                borderRadius: '8px', padding: '6px 10px',
+                fontSize: '14px', color: 'var(--text-secondary)', cursor: 'pointer',
               }}
             >
               ✕
@@ -105,13 +153,11 @@ export function ChangelogModal({ currentVersion, latestVersion, hasUpdate, relea
               Loading releases…
             </div>
           )}
-
           {!loading && releases.length === 0 && (
             <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '32px 0', fontSize: '13px' }}>
               No releases found.
             </div>
           )}
-
           {releases.map((rel, i) => (
             <div
               key={rel.tag_name}
@@ -122,52 +168,37 @@ export function ChangelogModal({ currentVersion, latestVersion, hasUpdate, relea
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    fontSize: '13px', fontWeight: 700,
-                    color: rel.tag_name.replace(/^v/, '') === currentVersion ? 'var(--accent)' : 'var(--text-primary)',
-                  }}
-                >
+                <span style={{
+                  fontSize: '13px', fontWeight: 700,
+                  color: rel.tag_name.replace(/^v/, '') === currentVersion ? 'var(--accent)' : 'var(--text-primary)',
+                }}>
                   {rel.tag_name}
                 </span>
                 {rel.tag_name.replace(/^v/, '') === currentVersion && (
                   <span style={{
                     fontSize: '10px', fontWeight: 600,
-                    background: 'rgba(124,77,255,0.2)',
-                    color: 'var(--accent)',
+                    background: 'rgba(124,77,255,0.2)', color: 'var(--accent)',
                     border: '1px solid rgba(124,77,255,0.35)',
-                    borderRadius: '20px',
-                    padding: '1px 8px',
-                  }}>
-                    current
-                  </span>
+                    borderRadius: '20px', padding: '1px 8px',
+                  }}>current</span>
                 )}
                 {i === 0 && rel.tag_name.replace(/^v/, '') !== currentVersion && (
                   <span style={{
                     fontSize: '10px', fontWeight: 600,
-                    background: 'rgba(74,222,128,0.15)',
-                    color: '#4ade80',
+                    background: 'rgba(74,222,128,0.15)', color: '#4ade80',
                     border: '1px solid rgba(74,222,128,0.3)',
-                    borderRadius: '20px',
-                    padding: '1px 8px',
-                  }}>
-                    latest
-                  </span>
+                    borderRadius: '20px', padding: '1px 8px',
+                  }}>latest</span>
                 )}
                 <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginLeft: 'auto' }}>
                   {formatDate(rel.published_at)}
                 </span>
               </div>
-
               {rel.body ? (
                 <pre style={{
-                  fontSize: '12px',
-                  color: 'var(--text-secondary)',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  lineHeight: '1.6',
-                  margin: 0,
-                  fontFamily: 'inherit',
+                  fontSize: '12px', color: 'var(--text-secondary)',
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                  lineHeight: '1.6', margin: 0, fontFamily: 'inherit',
                 }}>
                   {rel.body.trim()}
                 </pre>
