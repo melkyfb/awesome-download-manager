@@ -1,10 +1,11 @@
 pub mod db;
 pub mod config;
 pub mod download;
+pub mod tray;
 
 use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
-use std::sync::atomic::AtomicU64;
+use std::sync::atomic::{AtomicBool, AtomicU64};
 use rusqlite::Connection;
 use tauri::Manager;
 use tauri_plugin_opener::OpenerExt;
@@ -18,6 +19,9 @@ pub struct AppState {
     pub db: Arc<Mutex<Connection>>,
     pub downloads: Arc<tokio::sync::RwLock<HashMap<String, (tokio::task::AbortHandle, Arc<std::sync::atomic::AtomicBool>)>>>,
     pub global_speed_limit: Arc<std::sync::atomic::AtomicU64>,
+    pub tray_speed_bps: Arc<AtomicU64>,
+    pub clipboard_monitor_enabled: Arc<AtomicBool>,
+    pub pending_clipboard_url: Arc<Mutex<Option<String>>>,
 }
 
 #[cfg(target_os = "android")]
@@ -41,6 +45,10 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             let db_path = get_db_path(&app.handle());
             std::fs::create_dir_all(
@@ -52,8 +60,12 @@ pub fn run() {
                 db: Arc::new(Mutex::new(conn)),
                 downloads: Arc::new(tokio::sync::RwLock::new(HashMap::new())),
                 global_speed_limit: Arc::new(AtomicU64::new(0)),
+                tray_speed_bps: Arc::new(AtomicU64::new(0)),
+                clipboard_monitor_enabled: Arc::new(AtomicBool::new(true)),
+                pending_clipboard_url: Arc::new(Mutex::new(None)),
             };
             app.manage(state);
+            tray::setup_tray(&app.handle())?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
