@@ -90,23 +90,11 @@ jobs:
         env:
           BUILD_VERSION: ${{ github.ref_name }}
 
-      - name: Decode signing key into env
-        shell: python3 {0}
-        env:
-          TAURI_KEY_B64: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-        run: |
-          import base64, os
-          key = base64.b64decode(os.environ['TAURI_KEY_B64']).decode('utf-8')
-          with open(os.environ['GITHUB_ENV'], 'a') as f:
-            f.write('TAURI_SIGNING_PRIVATE_KEY<<KEYEOF\n')
-            f.write(key)
-            f.write('\nKEYEOF\n')
-
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ env.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
         with:
           tagName: ${{ github.ref_name }}
