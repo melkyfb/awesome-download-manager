@@ -40,4 +40,6 @@ export interface Config {
   theme_id: string
   font_id: string
   language: string
+  start_minimized: boolean
+  clipboard_monitor_enabled: boolean
 }
