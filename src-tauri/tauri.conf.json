@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "awesome-download-manager",
+  "productName": "Awesome Download Manager",
   "version": "0.1.0",
   "identifier": "com.melkyfb.awesomedownloadmanager",
   "build": {
