@@ -76,6 +76,17 @@ pub fn run() {
             };
             app.manage(state);
             tray::setup_tray(&app.handle())?;
+            {
+                let state = app.state::<AppState>();
+                let db = state.db.lock().map_err(|e| e.to_string())?;
+                let repo = db::repository::Repository::new(&db);
+                let settings = config::settings::load_settings(&repo);
+                if settings.start_minimized {
+                    if let Some(win) = app.get_webview_window("main") {
+                        let _ = win.hide();
+                    }
+                }
+            }
             Ok(())
         })
         .on_window_event(|window, event| {
