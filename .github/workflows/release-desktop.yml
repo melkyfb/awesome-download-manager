@@ -90,11 +90,24 @@ jobs:
         env:
           BUILD_VERSION: ${{ github.ref_name }}
 
+      - name: Write signing key to file
+        shell: python3 {0}
+        env:
+          TAURI_KEY_B64: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          import base64, os, tempfile
+          key = base64.b64decode(os.environ['TAURI_KEY_B64'])
+          fd, path = tempfile.mkstemp(suffix='.key', prefix='tauri-signing-')
+          os.write(fd, key)
+          os.close(fd)
+          with open(os.environ['GITHUB_ENV'], 'a') as f:
+            f.write(f'SIGNING_KEY_PATH={path}\n')
+
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PATH: ${{ env.SIGNING_KEY_PATH }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
         with:
           tagName: ${{ github.ref_name }}
