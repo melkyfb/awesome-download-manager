@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { useTranslation } from 'react-i18next'
 import type { RootState, AppDispatch } from '../store'
-import { closeAddModal, openSettings } from '../store/uiSlice'
+import { closeAddModal, openSettings, setPrefillUrl } from '../store/uiSlice'
 import { upsertDownload } from '../store/downloadsSlice'
 import type { Download } from '../types'
 
@@ -12,7 +12,12 @@ export function AddDownloadModal() {
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const config = useSelector((s: RootState) => s.config)
-  const [url, setUrl] = useState('')
+  const prefillUrl = useSelector((s: RootState) => s.ui.prefillUrl)
+  const [url, setUrl] = useState(prefillUrl)
+
+  useEffect(() => {
+    return () => { dispatch(setPrefillUrl('')) }
+  }, [dispatch])
   const [destFolder, setDestFolder] = useState(config.dest_folder)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

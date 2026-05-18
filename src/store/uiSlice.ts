@@ -5,6 +5,8 @@ interface UiState {
   addModalOpen: boolean
   settingsOpen: boolean
   changelogOpen: boolean
+  closeDialogOpen: boolean
+  prefillUrl: string
 }
 
 const initialState: UiState = {
@@ -12,6 +14,8 @@ const initialState: UiState = {
   addModalOpen: false,
   settingsOpen: false,
   changelogOpen: false,
+  closeDialogOpen: false,
+  prefillUrl: '',
 }
 
 const uiSlice = createSlice({
@@ -27,8 +31,18 @@ const uiSlice = createSlice({
     closeSettings(state) { state.settingsOpen = false },
     openChangelog(state) { state.changelogOpen = true },
     closeChangelog(state) { state.changelogOpen = false },
+    openCloseDialog(state) { state.closeDialogOpen = true },
+    closeCloseDialog(state) { state.closeDialogOpen = false },
+    setPrefillUrl(state, action: PayloadAction<string>) { state.prefillUrl = action.payload },
   },
 })
 
-export const { setExpandedCard, openAddModal, closeAddModal, openSettings, closeSettings, openChangelog, closeChangelog } = uiSlice.actions
+export const {
+  setExpandedCard,
+  openAddModal, closeAddModal,
+  openSettings, closeSettings,
+  openChangelog, closeChangelog,
+  openCloseDialog, closeCloseDialog,
+  setPrefillUrl,
+} = uiSlice.actions
 export default uiSlice.reducer

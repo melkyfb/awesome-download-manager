@@ -16,6 +16,7 @@ import { DownloadCard } from './components/DownloadCard'
 import { AddDownloadModal } from './components/AddDownloadModal'
 import { SettingsPage } from './components/SettingsPage'
 import { ChangelogModal } from './components/ChangelogModal'
+import { CloseDialog } from './components/CloseDialog'
 import { useUpdateCheck } from './hooks/useUpdateCheck'
 import type { Config, Download } from './types'
 
@@ -26,6 +27,7 @@ export default function App() {
   const addModalOpen = useSelector((s: RootState) => s.ui.addModalOpen)
   const settingsOpen = useSelector((s: RootState) => s.ui.settingsOpen)
   const changelogOpen = useSelector((s: RootState) => s.ui.changelogOpen)
+  const closeDialogOpen = useSelector((s: RootState) => s.ui.closeDialogOpen)
   const updateState = useUpdateCheck()
   const language = useSelector((s: RootState) => s.appearance.language)
 
@@ -81,6 +83,7 @@ export default function App() {
             {addModalOpen && <AddDownloadModal />}
             {settingsOpen && <SettingsPage />}
             {changelogOpen && <ChangelogModal {...updateState} />}
+            {closeDialogOpen && <CloseDialog />}
           </div>
         </AppBackground>
       </FontProvider>
