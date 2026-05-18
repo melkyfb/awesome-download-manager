@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, AtomicU64};
 use rusqlite::Connection;
 use tauri::{Emitter, Manager};
+use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_opener::OpenerExt;
 
 #[tauri::command]
@@ -49,6 +50,18 @@ fn get_db_path(_app: &tauri::AppHandle) -> std::path::PathBuf {
         .join("db.sqlite")
 }
 
+pub fn is_download_url(text: &str) -> bool {
+    let Ok(parsed) = url::Url::parse(text) else { return false };
+    if parsed.scheme() != "http" && parsed.scheme() != "https" { return false }
+    let path = parsed.path().to_lowercase();
+    const EXTS: &[&str] = &[
+        ".zip", ".exe", ".apk", ".iso", ".dmg", ".tar.gz", ".tar.bz2",
+        ".7z", ".rar", ".deb", ".rpm", ".msi", ".pkg", ".appimage",
+        ".mp4", ".mp3", ".mkv",
+    ];
+    EXTS.iter().any(|ext| path.ends_with(ext))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -77,15 +90,53 @@ pub fn run() {
             app.manage(state);
             tray::setup_tray(&app.handle())?;
             {
+                use std::sync::atomic::Ordering;
                 let state = app.state::<AppState>();
                 let db = state.db.lock().map_err(|e| e.to_string())?;
                 let repo = db::repository::Repository::new(&db);
                 let settings = config::settings::load_settings(&repo);
+                state.clipboard_monitor_enabled.store(settings.clipboard_monitor_enabled, Ordering::Relaxed);
                 if settings.start_minimized {
                     if let Some(win) = app.get_webview_window("main") {
                         let _ = win.hide();
                     }
                 }
+            }
+            // spawn clipboard monitor background task
+            {
+                use std::sync::atomic::Ordering;
+                let app_handle = app.handle().clone();
+                tokio::spawn(async move {
+                    let clipboard = app_handle.clipboard();
+                    let mut last_seen = String::new();
+                    loop {
+                        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+                        let state = match app_handle.try_state::<AppState>() {
+                            Some(s) => s,
+                            None => continue,
+                        };
+                        if !state.clipboard_monitor_enabled.load(Ordering::Relaxed) {
+                            continue;
+                        }
+                        let text = match clipboard.read_text() {
+                            Ok(t) => t,
+                            _ => continue,
+                        };
+                        if text == last_seen { continue; }
+                        last_seen = text.clone();
+                        if is_download_url(&text) {
+                            if let Ok(mut pending) = state.pending_clipboard_url.lock() {
+                                *pending = Some(text);
+                            }
+                            use tauri_plugin_notification::NotificationExt;
+                            let _ = app_handle.notification()
+                                .builder()
+                                .title("Awesome Download Manager")
+                                .body("Link de download copiado. Clique para baixar.")
+                                .show();
+                        }
+                    }
+                });
             }
             Ok(())
         })
@@ -120,4 +171,39 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_download_url;
+
+    #[test]
+    fn detects_zip_url() {
+        assert!(is_download_url("https://example.com/file.zip"));
+    }
+
+    #[test]
+    fn detects_exe_url() {
+        assert!(is_download_url("https://example.com/setup.exe"));
+    }
+
+    #[test]
+    fn detects_tar_gz_url() {
+        assert!(is_download_url("https://example.com/archive.tar.gz"));
+    }
+
+    #[test]
+    fn ignores_plain_html_url() {
+        assert!(!is_download_url("https://example.com/page.html"));
+    }
+
+    #[test]
+    fn ignores_non_url() {
+        assert!(!is_download_url("just some text"));
+    }
+
+    #[test]
+    fn ignores_ftp_url() {
+        assert!(!is_download_url("ftp://example.com/file.zip"));
+    }
 }
