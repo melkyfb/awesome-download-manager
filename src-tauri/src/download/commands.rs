@@ -83,8 +83,11 @@ async fn spawn_download_task(
                             );
                             if let Some(state) = app.try_state::<crate::AppState>() {
                                 state.tray_speed_bps.store(speed_bps, std::sync::atomic::Ordering::Relaxed);
-                                let active = state.downloads.blocking_read().len();
-                                crate::tray::rebuild_menu(&app, active, speed_bps);
+                                #[cfg(desktop)]
+                                {
+                                    let active = state.downloads.blocking_read().len();
+                                    crate::tray::rebuild_menu(&app, active, speed_bps);
+                                }
                             }
                             if let Ok(db) = db.lock() {
                                 let repo = Repository::new(&db);
@@ -110,6 +113,7 @@ async fn spawn_download_task(
                 );
                 if let Some(state) = app_arc.try_state::<crate::AppState>() {
                     let active = state.downloads.blocking_read().len();
+                    #[cfg(desktop)]
                     crate::tray::rebuild_menu(&app_arc, active, 0);
                 }
             }
@@ -124,6 +128,7 @@ async fn spawn_download_task(
                 );
                 if let Some(state) = app_arc.try_state::<crate::AppState>() {
                     let active = state.downloads.blocking_read().len();
+                    #[cfg(desktop)]
                     crate::tray::rebuild_menu(&app_arc, active, 0);
                 }
             }
@@ -180,6 +185,7 @@ pub async fn start_download(
 
     {
         let active = state.downloads.read().await.len();
+        #[cfg(desktop)]
         crate::tray::rebuild_menu(&app, active, 0);
     }
 

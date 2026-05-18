@@ -1,3 +1,5 @@
+#![cfg(desktop)]
+
 use std::sync::atomic::Ordering;
 use tauri::{
     AppHandle, Emitter, Manager,

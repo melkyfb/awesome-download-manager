@@ -1,6 +1,7 @@
 pub mod db;
 pub mod config;
 pub mod download;
+#[cfg(desktop)]
 pub mod tray;
 
 use std::sync::{Arc, Mutex};
@@ -97,6 +98,7 @@ pub fn run() {
                 pending_clipboard_url: Arc::new(Mutex::new(None)),
             };
             app.manage(state);
+            #[cfg(desktop)]
             tray::setup_tray(&app.handle())?;
             {
                 use std::sync::atomic::Ordering;
