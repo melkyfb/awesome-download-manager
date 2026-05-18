@@ -5,9 +5,20 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:tray:default",
     "dialog:default",
     "opener:default",
     "opener:allow-open-url",
-    "opener:allow-default-urls"
+    "opener:allow-default-urls",
+    "clipboard-manager:default",
+    "clipboard-manager:allow-read-text",
+    "notification:default",
+    "notification:allow-request-permission",
+    "notification:allow-notify",
+    "updater:default",
+    "updater:allow-check",
+    "updater:allow-download-and-install",
+    "process:default",
+    "process:allow-restart"
   ]
 }

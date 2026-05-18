@@ -204,6 +204,25 @@ export function SettingsPage() {
                   </button>
                 ))}
               </div>
+
+              {/* Tray behavior */}
+              <div style={{ marginTop: '20px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+                  Tray
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={config.start_minimized}
+                    onChange={async (e) => {
+                      const updated = { ...config, start_minimized: e.target.checked }
+                      dispatch(setConfig(updated))
+                      await invoke('save_settings_cmd', { settings: updated }).catch(console.error)
+                    }}
+                  />
+                  <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>Iniciar minimizado no tray</span>
+                </label>
+              </div>
             </div>
           )}
 

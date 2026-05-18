@@ -15,7 +15,13 @@ pub struct Settings {
     pub font_id: String,
     #[serde(default)]
     pub language: String,
+    #[serde(default)]
+    pub start_minimized: bool,
+    #[serde(default = "default_clipboard_monitor")]
+    pub clipboard_monitor_enabled: bool,
 }
+
+fn default_clipboard_monitor() -> bool { true }
 
 impl Default for Settings {
     fn default() -> Self {
@@ -29,6 +35,8 @@ impl Default for Settings {
             theme_id: "dark-glass".to_string(),
             font_id: "inter".to_string(),
             language: "pt".to_string(),
+            start_minimized: false,
+            clipboard_monitor_enabled: true,
         }
     }
 }
@@ -60,6 +68,12 @@ pub fn load_settings(repo: &Repository<'_>) -> Settings {
     if let Ok(Some(v)) = repo.get_setting("theme_id") { s.theme_id = v; }
     if let Ok(Some(v)) = repo.get_setting("font_id") { s.font_id = v; }
     if let Ok(Some(v)) = repo.get_setting("language") { s.language = v; }
+    if let Ok(Some(v)) = repo.get_setting("start_minimized") {
+        s.start_minimized = v == "true";
+    }
+    if let Ok(Some(v)) = repo.get_setting("clipboard_monitor_enabled") {
+        s.clipboard_monitor_enabled = v == "true";
+    }
 
     // Check keyring for AI key existence — value never exposed to frontend
     s.ai_enabled = get_ai_key().is_some();
@@ -79,6 +93,8 @@ pub fn save_settings(repo: &Repository<'_>, settings: &Settings) -> rusqlite::Re
     repo.set_setting("theme_id", &settings.theme_id)?;
     repo.set_setting("font_id", &settings.font_id)?;
     repo.set_setting("language", &settings.language)?;
+    repo.set_setting("start_minimized", if settings.start_minimized { "true" } else { "false" })?;
+    repo.set_setting("clipboard_monitor_enabled", if settings.clipboard_monitor_enabled { "true" } else { "false" })?;
     Ok(())
 }
 
@@ -142,6 +158,8 @@ mod tests {
             theme_id: "brasil".to_string(),
             font_id: "pacifico".to_string(),
             language: "en".to_string(),
+            start_minimized: false,
+            clipboard_monitor_enabled: true,
         };
         save_settings(&repo, &s).unwrap();
         let loaded = load_settings(&repo);
@@ -171,5 +189,43 @@ mod tests {
         repo.set_setting("chunks", "0").unwrap();
         let loaded = load_settings(&repo);
         assert_eq!(loaded.chunks, 1);
+    }
+
+    #[test]
+    fn clipboard_monitor_defaults_true() {
+        let conn = make_repo_conn();
+        let repo = Repository::new(&conn);
+        let s = load_settings(&repo);
+        assert!(s.clipboard_monitor_enabled);
+    }
+
+    #[test]
+    fn clipboard_monitor_saved_and_loaded() {
+        let conn = make_repo_conn();
+        let repo = Repository::new(&conn);
+        let mut s = Settings::default();
+        s.clipboard_monitor_enabled = false;
+        save_settings(&repo, &s).unwrap();
+        let loaded = load_settings(&repo);
+        assert!(!loaded.clipboard_monitor_enabled);
+    }
+
+    #[test]
+    fn start_minimized_defaults_false() {
+        let conn = make_repo_conn();
+        let repo = Repository::new(&conn);
+        let s = load_settings(&repo);
+        assert!(!s.start_minimized);
+    }
+
+    #[test]
+    fn start_minimized_saved_and_loaded() {
+        let conn = make_repo_conn();
+        let repo = Repository::new(&conn);
+        let mut s = Settings::default();
+        s.start_minimized = true;
+        save_settings(&repo, &s).unwrap();
+        let loaded = load_settings(&repo);
+        assert!(loaded.start_minimized);
     }
 }

@@ -11,6 +11,8 @@ const initialState: Config = {
   theme_id: 'dark-glass',
   font_id: 'inter',
   language: 'pt',
+  start_minimized: false,
+  clipboard_monitor_enabled: true,
 }
 
 const configSlice = createSlice({
