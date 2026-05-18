@@ -7,12 +7,22 @@ use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, AtomicU64};
 use rusqlite::Connection;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 use tauri_plugin_opener::OpenerExt;
 
 #[tauri::command]
 fn open_in_browser(app: tauri::AppHandle, url: String) -> Result<(), String> {
     app.opener().open_url(&url, None::<&str>).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn hide_window(window: tauri::WebviewWindow) -> Result<(), String> {
+    window.hide().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn force_quit(app: tauri::AppHandle) {
+    app.exit(0);
 }
 
 pub struct AppState {
@@ -68,8 +78,22 @@ pub fn run() {
             tray::setup_tray(&app.handle())?;
             Ok(())
         })
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                if let Some(state) = window.try_state::<AppState>() {
+                    let active = state.downloads.blocking_read().len();
+                    if active > 0 {
+                        api.prevent_close();
+                        let _ = window.emit("window:close-requested", ());
+                        return;
+                    }
+                }
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             open_in_browser,
+            hide_window,
+            force_quit,
             download::commands::start_download,
             download::commands::pause_download,
             download::commands::cancel_download,
