@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { listen } from '@tauri-apps/api/event'
 import { invoke } from '@tauri-apps/api/core'
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { useDispatch } from 'react-redux'
 import type { AppDispatch } from '../store'
 import { updateProgress, completeDownload, setDownloadError } from '../store/downloadsSlice'
@@ -70,8 +71,21 @@ export function useTauriEvents() {
       }),
     ]
 
+    const win = getCurrentWebviewWindow()
+    const unlistenFocus = win.onFocusChanged(({ payload: focused }) => {
+      if (focused) {
+        invoke<string | null>('get_pending_clipboard_url').then((url) => {
+          if (url) {
+            dispatch(setPrefillUrl(url))
+            dispatch(openAddModal())
+          }
+        })
+      }
+    })
+
     return () => {
       unlisteners.forEach(p => p.then(fn => fn()))
+      unlistenFocus.then(fn => fn())
     }
   }, [dispatch])
 }

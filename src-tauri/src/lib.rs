@@ -26,6 +26,15 @@ fn force_quit(app: tauri::AppHandle) {
     app.exit(0);
 }
 
+#[tauri::command]
+fn get_pending_clipboard_url(state: tauri::State<'_, AppState>) -> Option<String> {
+    if let Ok(mut pending) = state.pending_clipboard_url.lock() {
+        pending.take()
+    } else {
+        None
+    }
+}
+
 pub struct AppState {
     pub db: Arc<Mutex<Connection>>,
     pub downloads: Arc<tokio::sync::RwLock<HashMap<String, (tokio::task::AbortHandle, Arc<std::sync::atomic::AtomicBool>)>>>,
@@ -156,6 +165,7 @@ pub fn run() {
             open_in_browser,
             hide_window,
             force_quit,
+            get_pending_clipboard_url,
             download::commands::start_download,
             download::commands::pause_download,
             download::commands::cancel_download,
