@@ -115,7 +115,7 @@ pub fn run() {
             {
                 use std::sync::atomic::Ordering;
                 let app_handle = app.handle().clone();
-                tokio::spawn(async move {
+                tauri::async_runtime::spawn(async move {
                     let clipboard = app_handle.clipboard();
                     let mut last_seen = String::new();
                     loop {
