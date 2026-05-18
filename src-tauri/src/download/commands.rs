@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use tauri::{AppHandle, Emitter, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 use uuid::Uuid;
 
 use crate::AppState;
@@ -81,6 +81,11 @@ async fn spawn_download_task(
                                     chunk_speeds,
                                 },
                             );
+                            if let Some(state) = app.try_state::<crate::AppState>() {
+                                state.tray_speed_bps.store(speed_bps, std::sync::atomic::Ordering::Relaxed);
+                                let active = state.downloads.blocking_read().len();
+                                crate::tray::rebuild_menu(&app, active, speed_bps);
+                            }
                             if let Ok(db) = db.lock() {
                                 let repo = Repository::new(&db);
                                 let _ = repo.update_progress(&id_for_db_cb, downloaded as i64, None);
@@ -103,6 +108,10 @@ async fn spawn_download_task(
                     "download:complete",
                     serde_json::json!({ "id": id_spawn, "sha256": sha256 }),
                 );
+                if let Some(state) = app_arc.try_state::<crate::AppState>() {
+                    let active = state.downloads.blocking_read().len();
+                    crate::tray::rebuild_menu(&app_arc, active, 0);
+                }
             }
             Err(e) => {
                 if let Ok(db) = db_arc.lock() {
@@ -113,6 +122,10 @@ async fn spawn_download_task(
                     "download:error",
                     serde_json::json!({ "id": id_spawn, "error": e }),
                 );
+                if let Some(state) = app_arc.try_state::<crate::AppState>() {
+                    let active = state.downloads.blocking_read().len();
+                    crate::tray::rebuild_menu(&app_arc, active, 0);
+                }
             }
         }
     })
@@ -161,9 +174,14 @@ pub async fn start_download(
         state.db.clone(),
         state.global_speed_limit.clone(),
         state.downloads.clone(),
-        app,
+        app.clone(),
     )
     .await;
+
+    {
+        let active = state.downloads.read().await.len();
+        crate::tray::rebuild_menu(&app, active, 0);
+    }
 
     Ok(id)
 }
