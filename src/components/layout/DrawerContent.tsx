@@ -9,6 +9,7 @@ import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded'
 import TableChartRoundedIcon from '@mui/icons-material/TableChartRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
 import { useDispatch, useSelector } from 'react-redux'
+import { useTranslation } from 'react-i18next'
 import type { AppDispatch, RootState } from '../../store'
 import { openSettings, closeSettings, setDownloadFilter } from '../../store/uiSlice'
 import { GlobalSpeedWidget } from '../common/GlobalSpeedWidget'
@@ -21,6 +22,7 @@ interface Props {
 export function DrawerContent({ onNavigate }: Props) {
   const dispatch = useDispatch<AppDispatch>()
   const settingsOpen = useSelector((s: RootState) => s.ui.settingsOpen)
+  const { t } = useTranslation()
 
   function goDownloads() {
     dispatch(closeSettings())
@@ -54,15 +56,15 @@ export function DrawerContent({ onNavigate }: Props) {
       <List sx={{ flex: 1 }}>
         <ListItemButton selected={!settingsOpen} onClick={goDownloads}>
           <ListItemIcon><DownloadRoundedIcon /></ListItemIcon>
-          <ListItemText primary="Downloads" />
+          <ListItemText primary={t('nav.downloads')} />
         </ListItemButton>
         <ListItemButton selected={false} onClick={goHistory}>
           <ListItemIcon><TableChartRoundedIcon /></ListItemIcon>
-          <ListItemText primary="Histórico" />
+          <ListItemText primary={t('nav.history')} />
         </ListItemButton>
         <ListItemButton selected={settingsOpen} onClick={goSettings}>
           <ListItemIcon><SettingsRoundedIcon /></ListItemIcon>
-          <ListItemText primary="Configurações" />
+          <ListItemText primary={t('nav.settings')} />
         </ListItemButton>
       </List>
 
