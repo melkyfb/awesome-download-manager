@@ -84,9 +84,8 @@ async fn spawn_download_task(
                             if let Some(state) = app.try_state::<crate::AppState>() {
                                 state.tray_speed_bps.store(speed_bps, std::sync::atomic::Ordering::Relaxed);
                                 #[cfg(desktop)]
-                                {
-                                    let active = state.downloads.blocking_read().len();
-                                    crate::tray::rebuild_menu(&app, active, speed_bps);
+                                if let Ok(guard) = state.downloads.try_read() {
+                                    crate::tray::rebuild_menu(&app, guard.len(), speed_bps);
                                 }
                             }
                             if let Ok(db) = db.lock() {
@@ -112,7 +111,7 @@ async fn spawn_download_task(
                     serde_json::json!({ "id": id_spawn, "sha256": sha256 }),
                 );
                 if let Some(state) = app_arc.try_state::<crate::AppState>() {
-                    let active = state.downloads.blocking_read().len();
+                    let active = state.downloads.read().await.len();
                     #[cfg(desktop)]
                     crate::tray::rebuild_menu(&app_arc, active, 0);
                 }
@@ -127,7 +126,7 @@ async fn spawn_download_task(
                     serde_json::json!({ "id": id_spawn, "error": e }),
                 );
                 if let Some(state) = app_arc.try_state::<crate::AppState>() {
-                    let active = state.downloads.blocking_read().len();
+                    let active = state.downloads.read().await.len();
                     #[cfg(desktop)]
                     crate::tray::rebuild_menu(&app_arc, active, 0);
                 }
