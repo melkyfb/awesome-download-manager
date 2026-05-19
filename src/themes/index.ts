@@ -49,6 +49,22 @@ export const THEMES: ThemeMeta[] = [
     id: 'royal', name: 'Royal',
     theme: createTheme({ ...shared, palette: { mode: 'dark', primary: { main: '#fbbf24' }, secondary: { main: '#e879f9' }, background: { default: '#0a0a1f', paper: '#12122e' }, error: { main: '#f87171' } } }),
   },
+  {
+    id: 'piano', name: 'Piano Black',
+    theme: createTheme({ ...shared, palette: { mode: 'dark', primary: { main: '#f5f5f5' }, secondary: { main: '#bdbdbd' }, background: { default: '#000000', paper: '#0a0a0a' }, error: { main: '#f87171' } } }),
+  },
+  {
+    id: 'midnight', name: 'Midnight',
+    theme: createTheme({ ...shared, palette: { mode: 'dark', primary: { main: '#9e9e9e' }, secondary: { main: '#757575' }, background: { default: '#121212', paper: '#1e1e1e' }, error: { main: '#f87171' } } }),
+  },
+  {
+    id: 'pure-white', name: 'Pure White',
+    theme: createTheme({ ...shared, palette: { mode: 'light', primary: { main: '#212121' }, secondary: { main: '#616161' }, background: { default: '#ffffff', paper: '#f5f5f5' }, error: { main: '#ef4444' } } }),
+  },
+  {
+    id: 'ice-white', name: 'Ice White',
+    theme: createTheme({ ...shared, palette: { mode: 'light', primary: { main: '#0284c7' }, secondary: { main: '#0ea5e9' }, background: { default: '#e8f4fd', paper: '#ffffff' }, error: { main: '#ef4444' } } }),
+  },
 ]
 
 export function getTheme(id: string): Theme {

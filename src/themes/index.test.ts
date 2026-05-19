@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { THEMES, getTheme } from './index'
 
 describe('THEMES', () => {
-  it('exports exactly 10 themes', () => {
-    expect(THEMES).toHaveLength(10)
+  it('exports exactly 14 themes', () => {
+    expect(THEMES).toHaveLength(14)
   })
 
   it('every theme has an id, name, and MUI theme with palette', () => {
