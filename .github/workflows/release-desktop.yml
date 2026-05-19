@@ -119,6 +119,9 @@ jobs:
           echo "=== Release assets for ${TAG} ==="
           gh release view "${TAG}" --repo "${REPO}" --json assets --jq '.assets[].name'
 
+          # Fetch release notes from the GitHub release body
+          RELEASE_NOTES=$(gh release view "${TAG}" --repo "${REPO}" --json body --jq '.body')
+
           # Download all .sig files from the release (uploaded by tauri-action on each runner)
           mkdir -p sigs
           if ! gh release download "${TAG}" --repo "${REPO}" --pattern "*.sig" --dir ./sigs; then
@@ -148,7 +151,7 @@ jobs:
 
           jq -n \
             --arg version "${VERSION}" \
-            --arg notes "See https://github.com/${REPO}/releases/tag/${TAG}" \
+            --arg notes "${RELEASE_NOTES}" \
             --arg pub_date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             --arg linux_sig "${LINUX_SIG}" \
             --arg linux_url "${LINUX_URL}" \
