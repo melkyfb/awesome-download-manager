@@ -1,0 +1,100 @@
+<h2>Qual layout principal você prefere?</h2>
+<p class="subtitle">Escolha a estrutura geral da interface do gerenciador de downloads</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="display:flex;height:160px;font-size:11px;gap:2px">
+        <div class="mock-sidebar" style="width:60px;padding:6px;font-size:10px;flex-shrink:0">
+          <div style="font-weight:bold;margin-bottom:8px">⬇ ADM</div>
+          <div style="margin-bottom:4px">📥 Downloads</div>
+          <div style="margin-bottom:4px">✅ Completos</div>
+          <div style="margin-bottom:4px">⚙️ Config</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px;padding:4px;background:#f9f9f9">
+          <div class="mock-nav" style="font-size:10px;padding:4px 6px">+ Novo Download &nbsp;|&nbsp; Velocidade: 0 (sem limite)</div>
+          <div style="flex:1;background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:6px">
+            <div style="font-size:10px;font-weight:bold;margin-bottom:4px">Downloads Ativos</div>
+            <div style="background:#f0f0f0;border-radius:3px;padding:4px;margin-bottom:3px;font-size:9px">
+              ubuntu-24.iso &nbsp;▓▓▓▓▓▓░░░░ 60% &nbsp;🛡 Seguro
+            </div>
+            <div style="background:#f0f0f0;border-radius:3px;padding:4px;font-size:9px">
+              vlc-3.0.exe &nbsp;▓▓░░░░░░░░ 20% &nbsp;⏳ Analisando...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Sidebar + Lista</h3>
+      <p>Navegação lateral fixa com lista de downloads no centro. Clássico e eficiente.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="display:flex;flex-direction:column;height:160px;font-size:11px;gap:2px">
+        <div class="mock-nav" style="font-size:10px;padding:4px 8px">⬇ Awesome DL &nbsp;|&nbsp; + Novo &nbsp;|&nbsp; 📥 Ativos (2) &nbsp;|&nbsp; ✅ Completos &nbsp;|&nbsp; ⚙️</div>
+        <div style="display:flex;flex:1;gap:4px;padding:4px;background:#f9f9f9">
+          <div style="flex:2;background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:6px">
+            <div style="font-size:9px;font-weight:bold;margin-bottom:4px">Downloads</div>
+            <div style="background:#f0f0f0;border-radius:3px;padding:4px;margin-bottom:3px;font-size:9px">
+              ubuntu-24.iso &nbsp;▓▓▓▓▓▓░░░░ 60%
+            </div>
+            <div style="background:#f0f0f0;border-radius:3px;padding:4px;font-size:9px">
+              vlc-3.0.exe &nbsp;▓▓░░░░░░░░ 20%
+            </div>
+          </div>
+          <div style="flex:1;background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:6px">
+            <div style="font-size:9px;font-weight:bold;margin-bottom:4px">🤖 IA — ubuntu-24.iso</div>
+            <div style="font-size:9px;color:#555;margin-bottom:3px">📋 ISO de instalação Linux</div>
+            <div style="font-size:9px;color:#2a9d2a">🛡 Não malicioso</div>
+            <div style="font-size:9px;color:#555;margin-top:3px">🔗 3 mirrors encontrados</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Toolbar + Painel de IA</h3>
+      <p>Barra de navegação no topo, lista à esquerda e painel de análise de IA fixo à direita.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="display:flex;flex-direction:column;height:160px;font-size:11px;gap:2px">
+        <div class="mock-nav" style="font-size:10px;padding:4px 8px">⬇ Awesome DL &nbsp;|&nbsp; + Novo &nbsp;|&nbsp; ⚙️ &nbsp;|&nbsp; 🚀 2 ativos</div>
+        <div style="flex:1;padding:4px;background:#f9f9f9;overflow:hidden">
+          <div style="background:#fff;border:1px solid #e0e0e0;border-radius:4px;margin-bottom:3px;padding:6px">
+            <div style="display:flex;justify-content:space-between;font-size:9px;margin-bottom:3px">
+              <span style="font-weight:bold">ubuntu-24.iso</span>
+              <span style="color:#2a9d2a">🛡 Seguro</span>
+            </div>
+            <div style="background:#e8f4e8;border-radius:2px;height:6px;margin-bottom:3px">
+              <div style="background:#2a9d2a;width:60%;height:100%;border-radius:2px"></div>
+            </div>
+            <div style="font-size:9px;color:#666;display:flex;gap:8px">
+              <span>60% · 2.1 MB/s</span><span>📋 ISO Linux · 🔗 3 mirrors</span><span style="color:#2a9d2a">SHA ✓</span>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:6px">
+            <div style="display:flex;justify-content:space-between;font-size:9px;margin-bottom:3px">
+              <span style="font-weight:bold">vlc-3.0.exe</span>
+              <span style="color:#e88c00">⏳ Analisando</span>
+            </div>
+            <div style="background:#f0f0f0;border-radius:2px;height:6px;margin-bottom:3px">
+              <div style="background:#3b82f6;width:20%;height:100%;border-radius:2px"></div>
+            </div>
+            <div style="font-size:9px;color:#666">20% · 800 KB/s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Cards expandíveis</h3>
+      <p>Cada download é um card com infos de IA inline (status, SHA, mirrors). Sem painel lateral separado — tudo compacto e expansível ao clicar.</p>
+    </div>
+  </div>
+
+</div>

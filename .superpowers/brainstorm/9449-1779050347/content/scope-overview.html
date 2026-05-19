@@ -1,0 +1,68 @@
+<h2>Integrações com o Sistema Operacional</h2>
+<p class="subtitle">Quais dessas 5 integrações são prioridade para esse ciclo?</p>
+
+<div class="options" data-multiselect>
+
+  <div class="option" data-choice="tray" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>🗂 System Tray</h3>
+      <p>Minimizar para a gaveta de aplicativos. App roda em background, ícone na bandeja com menu rápido (pausar tudo, abrir janela, sair).</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Prós</h4><ul><li>App sempre disponível sem ocupar a barra de tarefas</li><li>Download continua mesmo com a janela fechada</li></ul></div>
+        <div class="cons"><h4>Esforço</h4><ul><li>Médio — tauri-plugin-tray já existe</li><li>Precisa do diálogo "fechar ou minimizar"</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="close-dialog" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>❓ Diálogo ao Fechar</h3>
+      <p>Intercepta o X da janela. Se há downloads ativos → pergunta: <strong>Minimizar para tray</strong> ou <strong>Fechar mesmo</strong>. Se não há nada ativo → fecha direto.</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Prós</h4><ul><li>Evita interrupção acidental de downloads</li></ul></div>
+        <div class="cons"><h4>Esforço</h4><ul><li>Baixo — depende do Tray (A) estar implementado</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="clipboard" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>📋 Clipboard Monitor</h3>
+      <p>Detecta quando uma URL de download é copiada (qualquer coisa com extensão conhecida: .zip, .exe, .apk, .iso…) e abre automaticamente o modal de novo download com o link preenchido.</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Prós</h4><ul><li>Zero cliques extras — copy → abre pronto</li></ul></div>
+        <div class="cons"><h4>Esforço</h4><ul><li>Médio — polling ou hook nativo no OS</li><li>Pode gerar falsos positivos em links genéricos</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="browser" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>🌐 Interceptação de Downloads do Browser</h3>
+      <p>Extensão de browser (Chrome/Firefox) ou protocolo customizado (<code>adm://</code>) que redireciona downloads para o ADM automaticamente. O browser "entrega" o arquivo ao ADM em vez de baixar ele mesmo.</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Prós</h4><ul><li>Experiência seamless — clicou em download no browser, ADM assume</li></ul></div>
+        <div class="cons"><h4>Esforço</h4><ul><li>Alto — extensão separada para cada browser + review na Web Store</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="autoupdate" onclick="toggleSelect(this)">
+    <div class="letter">E</div>
+    <div class="content">
+      <h3>🔄 Auto-Update Real</h3>
+      <p>Atualmente abre apenas a página de releases. Queremos: detectar nova versão → baixar o instalador em background → notificar → ao clicar, lançar o instalador silenciosamente.</p>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Prós</h4><ul><li>Atualização com 1 clique, sem sair do app</li></ul></div>
+        <div class="cons"><h4>Esforço</h4><ul><li>Médio — tauri-plugin-updater com assinatura dos artifacts</li><li>Requer gerar keypair e configurar CI de signing</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px">Selecione todas as que quer no ciclo atual. Pode selecionar todas.</p>

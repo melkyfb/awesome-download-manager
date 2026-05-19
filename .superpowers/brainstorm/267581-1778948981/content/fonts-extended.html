@@ -1,0 +1,168 @@
+<h2>+20 fontes — das mais sérias às mais cômicas</h2>
+<p class="subtitle">As 5 anteriores já confirmadas. Clique para marcar as favoritas (multi-select)</p>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700&family=DM+Sans:wght@500;700&family=IBM+Plex+Sans:wght@500;700&family=Sora:wght@500;700&family=Figtree:wght@500;700&family=Lexend:wght@500;700&family=Barlow:wght@500;700&family=Mulish:wght@500;700&family=Urbanist:wght@500;700&family=Oxanium:wght@500;700&family=Exo+2:wght@500;700&family=Rajdhani:wght@500;700&family=Bebas+Neue&family=Pacifico&family=Fredoka+One&family=Boogaloo&family=Comfortaa:wght@500;700&family=Righteous&family=Lilita+One&family=Baloo+2:wght@500;700&family=Bubblegum+Sans&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+.font-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.font-row {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.font-row:hover { background: rgba(255,255,255,0.1); }
+.font-row.selected {
+  background: rgba(124,77,255,0.2);
+  border-color: rgba(124,77,255,0.6);
+}
+.font-preview { font-size: 17px; color: #fff; font-weight: 700; line-height: 1.2; }
+.font-meta { font-size: 10px; color: rgba(255,255,255,0.4); font-family: 'Inter',sans-serif; }
+.font-tag {
+  display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 4px;
+  font-family: 'Inter',sans-serif; font-weight: 500; letter-spacing: 0.3px;
+}
+.tag-serious { background: rgba(59,130,246,0.25); color: #93c5fd; }
+.tag-fun { background: rgba(251,146,60,0.25); color: #fdba74; }
+.tag-techy { background: rgba(52,211,153,0.25); color: #6ee7b7; }
+.tag-mono { background: rgba(168,85,247,0.25); color: #d8b4fe; }
+.section-label {
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.35); letter-spacing: 1px; text-transform: uppercase;
+  margin: 16px 0 8px; padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+</style>
+
+<div class="section-label">🏢 Sérias / Profissionais</div>
+<div class="font-grid">
+  <div class="font-row" data-choice="manrope" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Manrope',sans-serif">Download Manager</div>
+    <div class="font-meta">Manrope <span class="font-tag tag-serious">séria</span></div>
+    <div style="font-family:'Manrope',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Geométrica, alto contraste. Muito legível.</div>
+  </div>
+  <div class="font-row" data-choice="dmsans" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'DM Sans',sans-serif">Download Manager</div>
+    <div class="font-meta">DM Sans <span class="font-tag tag-serious">séria</span></div>
+    <div style="font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Criada pelo Google, corpo de texto ideal.</div>
+  </div>
+  <div class="font-row" data-choice="ibm" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'IBM Plex Sans',sans-serif">Download Manager</div>
+    <div class="font-meta">IBM Plex Sans <span class="font-tag tag-serious">séria</span></div>
+    <div style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Corporativa, técnica. Família completa.</div>
+  </div>
+  <div class="font-row" data-choice="sora" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Sora',sans-serif">Download Manager</div>
+    <div class="font-meta">Sora <span class="font-tag tag-serious">séria</span></div>
+    <div style="font-family:'Sora',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Influência japonesa, elegante e clean.</div>
+  </div>
+  <div class="font-row" data-choice="figtree" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Figtree',sans-serif">Download Manager</div>
+    <div class="font-meta">Figtree <span class="font-tag tag-serious">séria</span></div>
+    <div style="font-family:'Figtree',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Neutra, muito legível, moderna discreta.</div>
+  </div>
+  <div class="font-row" data-choice="lexend" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Lexend',sans-serif">Download Manager</div>
+    <div class="font-meta">Lexend <span class="font-tag tag-serious">séria</span></div>
+    <div style="font-family:'Lexend',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Desenhada p/ velocidade de leitura.</div>
+  </div>
+  <div class="font-row" data-choice="barlow" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Barlow',sans-serif">Download Manager</div>
+    <div class="font-meta">Barlow <span class="font-tag tag-serious">séria</span></div>
+    <div style="font-family:'Barlow',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Condensada, muito profissional.</div>
+  </div>
+  <div class="font-row" data-choice="mulish" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Mulish',sans-serif">Download Manager</div>
+    <div class="font-meta">Mulish <span class="font-tag tag-serious">séria</span></div>
+    <div style="font-family:'Mulish',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Minimalista, geométrica, espaçada.</div>
+  </div>
+</div>
+
+<div class="section-label">⚡ Tech / Futuristas</div>
+<div class="font-grid">
+  <div class="font-row" data-choice="urbanist" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Urbanist',sans-serif">Download Manager</div>
+    <div class="font-meta">Urbanist <span class="font-tag tag-techy">tech</span></div>
+    <div style="font-family:'Urbanist',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Muito geométrica, estilo startup.</div>
+  </div>
+  <div class="font-row" data-choice="oxanium" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Oxanium',sans-serif">Download Manager</div>
+    <div class="font-meta">Oxanium <span class="font-tag tag-techy">tech</span></div>
+    <div style="font-family:'Oxanium',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Futurista, ângulos tecnológicos.</div>
+  </div>
+  <div class="font-row" data-choice="exo2" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Exo 2',sans-serif">Download Manager</div>
+    <div class="font-meta">Exo 2 <span class="font-tag tag-techy">tech</span></div>
+    <div style="font-family:'Exo 2',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Sci-fi, muito popular em UIs tech.</div>
+  </div>
+  <div class="font-row" data-choice="rajdhani" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Rajdhani',sans-serif">Download Manager</div>
+    <div class="font-meta">Rajdhani <span class="font-tag tag-techy">tech</span></div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Geométrica forte, inspiração indiana.</div>
+  </div>
+  <div class="font-row" data-choice="bebas" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Bebas Neue',sans-serif;letter-spacing:2px">Download Manager</div>
+    <div class="font-meta">Bebas Neue <span class="font-tag tag-techy">display</span></div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">All-caps, impactante. Títulos e headers.</div>
+  </div>
+  <div class="font-row" data-choice="jetbrains" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'JetBrains Mono',monospace">Download Manager</div>
+    <div class="font-meta">JetBrains Mono <span class="font-tag tag-mono">mono</span></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.5)">Monoespacada dev. SHA256, paths.</div>
+  </div>
+</div>
+
+<div class="section-label">🎉 Divertidas / Cômicas</div>
+<div class="font-grid">
+  <div class="font-row" data-choice="pacifico" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Pacifico',cursive">Download Manager</div>
+    <div class="font-meta">Pacifico <span class="font-tag tag-fun">cômica</span></div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Script surfista, muito descontraída.</div>
+  </div>
+  <div class="font-row" data-choice="fredoka" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Fredoka One',cursive">Download Manager</div>
+    <div class="font-meta">Fredoka One <span class="font-tag tag-fun">cômica</span></div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Arredondada e fofa, estilo cartoon.</div>
+  </div>
+  <div class="font-row" data-choice="boogaloo" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Boogaloo',cursive">Download Manager</div>
+    <div class="font-meta">Boogaloo <span class="font-tag tag-fun">cômica</span></div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Casual, anos 60, estilo HQ.</div>
+  </div>
+  <div class="font-row" data-choice="comfortaa" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Comfortaa',cursive">Download Manager</div>
+    <div class="font-meta">Comfortaa <span class="font-tag tag-fun">amigável</span></div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Geométrica arredondada, muito simpática.</div>
+  </div>
+  <div class="font-row" data-choice="righteous" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Righteous',cursive">Download Manager</div>
+    <div class="font-meta">Righteous <span class="font-tag tag-fun">retro</span></div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Retro funk, anos 70. Estilo poster.</div>
+  </div>
+  <div class="font-row" data-choice="lilita" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Lilita One',cursive">Download Manager</div>
+    <div class="font-meta">Lilita One <span class="font-tag tag-fun">cômica</span></div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Bold divertida, impacto com leveza.</div>
+  </div>
+  <div class="font-row" data-choice="baloo" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Baloo 2',cursive">Download Manager</div>
+    <div class="font-meta">Baloo 2 <span class="font-tag tag-fun">amigável</span></div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Quente, humana. Ótima p/ múltiplos idiomas.</div>
+  </div>
+  <div class="font-row" data-choice="bubblegum" onclick="toggleSelect(this)">
+    <div class="font-preview" style="font-family:'Bubblegum Sans',cursive">Download Manager</div>
+    <div class="font-meta">Bubblegum Sans <span class="font-tag tag-fun">cômica</span></div>
+    <div style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.5)">Bolha de chiclete. A mais fofa de todas.</div>
+  </div>
+</div>

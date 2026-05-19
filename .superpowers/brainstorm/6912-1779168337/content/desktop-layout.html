@@ -1,0 +1,101 @@
+<h2>Layout no Desktop — como o drawer se adapta?</h2>
+<p class="subtitle">No mobile o drawer é oculto (hamburguer). No desktop temos espaço — como usar?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Sidebar permanente no desktop <span style="font-size:12px;color:#7c3aed;background:#ede9fe;padding:2px 8px;border-radius:12px;margin-left:8px">Recomendado</span></h3>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">🖥️ Desktop — Sidebar sempre visível</div>
+        <div class="mockup-body" style="padding:0;overflow:hidden;background:#1a1a2e;border-radius:0 0 8px 8px;display:flex;min-height:220px">
+          <!-- Sidebar -->
+          <div style="width:200px;background:#141424;border-right:1px solid rgba(255,255,255,0.08);padding:16px 0;flex-shrink:0">
+            <div style="padding:0 16px;margin-bottom:20px">
+              <div style="color:#bb86fc;font-size:13px;font-weight:700">Awesome DM</div>
+              <div style="color:#666;font-size:10px">v2.0</div>
+            </div>
+            <div style="background:rgba(187,134,252,0.15);border-radius:0 24px 24px 0;padding:10px 16px;display:flex;align-items:center;gap:10px;margin-right:12px;margin-bottom:4px">
+              <span style="font-size:14px">⬇️</span>
+              <span style="color:#bb86fc;font-size:12px;font-weight:600">Downloads</span>
+            </div>
+            <div style="padding:10px 16px;display:flex;align-items:center;gap:10px">
+              <span style="font-size:14px">📊</span>
+              <span style="color:#888;font-size:12px">Histórico</span>
+            </div>
+            <div style="padding:10px 16px;display:flex;align-items:center;gap:10px">
+              <span style="font-size:14px">⚙️</span>
+              <span style="color:#888;font-size:12px">Configurações</span>
+            </div>
+            <div style="padding:10px 16px;display:flex;align-items:center;gap:10px">
+              <span style="font-size:14px">ℹ️</span>
+              <span style="color:#888;font-size:12px">Sobre</span>
+            </div>
+          </div>
+          <!-- Main content -->
+          <div style="flex:1;padding:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <span style="color:#fff;font-size:13px;font-weight:600">Downloads ativos</span>
+              <div style="background:#bb86fc;color:#fff;border-radius:20px;padding:6px 16px;font-size:11px;font-weight:600">+ Novo</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:12px;margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="color:#e0e0e0;font-size:11px">ubuntu-24.04.iso</span>
+                <span style="color:#bb86fc;font-size:10px">62%</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px">
+                <div style="background:#bb86fc;width:62%;height:4px;border-radius:4px"></div>
+              </div>
+              <div style="color:#666;font-size:10px;margin-top:4px">4.2 MB/s · ETA 3min</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:12px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="color:#e0e0e0;font-size:11px">setup-chrome.exe</span>
+                <span style="color:#4ade80;font-size:10px">100%</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px">
+                <div style="background:#4ade80;width:100%;height:4px;border-radius:4px"></div>
+              </div>
+              <div style="color:#666;font-size:10px;margin-top:4px">Concluído · 94 MB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:10px;font-size:13px">Sidebar sempre visível em telas ≥ 768px. No mobile, vira drawer hamburguer. Padrão MUI "permanent drawer". Aproveita o espaço do desktop sem esconder navegação.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Mesmo hamburguer em todas as telas</h3>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">🖥️ Desktop — Drawer oculto</div>
+        <div class="mockup-body" style="padding:0;overflow:hidden;background:#1a1a2e;border-radius:0 0 8px 8px;min-height:220px">
+          <div style="background:#2a2a3e;padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="color:#fff;font-size:16px">☰</span>
+              <span style="color:#fff;font-size:13px;font-weight:600">Awesome Download Manager</span>
+            </div>
+            <div style="display:flex;gap:12px">
+              <div style="background:#bb86fc;color:#fff;border-radius:20px;padding:6px 16px;font-size:11px;font-weight:600">+ Novo Download</div>
+              <span style="color:#fff;font-size:16px">⚙️</span>
+            </div>
+          </div>
+          <div style="padding:16px">
+            <div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:12px;margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="color:#e0e0e0;font-size:11px">ubuntu-24.04.iso</span>
+                <span style="color:#bb86fc;font-size:10px">62%</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px">
+                <div style="background:#bb86fc;width:62%;height:4px;border-radius:4px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:10px;font-size:13px">Consistência total mobile/desktop. Mais espaço para o conteúdo. Configurações e navegação acessíveis via hamburguer em qualquer tela.</p>
+    </div>
+  </div>
+</div>

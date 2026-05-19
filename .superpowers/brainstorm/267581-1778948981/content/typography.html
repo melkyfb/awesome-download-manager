@@ -1,0 +1,149 @@
+<h2>Qual tipografia combina com o Glassmorphism?</h2>
+<p class="subtitle">Todas as fontes são do Google Fonts — carregamento automático</p>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+.font-cards { display: flex; flex-direction: column; gap: 12px; }
+.font-demo {
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.font-demo:hover { border-color: rgba(255,255,255,0.3); }
+.font-demo.selected { border-color: rgba(124,77,255,0.8); box-shadow: 0 0 0 1px rgba(124,77,255,0.4); }
+.font-demo-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.font-name { font-size: 11px; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; }
+.font-demo-body {
+  background: linear-gradient(135deg, rgba(15,12,41,0.95), rgba(48,43,99,0.95));
+  padding: 14px 16px;
+}
+.mock-card {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.mock-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.mock-progress-wrap { background: rgba(0,0,0,0.25); border-radius: 3px; height: 4px; margin-bottom: 6px; }
+.mock-progress { background: linear-gradient(90deg, #7C4DFF, #E040FB); height: 4px; border-radius: 3px; width: 62%; }
+.mock-meta { display: flex; justify-content: space-between; }
+.badge { background: rgba(124,77,255,0.35); color: #d4b5ff; border-radius: 8px; padding: 1px 8px; font-size: 11px; }
+</style>
+
+<div class="font-cards">
+
+  <!-- Inter -->
+  <div class="font-demo selected" data-choice="inter" onclick="toggleSelect(this)">
+    <div class="font-demo-header">
+      <span class="font-name">A · Inter — atual, já usada</span>
+      <span style="font-size:10px;color:rgba(124,77,255,0.8)">✓ padrão atual</span>
+    </div>
+    <div class="font-demo-body">
+      <div class="mock-card" style="font-family:'Inter',sans-serif">
+        <div class="mock-row">
+          <span style="font-weight:600;font-size:14px;color:#fff">UnitySetup64-6000.exe</span>
+          <span class="badge">active</span>
+        </div>
+        <div class="mock-progress-wrap"><div class="mock-progress"></div></div>
+        <div class="mock-meta" style="font-size:12px;color:rgba(255,255,255,0.5)">
+          <span>62% · 2.3 GB · 45 MB/s</span>
+          <span>ETA 2min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Geist -->
+  <div class="font-demo" data-choice="geist" onclick="toggleSelect(this)">
+    <div class="font-demo-header">
+      <span class="font-name">B · Geist — criada pela Vercel</span>
+      <span style="font-size:10px;color:rgba(255,255,255,0.3)">moderna, técnica</span>
+    </div>
+    <div class="font-demo-body">
+      <div class="mock-card" style="font-family:'Geist',sans-serif">
+        <div class="mock-row">
+          <span style="font-weight:600;font-size:14px;color:#fff">UnitySetup64-6000.exe</span>
+          <span class="badge">active</span>
+        </div>
+        <div class="mock-progress-wrap"><div class="mock-progress"></div></div>
+        <div class="mock-meta" style="font-size:12px;color:rgba(255,255,255,0.5)">
+          <span>62% · 2.3 GB · 45 MB/s</span>
+          <span>ETA 2min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plus Jakarta Sans -->
+  <div class="font-demo" data-choice="jakarta" onclick="toggleSelect(this)">
+    <div class="font-demo-header">
+      <span class="font-name">C · Plus Jakarta Sans</span>
+      <span style="font-size:10px;color:rgba(255,255,255,0.3)">elegante, levemente humanista</span>
+    </div>
+    <div class="font-demo-body">
+      <div class="mock-card" style="font-family:'Plus Jakarta Sans',sans-serif">
+        <div class="mock-row">
+          <span style="font-weight:600;font-size:14px;color:#fff">UnitySetup64-6000.exe</span>
+          <span class="badge">active</span>
+        </div>
+        <div class="mock-progress-wrap"><div class="mock-progress"></div></div>
+        <div class="mock-meta" style="font-size:12px;color:rgba(255,255,255,0.5)">
+          <span>62% · 2.3 GB · 45 MB/s</span>
+          <span>ETA 2min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outfit -->
+  <div class="font-demo" data-choice="outfit" onclick="toggleSelect(this)">
+    <div class="font-demo-header">
+      <span class="font-name">D · Outfit</span>
+      <span style="font-size:10px;color:rgba(255,255,255,0.3)">geométrica, amigável, arredondada</span>
+    </div>
+    <div class="font-demo-body">
+      <div class="mock-card" style="font-family:'Outfit',sans-serif">
+        <div class="mock-row">
+          <span style="font-weight:600;font-size:14px;color:#fff">UnitySetup64-6000.exe</span>
+          <span class="badge">active</span>
+        </div>
+        <div class="mock-progress-wrap"><div class="mock-progress"></div></div>
+        <div class="mock-meta" style="font-size:12px;color:rgba(255,255,255,0.5)">
+          <span>62% · 2.3 GB · 45 MB/s</span>
+          <span>ETA 2min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Space Grotesk -->
+  <div class="font-demo" data-choice="space-grotesk" onclick="toggleSelect(this)">
+    <div class="font-demo-header">
+      <span class="font-name">E · Space Grotesk</span>
+      <span style="font-size:10px;color:rgba(255,255,255,0.3)">tech, única, quirky — estilo Figma</span>
+    </div>
+    <div class="font-demo-body">
+      <div class="mock-card" style="font-family:'Space Grotesk',sans-serif">
+        <div class="mock-row">
+          <span style="font-weight:600;font-size:14px;color:#fff">UnitySetup64-6000.exe</span>
+          <span class="badge">active</span>
+        </div>
+        <div class="mock-progress-wrap"><div class="mock-progress"></div></div>
+        <div class="mock-meta" style="font-size:12px;color:rgba(255,255,255,0.5)">
+          <span>62% · 2.3 GB · 45 MB/s</span>
+          <span>ETA 2min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

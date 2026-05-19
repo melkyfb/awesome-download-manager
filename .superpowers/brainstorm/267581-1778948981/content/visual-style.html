@@ -1,0 +1,156 @@
+<h2>Qual direção visual combina mais com o Download Manager?</h2>
+<p class="subtitle">Escolha o estilo geral da interface</p>
+
+<div class="cards">
+
+  <!-- A: Material Design -->
+  <div class="card" data-choice="material" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8f9fa;padding:12px;font-family:Roboto,sans-serif">
+      <div style="background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.12);padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-weight:500;font-size:13px;color:#1a1a1a">UnitySetup64.exe</span>
+          <span style="background:#1976D2;color:#fff;font-size:10px;padding:2px 8px;border-radius:12px">active</span>
+        </div>
+        <div style="background:#e3f2fd;border-radius:4px;height:4px;margin-bottom:6px">
+          <div style="background:#1976D2;width:62%;height:4px;border-radius:4px"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#666">
+          <span>62% · 2.3 GB · 45 MB/s</span>
+          <div style="display:flex;gap:8px">
+            <span style="color:#F57C00;cursor:pointer">Pause</span>
+            <span style="color:#D32F2F;cursor:pointer">Delete</span>
+          </div>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.12);padding:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-weight:500;font-size:13px;color:#1a1a1a">ubuntu-24.iso</span>
+          <span style="background:#388E3C;color:#fff;font-size:10px;padding:2px 8px;border-radius:12px">complete</span>
+        </div>
+        <div style="background:#e8f5e9;border-radius:4px;height:4px;margin-bottom:6px">
+          <div style="background:#388E3C;width:100%;height:4px;border-radius:4px"></div>
+        </div>
+        <div style="font-size:11px;color:#666">100% · 1.8 GB</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Material Design</h3>
+      <p>Cards com elevação, cores primárias vibrantes, tipografia Roboto. Google-style, familiar e limpo.</p>
+    </div>
+  </div>
+
+  <!-- B: Dark Mode First -->
+  <div class="card" data-choice="dark" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#121212;padding:12px;font-family:'Inter',sans-serif">
+      <div style="background:#1e1e1e;border-radius:8px;border:1px solid #333;padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-weight:500;font-size:13px;color:#e0e0e0">UnitySetup64.exe</span>
+          <span style="background:#7C4DFF;color:#fff;font-size:10px;padding:2px 8px;border-radius:12px">active</span>
+        </div>
+        <div style="background:#333;border-radius:4px;height:4px;margin-bottom:6px">
+          <div style="background:linear-gradient(90deg,#7C4DFF,#E040FB);width:62%;height:4px;border-radius:4px"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa">
+          <span>62% · 2.3 GB · 45 MB/s</span>
+          <div style="display:flex;gap:8px">
+            <span style="color:#FFD740;cursor:pointer">Pause</span>
+            <span style="color:#FF5252;cursor:pointer">Delete</span>
+          </div>
+        </div>
+      </div>
+      <div style="background:#1e1e1e;border-radius:8px;border:1px solid #333;padding:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-weight:500;font-size:13px;color:#e0e0e0">ubuntu-24.iso</span>
+          <span style="background:#00C853;color:#000;font-size:10px;padding:2px 8px;border-radius:12px">complete</span>
+        </div>
+        <div style="background:#333;border-radius:4px;height:4px;margin-bottom:6px">
+          <div style="background:#00C853;width:100%;height:4px;border-radius:4px"></div>
+        </div>
+        <div style="font-size:11px;color:#aaa">100% · 1.8 GB</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Dark Mode Principal</h3>
+      <p>Tema escuro com acentos neon/gradiente. Moderno, fácil nos olhos em sessões longas, estilo dev-tool.</p>
+    </div>
+  </div>
+
+  <!-- C: Glassmorphism -->
+  <div class="card" data-choice="glass" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(135deg,#667eea,#764ba2);padding:12px;font-family:'Inter',sans-serif">
+      <div style="background:rgba(255,255,255,.15);backdrop-filter:blur(10px);border-radius:10px;border:1px solid rgba(255,255,255,.25);padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-weight:600;font-size:13px;color:#fff">UnitySetup64.exe</span>
+          <span style="background:rgba(255,255,255,.3);color:#fff;font-size:10px;padding:2px 8px;border-radius:12px">active</span>
+        </div>
+        <div style="background:rgba(0,0,0,.2);border-radius:4px;height:4px;margin-bottom:6px">
+          <div style="background:#fff;width:62%;height:4px;border-radius:4px;opacity:.9"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.8)">
+          <span>62% · 2.3 GB · 45 MB/s</span>
+          <div style="display:flex;gap:8px">
+            <span style="cursor:pointer">⏸ Pause</span>
+            <span style="cursor:pointer">🗑 Delete</span>
+          </div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);backdrop-filter:blur(10px);border-radius:10px;border:1px solid rgba(255,255,255,.25);padding:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-weight:600;font-size:13px;color:#fff">ubuntu-24.iso</span>
+          <span style="background:rgba(0,200,83,.5);color:#fff;font-size:10px;padding:2px 8px;border-radius:12px">complete</span>
+        </div>
+        <div style="background:rgba(0,0,0,.2);border-radius:4px;height:4px;margin-bottom:6px">
+          <div style="background:#69ff8f;width:100%;height:4px;border-radius:4px"></div>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,.8)">100% · 1.8 GB</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Glassmorphism</h3>
+      <p>Painéis translúcidos sobre gradiente vibrante. Visual premium, muito moderno. Exige tema claro + escuro.</p>
+    </div>
+  </div>
+
+  <!-- D: Minimal / Fluent -->
+  <div class="card" data-choice="minimal" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#fafafa;padding:12px;font-family:'Inter',sans-serif">
+      <div style="background:#fff;border-radius:6px;border:1px solid #ececec;padding:12px;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:600;font-size:13px;color:#111;letter-spacing:-.2px">UnitySetup64.exe</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:11px;color:#888">3.6 GB</span>
+            <span style="width:7px;height:7px;border-radius:50%;background:#3b82f6;display:inline-block"></span>
+          </div>
+        </div>
+        <div style="background:#f0f0f0;border-radius:2px;height:3px;margin-bottom:5px">
+          <div style="background:#3b82f6;width:62%;height:3px;border-radius:2px"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#999">
+          <span>62% · 45 MB/s · ETA 23s</span>
+          <div style="display:flex;gap:10px">
+            <span style="color:#f59e0b;cursor:pointer;font-weight:500">Pause</span>
+            <span style="color:#ef4444;cursor:pointer;font-weight:500">Delete</span>
+          </div>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:6px;border:1px solid #ececec;padding:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-weight:600;font-size:13px;color:#111;letter-spacing:-.2px">ubuntu-24.iso</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:11px;color:#888">1.8 GB</span>
+            <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block"></span>
+          </div>
+        </div>
+        <div style="background:#f0f0f0;border-radius:2px;height:3px;margin-bottom:5px">
+          <div style="background:#22c55e;width:100%;height:3px;border-radius:2px"></div>
+        </div>
+        <div style="font-size:11px;color:#999">100% · completo</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Minimal / Fluent</h3>
+      <p>Espaçamento generoso, tipografia Inter, bordas sutis, zero distração. Estilo Figma/Linear/Notion.</p>
+    </div>
+  </div>
+
+</div>

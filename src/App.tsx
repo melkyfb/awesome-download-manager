@@ -2,34 +2,37 @@ import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
 import { useTranslation } from 'react-i18next'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { useTheme } from '@mui/material/styles'
 import type { RootState, AppDispatch } from './store'
 import { setConfig } from './store/configSlice'
 import { setAppearance } from './store/appearanceSlice'
 import { upsertDownload } from './store/downloadsSlice'
 import { useTauriEvents } from './hooks/useTauriEvents'
 import { useForegroundService } from './hooks/useForegroundService'
-import { ThemeProvider } from './providers/ThemeProvider'
-import { FontProvider } from './providers/FontProvider'
-import { AppBackground } from './components/AppBackground'
-import { GlobalSpeedBar } from './components/GlobalSpeedBar'
-import { DownloadCard } from './components/DownloadCard'
-import { AddDownloadModal } from './components/AddDownloadModal'
-import { SettingsPage } from './components/SettingsPage'
-import { ChangelogModal } from './components/ChangelogModal'
-import { CloseDialog } from './components/CloseDialog'
 import { useUpdateCheck } from './hooks/useUpdateCheck'
+import { ThemeProvider } from './providers/ThemeProvider'
+import { AppShell } from './components/layout/AppShell'
+import { DownloadList } from './components/downloads/DownloadList'
+import { SettingsScreen } from './components/settings/SettingsScreen'
+import { AddDownloadFAB } from './components/add/AddDownloadFAB'
+import { AddDownloadButton } from './components/add/AddDownloadButton'
+import { AddDownloadSheet } from './components/add/AddDownloadSheet'
+import { AddDownloadDialog } from './components/add/AddDownloadDialog'
+import { CloseDialog } from './components/CloseDialog'
+import { ChangelogModal } from './components/ChangelogModal'
 import type { Config, Download } from './types'
 
-export default function App() {
-  const { t, i18n } = useTranslation()
+function AppContent() {
+  const { i18n } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
-  const downloads = useSelector((s: RootState) => Object.values(s.downloads.items))
-  const addModalOpen = useSelector((s: RootState) => s.ui.addModalOpen)
   const settingsOpen = useSelector((s: RootState) => s.ui.settingsOpen)
   const changelogOpen = useSelector((s: RootState) => s.ui.changelogOpen)
   const closeDialogOpen = useSelector((s: RootState) => s.ui.closeDialogOpen)
-  const updateState = useUpdateCheck()
   const language = useSelector((s: RootState) => s.appearance.language)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const updateState = useUpdateCheck()
 
   useTauriEvents()
   useForegroundService()
@@ -61,32 +64,26 @@ export default function App() {
     init()
   }, [dispatch])
 
-  const sorted = [...downloads].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  )
+  const title = settingsOpen ? 'Configurações' : 'Downloads'
+  const desktopActions = !settingsOpen && !isMobile ? <AddDownloadButton /> : undefined
 
   return (
+    <AppShell title={title} topBarActions={desktopActions}>
+      {settingsOpen ? <SettingsScreen /> : <DownloadList />}
+
+      {isMobile ? <AddDownloadSheet /> : <AddDownloadDialog />}
+      {isMobile && !settingsOpen && <AddDownloadFAB />}
+
+      {closeDialogOpen && <CloseDialog />}
+      {changelogOpen && <ChangelogModal {...updateState} />}
+    </AppShell>
+  )
+}
+
+export default function App() {
+  return (
     <ThemeProvider>
-      <FontProvider>
-        <AppBackground>
-          <div className="h-screen flex flex-col">
-            <GlobalSpeedBar currentVersion={updateState.currentVersion} hasUpdate={updateState.hasUpdate} />
-            <main className="flex-1 overflow-y-auto p-4 space-y-3">
-              {sorted.length === 0 && (
-                <div className="flex flex-col items-center justify-center h-full" style={{ color: 'var(--text-secondary)' }}>
-                  <p className="text-lg">{t('empty.title')}</p>
-                  <p className="text-sm">{t('empty.subtitle')}</p>
-                </div>
-              )}
-              {sorted.map(dl => <DownloadCard key={dl.id} download={dl} />)}
-            </main>
-            {addModalOpen && <AddDownloadModal />}
-            {settingsOpen && <SettingsPage />}
-            {changelogOpen && <ChangelogModal {...updateState} />}
-            {closeDialogOpen && <CloseDialog />}
-          </div>
-        </AppBackground>
-      </FontProvider>
+      <AppContent />
     </ThemeProvider>
   )
 }

@@ -1,0 +1,263 @@
+<h2>Seção 2 — Layout principal V2</h2>
+<p class="subtitle">Mobile (drawer hamburguer) e Desktop (sidebar permanente) lado a lado. Tema escuro padrão.</p>
+
+<div class="split">
+
+  <!-- MOBILE -->
+  <div class="mockup">
+    <div class="mockup-header">📱 Mobile (360px)</div>
+    <div class="mockup-body" style="padding:0;background:#121212;border-radius:0 0 8px 8px;overflow:hidden;font-family:'Roboto',sans-serif">
+      <!-- Status bar -->
+      <div style="height:28px;background:#000;display:flex;align-items:center;padding:0 14px;justify-content:space-between">
+        <span style="color:#fff;font-size:10px;font-weight:500">9:41</span>
+        <span style="color:#fff;font-size:10px">● ◑ ▌</span>
+      </div>
+      <!-- Top App Bar -->
+      <div style="background:#1c1c1e;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,0.4)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:24px;height:24px;display:flex;flex-direction:column;justify-content:center;gap:4px;cursor:pointer">
+            <div style="width:18px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="width:18px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+            <div style="width:12px;height:2px;background:#e0e0e0;border-radius:2px"></div>
+          </div>
+          <span style="color:#fff;font-size:16px;font-weight:500;letter-spacing:0.15px">Downloads</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </div>
+      </div>
+      <!-- Filter chips -->
+      <div style="padding:10px 16px 6px;display:flex;gap:8px;overflow:hidden">
+        <div style="background:#BB86FC;color:#000;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:600;white-space:nowrap">Todos</div>
+        <div style="border:1px solid rgba(255,255,255,0.2);color:#ccc;border-radius:8px;padding:6px 14px;font-size:11px;white-space:nowrap">Ativos</div>
+        <div style="border:1px solid rgba(255,255,255,0.2);color:#ccc;border-radius:8px;padding:6px 14px;font-size:11px;white-space:nowrap">Concluídos</div>
+      </div>
+      <!-- Global speed -->
+      <div style="margin:4px 16px 10px;background:#1e1e2a;border-radius:10px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#BB86FC" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <span style="color:#BB86FC;font-size:11px;font-weight:600">4.2 MB/s total</span>
+        </div>
+        <span style="color:#666;font-size:10px">Sem limite</span>
+      </div>
+      <!-- Download cards -->
+      <div style="padding:0 12px;display:flex;flex-direction:column;gap:8px">
+        <!-- Card ativo -->
+        <div style="background:#1e1e2a;border-radius:14px;padding:14px;border:1px solid rgba(187,134,252,0.15)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+                <div style="width:28px;height:28px;background:rgba(187,134,252,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">💿</div>
+                <span style="color:#fff;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">ubuntu-24.04-desktop.iso</span>
+              </div>
+              <span style="color:#888;font-size:10px;margin-left:36px">5.4 GB · 3 chunks</span>
+            </div>
+            <div style="background:rgba(187,134,252,0.18);border-radius:6px;padding:3px 10px;flex-shrink:0;margin-left:8px">
+              <span style="color:#BB86FC;font-size:10px;font-weight:600">ATIVO</span>
+            </div>
+          </div>
+          <!-- Progress -->
+          <div style="background:rgba(255,255,255,0.08);border-radius:6px;height:6px;margin-bottom:8px;overflow:hidden">
+            <div style="background:linear-gradient(90deg,#BB86FC,#9c5cf5);width:62%;height:6px;border-radius:6px;position:relative">
+              <div style="position:absolute;right:0;top:0;width:20px;height:6px;background:linear-gradient(90deg,#BB86FC,#fff);border-radius:6px;opacity:0.6"></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="color:#aaa;font-size:10px">62% · 4.2 MB/s · ETA 3min</span>
+            <div style="display:flex;gap:4px">
+              <div style="width:32px;height:32px;background:rgba(251,191,36,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#fbbf24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              </div>
+              <div style="width:32px;height:32px;background:rgba(248,113,113,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Card completo -->
+        <div style="background:#1a1a22;border-radius:14px;padding:14px;border:1px solid rgba(74,222,128,0.12)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+                <div style="width:28px;height:28px;background:rgba(74,222,128,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">⚙️</div>
+                <span style="color:#ccc;font-size:12px;font-weight:500">setup-chrome.exe</span>
+              </div>
+              <span style="color:#666;font-size:10px;margin-left:36px">94 MB</span>
+            </div>
+            <div style="background:rgba(74,222,128,0.15);border-radius:6px;padding:3px 10px;flex-shrink:0;margin-left:8px">
+              <span style="color:#4ade80;font-size:10px;font-weight:600">COMPLETO</span>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border-radius:6px;height:6px;overflow:hidden">
+            <div style="background:#4ade80;width:100%;height:6px;border-radius:6px"></div>
+          </div>
+        </div>
+        <!-- Card erro -->
+        <div style="background:#1a1a22;border-radius:14px;padding:14px;border:1px solid rgba(248,113,113,0.12)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+                <div style="width:28px;height:28px;background:rgba(248,113,113,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🎬</div>
+                <span style="color:#ccc;font-size:12px;font-weight:500">movie-4k.mkv</span>
+              </div>
+              <span style="color:#f87171;font-size:10px;margin-left:36px">⚠ Connection timeout</span>
+            </div>
+            <div style="background:rgba(248,113,113,0.15);border-radius:6px;padding:3px 10px;flex-shrink:0;margin-left:8px">
+              <span style="color:#f87171;font-size:10px;font-weight:600">ERRO</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:4px">
+            <div style="flex:1;background:rgba(187,134,252,0.12);border-radius:8px;padding:7px;text-align:center">
+              <span style="color:#BB86FC;font-size:10px;font-weight:600">↺ Tentar novamente</span>
+            </div>
+            <div style="width:36px;background:rgba(248,113,113,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- FAB -->
+      <div style="display:flex;justify-content:flex-end;padding:16px 16px 0">
+        <div style="width:56px;height:56px;background:#BB86FC;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(187,134,252,0.5)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESKTOP -->
+  <div class="mockup">
+    <div class="mockup-header">🖥️ Desktop (≥768px) — Sidebar permanente</div>
+    <div class="mockup-body" style="padding:0;background:#121212;border-radius:0 0 8px 8px;overflow:hidden;display:flex;font-family:'Roboto',sans-serif;min-height:380px">
+      <!-- Sidebar -->
+      <div style="width:220px;background:#0f0f13;border-right:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;flex-shrink:0">
+        <!-- Logo -->
+        <div style="padding:20px 16px 16px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+            <div style="width:32px;height:32px;background:linear-gradient(135deg,#BB86FC,#7c3aed);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px">⬇</div>
+            <div>
+              <div style="color:#fff;font-size:13px;font-weight:700;line-height:1.2">Awesome DM</div>
+              <div style="color:#555;font-size:10px">v2.0</div>
+            </div>
+          </div>
+        </div>
+        <!-- Speed widget -->
+        <div style="margin:0 12px 16px;background:#1a1a22;border-radius:10px;padding:10px 12px">
+          <div style="color:#888;font-size:9px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Velocidade total</div>
+          <div style="color:#BB86FC;font-size:18px;font-weight:700">4.2 <span style="font-size:11px;color:#888">MB/s</span></div>
+          <div style="background:rgba(255,255,255,0.08);border-radius:4px;height:3px;margin-top:6px">
+            <div style="background:#BB86FC;width:40%;height:3px;border-radius:4px"></div>
+          </div>
+        </div>
+        <!-- Nav items -->
+        <nav style="flex:1;padding:0 8px">
+          <div style="background:rgba(187,134,252,0.15);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:2px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#BB86FC" stroke-width="2"><path d="M12 2v13M5 15l7 7 7-7"/><path d="M2 21h20" opacity="0.4"/></svg>
+            <span style="color:#BB86FC;font-size:13px;font-weight:600">Downloads</span>
+            <div style="margin-left:auto;background:#BB86FC;color:#000;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700">3</div>
+          </div>
+          <div style="padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:2px;border-radius:10px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M3 3h18v18H3z" opacity="0.3"/><path d="M3 9h18M9 21V9"/></svg>
+            <span style="color:#666;font-size:13px">Histórico</span>
+          </div>
+          <div style="padding:10px 12px;display:flex;align-items:center;gap:10px;border-radius:10px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+            <span style="color:#666;font-size:13px">Configurações</span>
+          </div>
+        </nav>
+        <!-- Bottom actions -->
+        <div style="padding:12px 8px;border-top:1px solid rgba(255,255,255,0.06)">
+          <div style="padding:8px 12px;display:flex;align-items:center;gap:10px;border-radius:10px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <span style="color:#444;font-size:12px">v2.0.0</span>
+          </div>
+        </div>
+      </div>
+      <!-- Main content -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+        <!-- Top bar -->
+        <div style="padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div>
+            <div style="color:#fff;font-size:18px;font-weight:600">Downloads</div>
+            <div style="color:#555;font-size:11px">3 ativos, 1 completo</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="background:#1e1e2a;border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:8px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <span style="color:#555;font-size:12px">Buscar...</span>
+            </div>
+            <div style="background:#BB86FC;border-radius:10px;padding:8px 16px;display:flex;align-items:center;gap:6px;cursor:pointer">
+              <span style="color:#000;font-size:13px;font-weight:600">+ Novo Download</span>
+            </div>
+          </div>
+        </div>
+        <!-- Filter chips -->
+        <div style="padding:12px 20px;display:flex;gap:8px">
+          <div style="background:#BB86FC;color:#000;border-radius:8px;padding:6px 16px;font-size:11px;font-weight:600">Todos</div>
+          <div style="border:1px solid rgba(255,255,255,0.15);color:#888;border-radius:8px;padding:6px 16px;font-size:11px">Ativos</div>
+          <div style="border:1px solid rgba(255,255,255,0.15);color:#888;border-radius:8px;padding:6px 16px;font-size:11px">Pausados</div>
+          <div style="border:1px solid rgba(255,255,255,0.15);color:#888;border-radius:8px;padding:6px 16px;font-size:11px">Concluídos</div>
+        </div>
+        <!-- Cards list -->
+        <div style="flex:1;padding:0 20px;display:flex;flex-direction:column;gap:8px">
+          <div style="background:#1e1e2a;border-radius:14px;padding:14px 16px;border:1px solid rgba(187,134,252,0.15)">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:36px;height:36px;background:rgba(187,134,252,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">💿</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                  <span style="color:#fff;font-size:13px;font-weight:500">ubuntu-24.04-desktop.iso</span>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="color:#aaa;font-size:11px">4.2 MB/s · ETA 3min</span>
+                    <div style="background:rgba(187,134,252,0.18);border-radius:6px;padding:3px 10px"><span style="color:#BB86FC;font-size:10px;font-weight:600">ATIVO</span></div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:6px;height:5px;overflow:hidden">
+                    <div style="background:linear-gradient(90deg,#BB86FC,#9c5cf5);width:62%;height:5px;border-radius:6px"></div>
+                  </div>
+                  <span style="color:#888;font-size:11px;white-space:nowrap">62% · 3.3/5.4 GB</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:4px;margin-left:8px">
+                <div style="width:36px;height:36px;background:rgba(251,191,36,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#fbbf24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                </div>
+                <div style="width:36px;height:36px;background:rgba(248,113,113,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="background:#1a1a22;border-radius:14px;padding:14px 16px;border:1px solid rgba(74,222,128,0.1)">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:36px;height:36px;background:rgba(74,222,128,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">⚙️</div>
+              <div style="flex:1">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                  <span style="color:#ccc;font-size:13px;font-weight:500">setup-chrome.exe</span>
+                  <div style="background:rgba(74,222,128,0.15);border-radius:6px;padding:3px 10px"><span style="color:#4ade80;font-size:10px;font-weight:600">COMPLETO</span></div>
+                </div>
+                <div style="background:rgba(255,255,255,0.06);border-radius:6px;height:5px;overflow:hidden">
+                  <div style="background:#4ade80;width:100%;height:5px;border-radius:6px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:24px">
+  <h3>Detalhes do design</h3>
+  <ul style="color:var(--text-secondary);font-size:13px;line-height:1.8">
+    <li><strong style="color:var(--text-primary)">Ícone de tipo</strong> — detectado pela extensão do arquivo (iso, exe, mkv, zip…)</li>
+    <li><strong style="color:var(--text-primary)">Tap targets</strong> — botões de ação 36×36dp no mobile, 36×36dp no desktop</li>
+    <li><strong style="color:var(--text-primary)">Progress bar</strong> — gradiente animado quando ativo, cor sólida quando completo</li>
+    <li><strong style="color:var(--text-primary)">Status badge</strong> — color-coded: roxo=ativo, verde=completo, vermelho=erro, amarelo=pausado</li>
+    <li><strong style="color:var(--text-primary)">Chip de filtro "Todos/Ativos/Concluídos"</strong> — filtra a lista in-place, sem navegar</li>
+    <li><strong style="color:var(--text-primary)">FAB mobile</strong> — mesmo que botão "+ Novo Download" do desktop</li>
+  </ul>
+</div>

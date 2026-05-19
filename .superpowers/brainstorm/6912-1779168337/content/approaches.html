@@ -1,0 +1,84 @@
+<h2>Abordagem para a V2 — Qual stack de componentes?</h2>
+<p class="subtitle">Todas mantêm a mesma base: React + Tauri + Redux + i18n + sistema de temas. A diferença está na biblioteca de componentes.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>shadcn/ui + Tailwind <span style="font-size:12px;color:#7c3aed;background:#ede9fe;padding:2px 8px;border-radius:12px;margin-left:8px">Recomendado</span></h3>
+      <p>Componentes headless (Radix UI por baixo). Traz dialogs, bottom sheets, cards, sliders, progress bars — tudo acessível e sem opiniões visuais fortes. Nosso sistema de temas (CSS variables) encaixa perfeitamente.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Prós</h4>
+          <ul>
+            <li>Sistema de temas existente funciona sem adaptação</li>
+            <li>Componentes modernos e acessíveis (Radix)</li>
+            <li>Leve — só inclui o que usar</li>
+            <li>Visual totalmente controlável via Tailwind</li>
+            <li>Padrão da indústria em 2025</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Contras</h4>
+          <ul>
+            <li>Requer copiar componentes no repo (by design)</li>
+            <li>Menos "Material" por padrão — mas é configurável</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Material UI (MUI v6)</h3>
+      <p>A biblioteca Material Design 3 mais completa para React. Botões, cards, bottom navigation, FAB, dialogs — tudo seguindo as diretrizes do Android Material You.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Prós</h4>
+          <ul>
+            <li>Android/Material feel nativo out-of-the-box</li>
+            <li>Componentes ricos e bem testados</li>
+            <li>Suporte a temas via MUI theme engine</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Contras</h4>
+          <ul>
+            <li>Pesado (~300KB gzip)</li>
+            <li>Sistema de temas MUI conflita com nossas CSS variables</li>
+            <li>Precisa migrar os 35+ temas para o formato MUI</li>
+            <li>Opinionated — mais difícil de customizar</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Tailwind puro + componentes custom</h3>
+      <p>Redesenhar tudo do zero com Tailwind. Máximo controle, sem dependências novas. Mesma abordagem atual, mas com design V2.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Prós</h4>
+          <ul>
+            <li>Controle total sobre cada pixel</li>
+            <li>Zero dependências adicionais</li>
+            <li>Continuidade com o que já existe</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Contras</h4>
+          <ul>
+            <li>Reimplementar acessibilidade (foco, ARIA, teclado)</li>
+            <li>Bottom sheets, modals, etc. do zero</li>
+            <li>Mais trabalho para alcançar qualidade equivalente</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

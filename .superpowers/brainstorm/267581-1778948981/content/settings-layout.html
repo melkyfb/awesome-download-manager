@@ -1,0 +1,158 @@
+<h2>Como deve ser o seletor de Tema e Idioma nas configurações?</h2>
+<p class="subtitle">Duas abordagens para o painel de aparência e idioma</p>
+
+<style>
+.mock-settings {
+  font-family: 'Inter', sans-serif;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  overflow: hidden;
+  max-width: 420px;
+}
+.mock-settings-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+}
+.mock-settings-title { font-size: 14px; font-weight: 600; color: #e0e0e0; }
+.mock-settings-body { padding: 14px 16px; }
+.mock-section-label {
+  font-size: 9px; font-weight: 600; letter-spacing: 1px;
+  color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 10px;
+}
+.theme-swatches { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.theme-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid transparent; cursor: pointer;
+  position: relative; transition: transform 0.1s;
+}
+.theme-dot.selected { border-color: #fff; transform: scale(1.15); }
+.theme-dot::after {
+  content: ''; position: absolute; inset: 2px;
+  border-radius: 50%;
+}
+.lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.lang-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 8px; border-radius: 7px;
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+  font-size: 11px; color: #ccc; cursor: pointer;
+}
+.lang-item.selected {
+  background: rgba(124,77,255,0.25); border-color: rgba(124,77,255,0.5); color: #fff;
+}
+.lang-flag { font-size: 14px; }
+.mock-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 12px 0; }
+.mock-dropdown {
+  width: 100%; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+  padding: 8px 12px; color: #ccc; font-size: 12px; display: flex;
+  justify-content: space-between; align-items: center; cursor: pointer;
+}
+</style>
+
+<div class="split">
+
+  <!-- OPÇÃO A: Seletor visual (tema como bolinhas, idioma como grid de flags) -->
+  <div class="mockup">
+    <div class="mockup-header">A — Visual (swatches + grid de idiomas)</div>
+    <div class="mockup-body" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);padding:12px">
+      <div class="mock-settings">
+        <div class="mock-settings-header">
+          <span class="mock-settings-title">⚙ Configurações</span>
+          <span style="color:rgba(255,255,255,0.4);font-size:12px">✕</span>
+        </div>
+        <div class="mock-settings-body">
+
+          <div class="mock-section-label">🎨 Tema</div>
+          <div class="theme-swatches">
+            <div class="theme-dot selected" style="background:linear-gradient(135deg,#0f0c29,#302b63)" title="Dark Glass"></div>
+            <div class="theme-dot" style="background:#000" title="Black Piano"></div>
+            <div class="theme-dot" style="background:linear-gradient(135deg,#667eea,#764ba2)" title="Roxo/Violeta"></div>
+            <div class="theme-dot" style="background:linear-gradient(135deg,#0f2027,#2c5364)" title="Teal"></div>
+            <div class="theme-dot" style="background:linear-gradient(135deg,#f093fb,#f5576c)" title="Sunset"></div>
+            <div class="theme-dot" style="background:linear-gradient(135deg,#e0eafc,#cfdef3)" title="Frost"></div>
+            <div class="theme-dot" style="background:linear-gradient(135deg,#009c3b,#ffdf00)" title="Brasil"></div>
+            <div class="theme-dot" style="background:linear-gradient(90deg,#FF0018,#FFA52C,#FFFF41,#008018,#0000F9,#86007D)" title="LGBT"></div>
+            <div class="theme-dot" style="background:linear-gradient(135deg,#CC0000,#FFD700)" title="Poké"></div>
+            <div class="theme-dot" style="background:linear-gradient(135deg,#FF6B00,#FFD700,#1a6bcc)" title="DBZ"></div>
+            <div style="width:28px;height:28px;border-radius:50%;border:1px dashed rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(255,255,255,0.4)">+</div>
+          </div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:12px;margin-top:-6px">Dark Glass • Midnight</div>
+
+          <div class="mock-divider"></div>
+
+          <div class="mock-section-label" style="margin-top:12px">🌐 Idioma</div>
+          <div class="lang-grid">
+            <div class="lang-item selected"><span class="lang-flag">🇧🇷</span> Português</div>
+            <div class="lang-item"><span class="lang-flag">🇬🇧</span> English</div>
+            <div class="lang-item"><span class="lang-flag">🇨🇳</span> 中文</div>
+            <div class="lang-item"><span class="lang-flag">🇪🇸</span> Español</div>
+            <div class="lang-item"><span class="lang-flag">🇫🇷</span> Français</div>
+            <div class="lang-item"><span class="lang-flag">🇸🇦</span> العربية</div>
+            <div class="lang-item"><span class="lang-flag">🇮🇳</span> हिन्दी</div>
+            <div class="lang-item"><span class="lang-flag">🇷🇺</span> Русский</div>
+            <div class="lang-item"><span class="lang-flag">🇧🇩</span> বাংলা</div>
+            <div class="lang-item"><span class="lang-flag">🇮🇩</span> Indonesia</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPÇÃO B: Dropdowns (compacto, tudo num select) -->
+  <div class="mockup">
+    <div class="mockup-header">B — Compacto (dropdowns)</div>
+    <div class="mockup-body" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);padding:12px">
+      <div class="mock-settings">
+        <div class="mock-settings-header">
+          <span class="mock-settings-title">⚙ Configurações</span>
+          <span style="color:rgba(255,255,255,0.4);font-size:12px">✕</span>
+        </div>
+        <div class="mock-settings-body">
+
+          <div class="mock-section-label">🎨 Aparência</div>
+
+          <div style="margin-bottom:8px">
+            <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:4px">Tema</div>
+            <div class="mock-dropdown">
+              <span style="display:flex;align-items:center;gap:8px">
+                <span style="width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#0f0c29,#302b63);display:inline-block;border:1px solid rgba(255,255,255,0.3)"></span>
+                Dark Glass — Midnight
+              </span>
+              <span style="opacity:0.5">▾</span>
+            </div>
+          </div>
+
+          <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:4px">Grupo</div>
+          <div style="display:flex;gap:5px;margin-bottom:12px">
+            <div style="padding:4px 10px;border-radius:6px;background:rgba(124,77,255,0.3);border:1px solid rgba(124,77,255,0.5);font-size:10px;color:#fff;cursor:pointer">Escuros</div>
+            <div style="padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:10px;color:#aaa;cursor:pointer">Médios</div>
+            <div style="padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:10px;color:#aaa;cursor:pointer">Claros</div>
+            <div style="padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:10px;color:#aaa;cursor:pointer">Países</div>
+            <div style="padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:10px;color:#aaa;cursor:pointer">✨</div>
+          </div>
+
+          <div class="mock-divider"></div>
+
+          <div class="mock-section-label" style="margin-top:12px">🌐 Idioma</div>
+          <div class="mock-dropdown">
+            <span style="display:flex;align-items:center;gap:8px">
+              <span>🇧🇷</span> Português (Brasil)
+            </span>
+            <span style="opacity:0.5">▾</span>
+          </div>
+
+          <div class="mock-divider"></div>
+
+          <div class="mock-section-label" style="margin-top:12px">⬇ Downloads</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4)">Pasta destino, velocidade, chunks...</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

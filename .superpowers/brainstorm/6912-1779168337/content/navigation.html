@@ -1,0 +1,141 @@
+<h2>Estrutura de navegação da V2</h2>
+<p class="subtitle">Como organizar as telas do app? O padrão atual é tudo em uma única tela com modais.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Bottom Navigation + FAB <span style="font-size:12px;color:#7c3aed;background:#ede9fe;padding:2px 8px;border-radius:12px;margin-left:8px">Recomendado</span></h3>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">📱 Android — Bottom Nav</div>
+        <div class="mockup-body" style="padding:0;overflow:hidden;background:#1a1a2e;border-radius:0 0 8px 8px">
+          <!-- Status bar -->
+          <div style="height:24px;background:#111;display:flex;align-items:center;padding:0 12px;justify-content:space-between">
+            <span style="color:#fff;font-size:9px">9:41</span>
+            <span style="color:#fff;font-size:9px">● ● ▌</span>
+          </div>
+          <!-- Content area -->
+          <div style="padding:12px;min-height:200px">
+            <div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:12px">Downloads</div>
+            <!-- Download card mock -->
+            <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <span style="color:#e0e0e0;font-size:11px">ubuntu-24.04.iso</span>
+                <span style="color:#bb86fc;font-size:10px;background:rgba(187,134,252,0.15);padding:2px 8px;border-radius:10px">ativo</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px">
+                <div style="background:#bb86fc;width:62%;height:4px;border-radius:4px"></div>
+              </div>
+              <div style="color:#aaa;font-size:10px;margin-top:4px">62% · 4.2 MB/s · ETA 3min</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:12px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <span style="color:#e0e0e0;font-size:11px">setup-chrome.exe</span>
+                <span style="color:#4ade80;font-size:10px;background:rgba(74,222,128,0.15);padding:2px 8px;border-radius:10px">completo</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px">
+                <div style="background:#4ade80;width:100%;height:4px;border-radius:4px"></div>
+              </div>
+              <div style="color:#aaa;font-size:10px;margin-top:4px">100% · 94 MB</div>
+            </div>
+          </div>
+          <!-- FAB -->
+          <div style="position:relative;height:0">
+            <div style="position:absolute;right:16px;bottom:-40px;width:56px;height:56px;background:#bb86fc;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow:0 4px 12px rgba(187,134,252,0.4)">+</div>
+          </div>
+          <!-- Bottom navigation -->
+          <div style="height:64px;background:#1e1e2e;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-around;padding:0 8px;margin-top:16px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+              <div style="font-size:18px">⬇️</div>
+              <span style="color:#bb86fc;font-size:9px">Downloads</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+              <div style="font-size:18px">📊</div>
+              <span style="color:#888;font-size:9px">Stats</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+              <div style="font-size:18px">⚙️</div>
+              <span style="color:#888;font-size:9px">Config</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:10px;font-size:13px">Downloads (lista principal) · Stats/Histórico · Configurações. FAB para adicionar novo download. Padrão Android Material.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Tela única com Drawer lateral</h3>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">📱 Android — Drawer</div>
+        <div class="mockup-body" style="padding:0;overflow:hidden;background:#1a1a2e;border-radius:0 0 8px 8px">
+          <div style="height:24px;background:#111;display:flex;align-items:center;padding:0 12px;justify-content:space-between">
+            <span style="color:#fff;font-size:9px">9:41</span>
+            <span style="color:#fff;font-size:9px">● ● ▌</span>
+          </div>
+          <div style="background:#2a2a3e;padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-size:16px">☰</div>
+              <span style="color:#fff;font-size:13px;font-weight:600">Awesome DM</span>
+            </div>
+            <div style="font-size:16px">🔍</div>
+          </div>
+          <div style="padding:12px;min-height:200px">
+            <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;margin-bottom:8px">
+              <div style="color:#e0e0e0;font-size:11px;margin-bottom:6px">ubuntu-24.04.iso</div>
+              <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px">
+                <div style="background:#bb86fc;width:62%;height:4px;border-radius:4px"></div>
+              </div>
+            </div>
+          </div>
+          <div style="position:relative;text-align:right;padding:0 16px">
+            <div style="display:inline-flex;width:56px;height:56px;background:#bb86fc;border-radius:16px;align-items:center;justify-content:center;font-size:24px;color:#fff">+</div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:10px;font-size:13px">Top app bar com hamburger menu. Drawer lateral com seções. Mais comum em apps desktop-like portados para mobile.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Tela única simplificada</h3>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">📱 Android — Single Screen</div>
+        <div class="mockup-body" style="padding:0;overflow:hidden;background:#1a1a2e;border-radius:0 0 8px 8px">
+          <div style="height:24px;background:#111;display:flex;align-items:center;padding:0 12px;justify-content:space-between">
+            <span style="color:#fff;font-size:9px">9:41</span>
+            <span style="color:#fff;font-size:9px">● ● ▌</span>
+          </div>
+          <div style="background:#2a2a3e;padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
+            <span style="color:#fff;font-size:13px;font-weight:600">Awesome DM</span>
+            <div style="display:flex;gap:12px;font-size:16px">
+              <span>🔍</span><span>⚙️</span><span>⋮</span>
+            </div>
+          </div>
+          <!-- Filter chips -->
+          <div style="padding:8px 12px;display:flex;gap:6px;overflow:hidden">
+            <div style="background:#bb86fc;color:#fff;border-radius:20px;padding:4px 12px;font-size:10px;white-space:nowrap">Todos</div>
+            <div style="background:rgba(255,255,255,0.08);color:#aaa;border-radius:20px;padding:4px 12px;font-size:10px;white-space:nowrap">Ativos</div>
+            <div style="background:rgba(255,255,255,0.08);color:#aaa;border-radius:20px;padding:4px 12px;font-size:10px;white-space:nowrap">Concluídos</div>
+          </div>
+          <div style="padding:8px 12px">
+            <div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:12px">
+              <div style="color:#e0e0e0;font-size:11px;margin-bottom:6px">ubuntu-24.04.iso</div>
+              <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px">
+                <div style="background:#bb86fc;width:62%;height:4px;border-radius:4px"></div>
+              </div>
+            </div>
+          </div>
+          <div style="position:relative;text-align:right;padding:0 16px;margin-top:60px">
+            <div style="display:inline-flex;width:56px;height:56px;background:#bb86fc;border-radius:16px;align-items:center;justify-content:center;font-size:24px;color:#fff">+</div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:10px;font-size:13px">Top bar com ícones de ação. Filter chips para filtrar por status. FAB. Sem tabs — configurações abrem como tela separada via push.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,93 @@
+<h2>Auto-Update — como assinar e distribuir</h2>
+<p class="subtitle">Para baixar e instalar automaticamente, precisamos de uma estratégia de assinatura. Qual abordagem prefere?</p>
+
+<style>
+.detail-box {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.detail-box code {
+  background: rgba(124,77,255,0.2);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+}
+.step-list { margin: 0; padding-left: 16px; }
+.step-list li { margin-bottom: 4px; color: rgba(255,255,255,0.7); }
+.badge-effort {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+.effort-low { background: rgba(40,200,100,0.2); color: #28c864; }
+.effort-med { background: rgba(254,188,46,0.2); color: #febc2e; }
+.effort-high { background: rgba(255,80,80,0.2); color: #ff6060; }
+</style>
+
+<div class="options">
+
+  <div class="option" data-choice="plugin-updater" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>tauri-plugin-updater (oficial + assinado)</h3>
+      <p>Usa o plugin oficial do Tauri. O app verifica um endpoint JSON com a versão mais recente, baixa o instalador, valida a assinatura criptográfica, e lança o updater silenciosamente.</p>
+      <span class="badge-effort effort-high">Esforço alto</span>
+      <div class="detail-box">
+        <strong>O que é necessário:</strong>
+        <ul class="step-list" style="margin-top:6px">
+          <li>Gerar keypair (<code>tauri signer generate</code>)</li>
+          <li>Adicionar chave privada como secret no GitHub Actions</li>
+          <li>CI assina os artifacts em cada release</li>
+          <li>Hospedar <code>latest.json</code> (pode ser o próprio GitHub Releases)</li>
+        </ul>
+        <div style="margin-top:8px;color:rgba(255,255,255,0.4);font-size:11px">✅ Mais seguro — instaladores verificados criptograficamente<br>✅ Experiência 1-clique<br>⚠ Setup inicial mais complexo</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="download-launch" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Download + lançar instalador (sem signing)</h3>
+      <p>O app já detecta a nova versão via GitHub API (código existente). Adicionamos: download do instalador para temp dir e execução via <code>Command::new()</code> ou shell.</p>
+      <span class="badge-effort effort-med">Esforço médio</span>
+      <div class="detail-box">
+        <strong>Fluxo:</strong>
+        <ul class="step-list" style="margin-top:6px">
+          <li>Clique em "Atualizar" no ChangelogModal</li>
+          <li>Baixa o <code>.msi</code> / <code>.deb</code> / <code>.AppImage</code> correto para o SO</li>
+          <li>Lança o instalador (Windows: <code>msiexec /i</code>, Linux: abre o arquivo)</li>
+          <li>App pode fechar após lançar</li>
+        </ul>
+        <div style="margin-top:8px;color:rgba(255,255,255,0.4);font-size:11px">✅ Aproveita a infra de releases já existente<br>✅ Sem keypair nem mudanças no CI<br>⚠ Sem verificação criptográfica (mas é GitHub HTTPS)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="download-sha" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Download + verificar SHA256 + lançar</h3>
+      <p>Igual ao B, mas antes de lançar o instalador, verifica o SHA256 do arquivo baixado contra um hash publicado no release (arquivo <code>.sha256</code> no GitHub Releases).</p>
+      <span class="badge-effort effort-med">Esforço médio</span>
+      <div class="detail-box">
+        <strong>Extra em relação ao B:</strong>
+        <ul class="step-list" style="margin-top:6px">
+          <li>CI gera <code>sha256sum</code> de cada artifact e sobe como asset</li>
+          <li>App baixa o <code>.sha256</code>, compara com o hash local</li>
+          <li>Rejeita se não bater — avisa o usuário</li>
+        </ul>
+        <div style="margin-top:8px;color:rgba(255,255,255,0.4);font-size:11px">✅ Proteção razoável contra download corrompido<br>✅ Sem keypair<br>⚠ Não protege contra repositório GitHub comprometido</div>
+      </div>
+    </div>
+  </div>
+
+</div>

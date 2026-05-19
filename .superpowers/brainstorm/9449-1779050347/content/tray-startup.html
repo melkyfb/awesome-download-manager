@@ -1,0 +1,39 @@
+<h2>System Tray — comportamento ao iniciar</h2>
+<p class="subtitle">Quando o app é aberto (ex: no login do sistema), como ele deve se comportar?</p>
+
+<div class="options">
+
+  <div class="option" data-choice="window-first" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Abre a janela normalmente</h3>
+      <p>Comportamento atual. A janela aparece. O ícone no tray fica disponível como atalho para reabrir/minimizar. O usuário escolhe minimizar manualmente quando quiser.</p>
+      <div style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:13px;">
+        <strong>Fluxo:</strong> Start → 🪟 Janela aparece → usuário clica X → pergunta "minimizar ou fechar?"
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="tray-first" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Inicia direto no tray (silencioso)</h3>
+      <p>No startup do sistema, o app sobe direto para a bandeja sem mostrar janela. Ícone aparece na gaveta. Duplo-clique ou menu do tray abre a janela quando quiser.</p>
+      <div style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:13px;">
+        <strong>Fluxo:</strong> Start → 🗂 Ícone no tray (silencioso) → clica → 🪟 Janela aparece
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="setting" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Configurável nas Settings</h3>
+      <p>Default: abre janela normalmente. Nas configurações, há um toggle <em>"Iniciar minimizado no tray"</em> para quem prefere que o app suba silencioso com o sistema.</p>
+      <div style="margin-top:12px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:13px;">
+        <strong>Fluxo:</strong> Default = A. Com toggle ativo = B.
+      </div>
+    </div>
+  </div>
+
+</div>

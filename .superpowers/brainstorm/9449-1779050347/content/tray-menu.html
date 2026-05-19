@@ -1,0 +1,88 @@
+<h2>System Tray — menu do ícone</h2>
+<p class="subtitle">O que aparece ao clicar com o botão direito? Escolha o conjunto que faz mais sentido.</p>
+
+<style>
+.tray-mock {
+  background: #1e1e2e;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  padding: 6px 0;
+  width: 220px;
+  font-size: 13px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.tray-item {
+  padding: 7px 16px;
+  color: #e0e0ff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: default;
+}
+.tray-item.active { background: rgba(124,77,255,0.25); }
+.tray-item.dim { color: rgba(255,255,255,0.4); font-size: 11px; }
+.tray-item.danger { color: #ff6b6b; }
+.tray-sep { height: 1px; background: rgba(255,255,255,0.1); margin: 4px 0; }
+.tray-badge { background: var(--accent, #7C4DFF); color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 10px; margin-left: auto; }
+</style>
+
+<div class="options">
+
+  <div class="option" data-choice="minimal" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Minimal</h3>
+      <p>Só o essencial — abrir, pausar tudo, fechar.</p>
+      <div class="tray-mock" style="margin-top:10px">
+        <div class="tray-item">⬇ Awesome Download Manager</div>
+        <div class="tray-sep"></div>
+        <div class="tray-item">🪟 Abrir janela</div>
+        <div class="tray-item">⏸ Pausar todos os downloads</div>
+        <div class="tray-sep"></div>
+        <div class="tray-item danger">✕ Fechar</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="with-status" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Com status em tempo real</h3>
+      <p>Mostra quantos downloads estão ativos e velocidade atual no próprio menu.</p>
+      <div class="tray-mock" style="margin-top:10px">
+        <div class="tray-item dim">⬇ 3 ativos · 4.2 MB/s</div>
+        <div class="tray-sep"></div>
+        <div class="tray-item">🪟 Abrir janela</div>
+        <div class="tray-item">⏸ Pausar todos</div>
+        <div class="tray-item">▶ Retomar todos</div>
+        <div class="tray-sep"></div>
+        <div class="tray-item">+ Novo download…</div>
+        <div class="tray-sep"></div>
+        <div class="tray-item danger">✕ Fechar</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="full" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Completo</h3>
+      <p>Status + novo download + toggle do clipboard monitor + configurações rápidas.</p>
+      <div class="tray-mock" style="margin-top:10px">
+        <div class="tray-item dim">⬇ 3 ativos · 4.2 MB/s</div>
+        <div class="tray-sep"></div>
+        <div class="tray-item">🪟 Abrir janela</div>
+        <div class="tray-item">+ Novo download…</div>
+        <div class="tray-sep"></div>
+        <div class="tray-item">⏸ Pausar todos</div>
+        <div class="tray-item">▶ Retomar todos</div>
+        <div class="tray-sep"></div>
+        <div class="tray-item">📋 Clipboard monitor <span class="tray-badge">ON</span></div>
+        <div class="tray-item">⚙ Configurações</div>
+        <div class="tray-sep"></div>
+        <div class="tray-item danger">✕ Fechar</div>
+      </div>
+    </div>
+  </div>
+
+</div>

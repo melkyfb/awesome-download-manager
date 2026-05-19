@@ -1,0 +1,218 @@
+<h2>Settings com abas — aba Personalização aberta</h2>
+<p class="subtitle">Clique nas abas para ver o que cada uma contém</p>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+.settings-shell {
+  font-family: 'Inter', sans-serif;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.settings-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 0;
+  background: rgba(255,255,255,0.04);
+}
+.settings-title { font-size: 15px; font-weight: 600; color: #fff; }
+.settings-close { color: rgba(255,255,255,0.35); font-size: 14px; cursor: pointer; }
+.tab-bar {
+  display: flex; gap: 0;
+  padding: 12px 20px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.tab {
+  padding: 8px 16px; font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,0.4); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.tab.active { color: #fff; border-bottom-color: #7C4DFF; }
+.tab-content { display: none; padding: 18px 20px; }
+.tab-content.active { display: block; }
+
+.field-label { font-size: 10px; font-weight: 600; letter-spacing: 0.8px; color: rgba(255,255,255,0.35); text-transform: uppercase; margin-bottom: 8px; margin-top: 14px; }
+.field-label:first-child { margin-top: 0; }
+
+/* Theme dots */
+.theme-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.tdot {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.1);
+  cursor: pointer; transition: transform 0.1s, border-color 0.1s;
+  position: relative;
+}
+.tdot:hover { transform: scale(1.1); }
+.tdot.sel { border-color: #fff; transform: scale(1.15); }
+.tdot.sel::after {
+  content: '✓'; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+.theme-name-preview { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+/* Font picker */
+.font-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.font-opt {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 8px 10px; cursor: pointer;
+}
+.font-opt.sel { background: rgba(124,77,255,0.2); border-color: rgba(124,77,255,0.55); }
+.font-opt-name { font-size: 13px; color: #fff; font-weight: 600; }
+.font-opt-desc { font-size: 9px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+
+/* Language grid */
+.lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.lang-opt {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 7px 10px; cursor: pointer; font-size: 11px; color: #ccc;
+}
+.lang-opt.sel { background: rgba(124,77,255,0.2); border-color: rgba(124,77,255,0.5); color: #fff; }
+
+/* Download tab fields */
+.input-field {
+  width: 100%; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+  padding: 8px 12px; color: #ccc; font-size: 12px; font-family: 'Inter', sans-serif;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+}
+.input-num { width: 80px; }
+.divider { height: 1px; background: rgba(255,255,255,0.07); margin: 4px 0 10px; }
+.footer-btns { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
+.btn-cancel { padding: 7px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); color: #aaa; font-size: 12px; cursor: pointer; }
+.btn-save { padding: 7px 16px; border-radius: 8px; background: #7C4DFF; border: none; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+</style>
+
+<div class="settings-shell">
+  <div class="settings-header">
+    <span class="settings-title">⚙ Configurações</span>
+    <span class="settings-close">✕</span>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab" id="tab-geral" onclick="switchTab('geral')">🌐 Geral</div>
+    <div class="tab" id="tab-download" onclick="switchTab('download')">⬇ Download</div>
+    <div class="tab active" id="tab-personal" onclick="switchTab('personal')">🎨 Personalização</div>
+    <div class="tab" id="tab-ai" onclick="switchTab('ai')">🤖 IA</div>
+  </div>
+
+  <!-- ABA GERAL -->
+  <div class="tab-content" id="content-geral">
+    <div class="field-label">Idioma / Language</div>
+    <div class="lang-grid">
+      <div class="lang-opt sel">🇧🇷 Português</div>
+      <div class="lang-opt">🇬🇧 English</div>
+      <div class="lang-opt">🇨🇳 中文</div>
+      <div class="lang-opt">🇪🇸 Español</div>
+      <div class="lang-opt">🇫🇷 Français</div>
+      <div class="lang-opt">🇸🇦 العربية</div>
+      <div class="lang-opt">🇮🇳 हिन्दी</div>
+      <div class="lang-opt">🇷🇺 Русский</div>
+      <div class="lang-opt">🇧🇩 বাংলা</div>
+      <div class="lang-opt">🇮🇩 Indonesia</div>
+    </div>
+    <div class="field-label" style="margin-top:14px">Comportamento</div>
+    <div class="input-field">Iniciar com o sistema <span style="font-size:18px">○</span></div>
+    <div class="input-field">Minimizar na bandeja <span style="font-size:18px">○</span></div>
+    <div class="input-field">Notificações ao completar <span style="font-size:18px">◉</span></div>
+  </div>
+
+  <!-- ABA DOWNLOAD -->
+  <div class="tab-content" id="content-download">
+    <div class="field-label">Pasta de destino</div>
+    <div class="input-field">
+      <span style="color:rgba(255,255,255,0.5)">/home/user/Downloads</span>
+      <span style="font-size:10px;color:#7C4DFF">Alterar</span>
+    </div>
+    <div class="field-label">Velocidade máxima (KB/s)</div>
+    <div class="input-field input-num">0 <span style="color:rgba(255,255,255,0.3)">sem limite</span></div>
+    <div class="field-label">Chunks paralelos (1–16)</div>
+    <div class="input-field input-num">8</div>
+    <div class="field-label">Tentativas em caso de erro</div>
+    <div class="input-field input-num">3</div>
+    <div class="field-label">Verificação SHA256</div>
+    <div class="input-field">Sempre verificar ao completar <span style="font-size:18px">◉</span></div>
+  </div>
+
+  <!-- ABA PERSONALIZAÇÃO -->
+  <div class="tab-content active" id="content-personal">
+    <div class="field-label">Tema</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+      <span style="padding:3px 10px;border-radius:6px;background:rgba(124,77,255,0.3);border:1px solid rgba(124,77,255,0.5);font-size:10px;color:#fff;cursor:pointer">Escuros</span>
+      <span style="padding:3px 10px;border-radius:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:10px;color:#aaa;cursor:pointer">Médios</span>
+      <span style="padding:3px 10px;border-radius:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:10px;color:#aaa;cursor:pointer">Claros</span>
+      <span style="padding:3px 10px;border-radius:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:10px;color:#aaa;cursor:pointer">🌍 Países</span>
+      <span style="padding:3px 10px;border-radius:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:10px;color:#aaa;cursor:pointer">✨ Especiais</span>
+    </div>
+    <div class="theme-strip">
+      <div class="tdot sel" style="background:linear-gradient(135deg,#0f0c29,#302b63)" title="Dark Glass"></div>
+      <div class="tdot" style="background:#000" title="Black Piano"></div>
+      <div class="tdot" style="background:linear-gradient(135deg,#0a0a0a,#1a0a2e)" title="Obsidian"></div>
+      <div class="tdot" style="background:linear-gradient(135deg,#050505,#0d1117)" title="Void"></div>
+      <div class="tdot" style="background:linear-gradient(135deg,#0d0d0d,#16213e)" title="Abyss"></div>
+    </div>
+    <div class="theme-name-preview">Dark Glass — Midnight</div>
+
+    <div class="divider"></div>
+
+    <div class="field-label">Fonte</div>
+    <div class="font-picker">
+      <div class="font-opt sel" style="font-family:'Inter',sans-serif">
+        <div class="font-opt-name">Inter</div>
+        <div class="font-opt-desc">Clean, moderna</div>
+      </div>
+      <div class="font-opt" style="font-family:'Geist',sans-serif">
+        <div class="font-opt-name">Geist</div>
+        <div class="font-opt-desc">Vercel, técnica</div>
+      </div>
+      <div class="font-opt" style="font-family:'Outfit',sans-serif">
+        <div class="font-opt-name">Outfit</div>
+        <div class="font-opt-desc">Arredondada</div>
+      </div>
+      <div class="font-opt" style="font-family:'Oxanium',sans-serif">
+        <div class="font-opt-name" style="font-family:'Oxanium',sans-serif">Oxanium</div>
+        <div class="font-opt-desc">Futurista</div>
+      </div>
+      <div class="font-opt">
+        <div class="font-opt-name" style="font-family:'Pacifico',cursive;font-size:14px">Pacifico</div>
+        <div class="font-opt-desc">Descontraída</div>
+      </div>
+      <div class="font-opt" style="text-align:center;display:flex;align-items:center;justify-content:center">
+        <div style="font-size:11px;color:rgba(255,255,255,0.3)">+ ver todas (25)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA IA -->
+  <div class="tab-content" id="content-ai">
+    <div class="field-label">Provedor de IA</div>
+    <div class="input-field">Claude (Anthropic) <span style="font-size:10px;color:rgba(255,255,255,0.3)">▾</span></div>
+    <div class="field-label">API Key</div>
+    <div class="input-field"><span style="color:rgba(255,255,255,0.3)">••••••••••••••••••</span> <span style="font-size:10px;color:#22c55e">✓ configurada</span></div>
+    <div class="field-label">Provedor de busca</div>
+    <div class="input-field">Brave Search <span style="font-size:10px;color:rgba(255,255,255,0.3)">▾</span></div>
+    <div class="field-label">VirusTotal API Key</div>
+    <div class="input-field"><span style="color:rgba(255,255,255,0.3)">Opcional</span></div>
+  </div>
+
+  <div class="footer-btns">
+    <div class="btn-cancel">Cancelar</div>
+    <div class="btn-save">Salvar</div>
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('content-' + name).classList.add('active');
+}
+</script>

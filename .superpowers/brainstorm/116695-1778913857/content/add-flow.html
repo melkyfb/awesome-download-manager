@@ -1,0 +1,78 @@
+<h2>Ao colar uma URL, o que acontece?</h2>
+<p class="subtitle">Fluxo de análise de IA antes de iniciar o download</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="display:flex;flex-direction:column;gap:4px;padding:8px;background:#f9f9f9;height:160px;justify-content:center">
+        <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px;font-size:10px">
+          <div style="font-weight:bold;margin-bottom:4px">+ Novo Download</div>
+          <div class="mock-input" style="font-size:9px;margin-bottom:6px;padding:4px">https://example.com/ubuntu.iso</div>
+          <div style="background:#fff8e1;border:1px solid #ffd54f;border-radius:4px;padding:6px;font-size:9px;margin-bottom:6px">
+            <div style="font-weight:bold;margin-bottom:2px">🤖 Analisando antes de baixar...</div>
+            <div>📋 Tipo: ISO de instalação Linux (Ubuntu 24.04)</div>
+            <div>🛡 Risco: <span style="color:#2a9d2a">Não malicioso</span></div>
+            <div>🔗 Mirrors encontrados: <span style="color:#3b82f6">4 mirrors</span></div>
+            <div>SHA256: a3f2b1... <a style="color:#3b82f6">[VirusTotal]</a></div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="mock-button" style="font-size:9px;padding:3px 8px;background:#2a9d2a;color:#fff">▶ Iniciar Download</button>
+            <button class="mock-button" style="font-size:9px;padding:3px 8px">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Análise bloqueante</h3>
+      <p>IA analisa primeiro, mostra resultado completo no dialog. Usuário decide se baixa depois de ver o relatório.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="display:flex;flex-direction:column;gap:4px;padding:8px;background:#f9f9f9;height:160px;justify-content:center">
+        <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px;font-size:10px">
+          <div style="font-weight:bold;margin-bottom:4px">+ Novo Download</div>
+          <div class="mock-input" style="font-size:9px;margin-bottom:6px;padding:4px">https://example.com/ubuntu.iso</div>
+          <div style="display:flex;gap:4px;margin-bottom:0">
+            <button class="mock-button" style="font-size:9px;padding:3px 8px;background:#3b82f6;color:#fff">▶ Baixar Agora</button>
+            <button class="mock-button" style="font-size:9px;padding:3px 8px">Cancelar</button>
+          </div>
+        </div>
+        <div style="font-size:9px;color:#666;text-align:center">↓ download inicia imediatamente, card aparece na lista</div>
+        <div style="background:#fff;border:1px solid #ddd;border-radius:4px;padding:6px;font-size:9px">
+          <span style="font-weight:bold">ubuntu.iso</span> &nbsp; ▓▓▓░░░ 30% &nbsp;
+          <span style="color:#e88c00">⏳ IA analisando em paralelo...</span>
+          <div style="margin-top:2px;color:#2a9d2a">→ 🛡 Seguro · 📋 ISO Linux · 🔗 3 mirrors</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Download imediato + IA em paralelo</h3>
+      <p>Download começa na hora. IA analisa ao mesmo tempo e atualiza o card com resultados conforme chegam.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="display:flex;flex-direction:column;gap:4px;padding:8px;background:#f9f9f9;height:160px;justify-content:center">
+        <div style="background:#fff;border:1px solid #ddd;border-radius:6px;padding:8px;font-size:10px">
+          <div style="font-weight:bold;margin-bottom:4px">+ Novo Download</div>
+          <div class="mock-input" style="font-size:9px;margin-bottom:6px;padding:4px">https://example.com/ubuntu.iso</div>
+          <div style="display:flex;gap:4px">
+            <button class="mock-button" style="font-size:9px;padding:3px 8px;background:#3b82f6;color:#fff">▶ Baixar Agora</button>
+            <button class="mock-button" style="font-size:9px;padding:3px 8px;background:#fff8e1;border-color:#ffd54f">🤖 Analisar Primeiro</button>
+            <button class="mock-button" style="font-size:9px;padding:3px 8px">Cancelar</button>
+          </div>
+        </div>
+        <div style="font-size:9px;color:#666;text-align:center">↑ usuário escolhe o que quer fazer</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Usuário escolhe</h3>
+      <p>Dialog oferece "Baixar Agora" ou "Analisar Primeiro". Usuário decide quando quer análise de IA.</p>
+    </div>
+  </div>
+
+</div>
