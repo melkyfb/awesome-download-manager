@@ -75,7 +75,17 @@ function AppContent() {
       {isMobile && !settingsOpen && <AddDownloadFAB />}
 
       {closeDialogOpen && <CloseDialog />}
-      {changelogOpen && <ChangelogModal {...updateState} />}
+      {changelogOpen && (
+        <ChangelogModal
+          currentVersion={updateState.currentVersion}
+          hasUpdate={updateState.hasUpdate}
+          latestVersion={updateState.latestVersion}
+          releaseNotes={updateState.releases[0]?.body}
+          onUpdate={updateState.update
+            ? () => updateState.update!.downloadAndInstall().catch(console.error)
+            : undefined}
+        />
+      )}
     </AppShell>
   )
 }
