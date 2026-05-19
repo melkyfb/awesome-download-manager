@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import uiReducer, { openCloseDialog, closeCloseDialog } from './uiSlice'
+import uiReducer, { openCloseDialog, closeCloseDialog, setDownloadFilter } from './uiSlice'
 
 describe('uiSlice', () => {
   it('starts with closeDialogOpen false', () => {
@@ -17,4 +17,9 @@ describe('uiSlice', () => {
     state = uiReducer(state, closeCloseDialog())
     expect(state.closeDialogOpen).toBe(false)
   })
+})
+
+it('setDownloadFilter changes filter', () => {
+  const state = uiReducer(undefined, setDownloadFilter('active'))
+  expect(state.downloadFilter).toBe('active')
 })
