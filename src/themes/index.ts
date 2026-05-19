@@ -6,7 +6,10 @@ export interface ThemeMeta {
   theme: Theme
 }
 
-const shared = { shape: { borderRadius: 14 } }
+const shared = {
+  shape: { borderRadius: 14 },
+  breakpoints: { values: { xs: 0, sm: 600, md: 768, lg: 1200, xl: 1536 } },
+}
 
 export const THEMES: ThemeMeta[] = [
   {
