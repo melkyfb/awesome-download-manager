@@ -10,12 +10,13 @@ import TableChartRoundedIcon from '@mui/icons-material/TableChartRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
 import UpdateRoundedIcon from '@mui/icons-material/UpdateRounded'
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded'
+import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
+import { getVersion } from '@tauri-apps/api/app'
 import type { AppDispatch, RootState } from '../../store'
 import { openSettings, closeSettings, openChangelog, openAbout, closeAbout, setDownloadFilter } from '../../store/uiSlice'
 import { GlobalSpeedWidget } from '../common/GlobalSpeedWidget'
-import { APP_VERSION } from '../../version'
 
 interface Props {
   onNavigate?: () => void
@@ -28,6 +29,11 @@ export function DrawerContent({ onNavigate, hasUpdate, onUpdate: _onUpdate }: Pr
   const settingsOpen = useSelector((s: RootState) => s.ui.settingsOpen)
   const aboutOpen = useSelector((s: RootState) => s.ui.aboutOpen)
   const { t } = useTranslation()
+  const [version, setVersion] = useState('')
+
+  useEffect(() => {
+    getVersion().then(setVersion).catch(() => {})
+  }, [])
 
   function goDownloads() {
     dispatch(closeSettings())
@@ -107,7 +113,7 @@ export function DrawerContent({ onNavigate, hasUpdate, onUpdate: _onUpdate }: Pr
 
       <Divider />
       <Typography variant="caption" color="text.secondary" sx={{ px: 2, py: 1 }}>
-        v{APP_VERSION}
+        {version ? `v${version}` : ''}
       </Typography>
     </Box>
   )
