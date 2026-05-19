@@ -8,36 +8,55 @@ import Box from '@mui/material/Box'
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded'
 import TableChartRoundedIcon from '@mui/icons-material/TableChartRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
+import UpdateRoundedIcon from '@mui/icons-material/UpdateRounded'
+import InfoRoundedIcon from '@mui/icons-material/InfoRounded'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import type { AppDispatch, RootState } from '../../store'
-import { openSettings, closeSettings, setDownloadFilter } from '../../store/uiSlice'
+import { openSettings, closeSettings, openChangelog, openAbout, closeAbout, setDownloadFilter } from '../../store/uiSlice'
 import { GlobalSpeedWidget } from '../common/GlobalSpeedWidget'
 import { APP_VERSION } from '../../version'
 
 interface Props {
   onNavigate?: () => void
+  hasUpdate?: boolean
+  onUpdate?: () => void
 }
 
-export function DrawerContent({ onNavigate }: Props) {
+export function DrawerContent({ onNavigate, hasUpdate, onUpdate: _onUpdate }: Props) {
   const dispatch = useDispatch<AppDispatch>()
   const settingsOpen = useSelector((s: RootState) => s.ui.settingsOpen)
+  const aboutOpen = useSelector((s: RootState) => s.ui.aboutOpen)
   const { t } = useTranslation()
 
   function goDownloads() {
     dispatch(closeSettings())
+    dispatch(closeAbout())
     dispatch(setDownloadFilter('all'))
     onNavigate?.()
   }
 
   function goHistory() {
     dispatch(closeSettings())
+    dispatch(closeAbout())
     dispatch(setDownloadFilter('complete'))
     onNavigate?.()
   }
 
   function goSettings() {
     dispatch(openSettings())
+    dispatch(closeAbout())
+    onNavigate?.()
+  }
+
+  function goAbout() {
+    dispatch(closeSettings())
+    dispatch(openAbout())
+    onNavigate?.()
+  }
+
+  function goUpdate() {
+    dispatch(openChangelog())
     onNavigate?.()
   }
 
@@ -54,7 +73,7 @@ export function DrawerContent({ onNavigate }: Props) {
       <Divider />
 
       <List sx={{ flex: 1 }}>
-        <ListItemButton selected={!settingsOpen} onClick={goDownloads}>
+        <ListItemButton selected={!settingsOpen && !aboutOpen} onClick={goDownloads}>
           <ListItemIcon><DownloadRoundedIcon /></ListItemIcon>
           <ListItemText primary={t('nav.downloads')} />
         </ListItemButton>
@@ -65,6 +84,24 @@ export function DrawerContent({ onNavigate }: Props) {
         <ListItemButton selected={settingsOpen} onClick={goSettings}>
           <ListItemIcon><SettingsRoundedIcon /></ListItemIcon>
           <ListItemText primary={t('nav.settings')} />
+        </ListItemButton>
+
+        {/* Separator before utility items */}
+        <Divider sx={{ my: 1 }} />
+
+        {hasUpdate && (
+          <ListItemButton onClick={goUpdate}>
+            <ListItemIcon><UpdateRoundedIcon color="primary" /></ListItemIcon>
+            <ListItemText
+              primary="Atualizar"
+              slotProps={{ primary: { color: 'primary', sx: { fontWeight: 600 } } }}
+            />
+          </ListItemButton>
+        )}
+
+        <ListItemButton selected={aboutOpen} onClick={goAbout}>
+          <ListItemIcon><InfoRoundedIcon /></ListItemIcon>
+          <ListItemText primary="Sobre" />
         </ListItemButton>
       </List>
 

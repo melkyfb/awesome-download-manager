@@ -13,9 +13,11 @@ interface Props {
   title: string
   children: ReactNode
   topBarActions?: ReactNode
+  hasUpdate?: boolean
+  onUpdate?: () => void
 }
 
-export function AppShell({ title, children, topBarActions }: Props) {
+export function AppShell({ title, children, topBarActions, hasUpdate, onUpdate }: Props) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -32,7 +34,7 @@ export function AppShell({ title, children, topBarActions }: Props) {
             '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box' },
           }}
         >
-          <DrawerContent />
+          <DrawerContent hasUpdate={hasUpdate} onUpdate={onUpdate} />
         </Drawer>
       )}
 
@@ -44,7 +46,7 @@ export function AppShell({ title, children, topBarActions }: Props) {
           onClose={() => setDrawerOpen(false)}
           sx={{ '& .MuiDrawer-paper': { width: DRAWER_WIDTH } }}
         >
-          <DrawerContent onNavigate={() => setDrawerOpen(false)} />
+          <DrawerContent onNavigate={() => setDrawerOpen(false)} hasUpdate={hasUpdate} onUpdate={onUpdate} />
         </Drawer>
       )}
 

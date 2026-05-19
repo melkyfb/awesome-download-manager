@@ -8,6 +8,7 @@ interface UiState {
   closeDialogOpen: boolean
   prefillUrl: string
   downloadFilter: 'all' | 'active' | 'paused' | 'complete'
+  aboutOpen: boolean
 }
 
 const initialState: UiState = {
@@ -18,6 +19,7 @@ const initialState: UiState = {
   closeDialogOpen: false,
   prefillUrl: '',
   downloadFilter: 'all',
+  aboutOpen: false,
 }
 
 const uiSlice = createSlice({
@@ -39,6 +41,8 @@ const uiSlice = createSlice({
     setDownloadFilter(state, action: PayloadAction<'all' | 'active' | 'paused' | 'complete'>) {
       state.downloadFilter = action.payload
     },
+    openAbout(state) { state.aboutOpen = true },
+    closeAbout(state) { state.aboutOpen = false },
   },
 })
 
@@ -50,5 +54,6 @@ export const {
   openCloseDialog, closeCloseDialog,
   setPrefillUrl,
   setDownloadFilter,
+  openAbout, closeAbout,
 } = uiSlice.actions
 export default uiSlice.reducer
