@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +8,8 @@ import type { RootState, AppDispatch } from './store'
 import { setConfig } from './store/configSlice'
 import { setAppearance } from './store/appearanceSlice'
 import { upsertDownload } from './store/downloadsSlice'
-import { openChangelog } from './store/uiSlice'
+import { openChangelog, closeChangelog } from './store/uiSlice'
+import { relaunch } from '@tauri-apps/plugin-process'
 import { useTauriEvents } from './hooks/useTauriEvents'
 import { useForegroundService } from './hooks/useForegroundService'
 import { useUpdateCheck } from './hooks/useUpdateCheck'
@@ -36,6 +37,8 @@ function AppContent() {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const updateState = useUpdateCheck()
+  const [updateError, setUpdateError] = useState<string | null>(null)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   useTauriEvents()
   useForegroundService()
@@ -89,9 +92,21 @@ function AppContent() {
           hasUpdate={updateState.hasUpdate}
           latestVersion={updateState.latestVersion}
           releaseNotes={updateState.releases[0]?.body}
-          onUpdate={updateState.update
-            ? () => updateState.update!.downloadAndInstall().catch(console.error)
-            : undefined}
+          isUpdating={isUpdating}
+          updateError={updateError}
+          onUpdate={updateState.update ? async () => {
+            setIsUpdating(true)
+            setUpdateError(null)
+            try {
+              await updateState.update!.downloadAndInstall()
+              dispatch(closeChangelog())
+              await relaunch()
+            } catch (e) {
+              setUpdateError(String(e))
+            } finally {
+              setIsUpdating(false)
+            }
+          } : undefined}
         />
       )}
     </AppShell>

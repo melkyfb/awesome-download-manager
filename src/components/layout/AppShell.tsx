@@ -52,13 +52,11 @@ export function AppShell({ title, children, topBarActions, hasUpdate, onUpdate }
 
       {/* Main content */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {isMobile && (
-          <TopBar
-            title={title}
-            onMenuClick={() => setDrawerOpen(true)}
-            actions={topBarActions}
-          />
-        )}
+        <TopBar
+          title={title}
+          onMenuClick={isMobile ? () => setDrawerOpen(true) : undefined}
+          actions={topBarActions}
+        />
         <Box sx={{ flex: 1, overflowY: 'auto' }}>
           {children}
         </Box>
