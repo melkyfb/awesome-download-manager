@@ -165,6 +165,8 @@ pub async fn start_download(
             chunks_json: None,
             created_at: String::new(),
             completed_at: None,
+            download_type: None,
+            video_quality: None,
         })
         .map_err(|e| e.to_string())?;
     }

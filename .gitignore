@@ -27,3 +27,7 @@ dist-ssr
 *.keystore
 *.jks
 src-tauri/gen/android/keystore.properties
+
+# yt-dlp binary (downloaded at build time)
+src-tauri/binaries/*
+!src-tauri/binaries/.gitkeep

@@ -13,6 +13,8 @@ import type { RootState, AppDispatch } from '../../store'
 import { closeAddModal, setPrefillUrl } from '../../store/uiSlice'
 import { upsertDownload } from '../../store/downloadsSlice'
 import type { Download } from '../../types'
+import { isVideoUrl } from '../../utils/videoUrls'
+import { VideoDownloadForm } from './VideoDownloadForm'
 
 interface Props {
   onClose: () => void
@@ -27,8 +29,21 @@ export function AddDownloadForm({ onClose }: Props) {
   const [destFolder, setDestFolder] = useState(config.dest_folder)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [forceHttp, setForceHttp] = useState(false)
 
   useEffect(() => () => { dispatch(setPrefillUrl('')) }, [dispatch])
+
+  const showVideoForm = !forceHttp && isVideoUrl(url)
+
+  if (showVideoForm) {
+    return (
+      <VideoDownloadForm
+        url={url}
+        onClose={onClose}
+        onSwitchToHttp={() => setForceHttp(true)}
+      />
+    )
+  }
 
   async function pickFolder() {
     const selected = await open({ directory: true, defaultPath: destFolder })
@@ -69,7 +84,7 @@ export function AddDownloadForm({ onClose }: Props) {
         label={t('modal.urlLabel')}
         placeholder={t('modal.urlPlaceholder')}
         value={url}
-        onChange={e => setUrl(e.target.value)}
+        onChange={e => { setUrl(e.target.value); setForceHttp(false) }}
         fullWidth
         autoFocus
         type="url"

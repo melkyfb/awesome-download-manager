@@ -13,6 +13,7 @@ import ReplayRoundedIcon from '@mui/icons-material/ReplayRounded'
 import FolderZipRoundedIcon from '@mui/icons-material/FolderZipRounded'
 import PictureAsPdfRoundedIcon from '@mui/icons-material/PictureAsPdfRounded'
 import MovieRoundedIcon from '@mui/icons-material/MovieRounded'
+import VideoLibraryRoundedIcon from '@mui/icons-material/VideoLibraryRounded'
 import AlbumRoundedIcon from '@mui/icons-material/AlbumRounded'
 import TerminalRoundedIcon from '@mui/icons-material/TerminalRounded'
 import InsertDriveFileRoundedIcon from '@mui/icons-material/InsertDriveFileRounded'
@@ -66,9 +67,12 @@ export function DownloadCard({ download }: { download: Download }) {
   const isExpanded = expandedId === download.id
   const { t } = useTranslation()
 
-  const percent = download.total_bytes
-    ? Math.min(100, Math.round((download.downloaded_bytes / download.total_bytes) * 100))
-    : 0
+  const isVideo = download.download_type === 'video'
+  const percent = isVideo && download.percent !== undefined
+    ? Math.round(download.percent)
+    : download.total_bytes
+      ? Math.min(100, Math.round((download.downloaded_bytes / download.total_bytes) * 100))
+      : 0
 
   async function handlePause() {
     try {
@@ -113,6 +117,15 @@ export function DownloadCard({ download }: { download: Download }) {
               <Typography variant="body2" noWrap sx={{ flex: 1, fontWeight: 600 }}>
                 {download.filename}
               </Typography>
+              {isVideo && (
+                <Chip
+                  icon={<VideoLibraryRoundedIcon sx={{ fontSize: '0.75rem !important' }} />}
+                  label="Vídeo"
+                  size="small"
+                  color="secondary"
+                  sx={{ height: 20, fontSize: '0.7rem', flexShrink: 0 }}
+                />
+              )}
               <Chip
                 label={t(`status.${download.status}`)}
                 color={STATUS_COLORS[download.status]}
@@ -132,7 +145,7 @@ export function DownloadCard({ download }: { download: Download }) {
         </Box>
 
         <LinearProgress
-          variant={download.status === 'active' && !download.total_bytes ? 'indeterminate' : 'determinate'}
+          variant={download.status === 'active' && !download.total_bytes && !isVideo ? 'indeterminate' : 'determinate'}
           value={percent}
           sx={{ borderRadius: 2, height: 6, mb: 1 }}
           color={download.status === 'error' ? 'error' : download.status === 'complete' ? 'success' : 'primary'}
@@ -145,12 +158,12 @@ export function DownloadCard({ download }: { download: Download }) {
             {download.eta_seconds ? ` · ETA ${formatEta(download.eta_seconds)}` : ''}
           </Typography>
           <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
-            {download.status === 'active' && (
+            {!isVideo && download.status === 'active' && (
               <IconButton size="small" onClick={handlePause} aria-label={t('card.pause')}>
                 <PauseRoundedIcon fontSize="small" />
               </IconButton>
             )}
-            {download.status === 'paused' && (
+            {!isVideo && download.status === 'paused' && (
               <IconButton size="small" onClick={handleResume} color="success" aria-label={t('card.resume')}>
                 <PlayArrowRoundedIcon fontSize="small" />
               </IconButton>

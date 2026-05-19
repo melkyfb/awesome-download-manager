@@ -25,6 +25,7 @@ export const downloadsSlice = createSlice({
         speed_bps?: number
         eta_seconds?: number | null
         chunk_speeds?: number[]
+        percent?: number
       }>
     ) => {
       const download = state.items[action.payload.id]
@@ -43,6 +44,9 @@ export const downloadsSlice = createSlice({
         }
         if (action.payload.chunk_speeds !== undefined) {
           download.chunk_speeds = action.payload.chunk_speeds
+        }
+        if (action.payload.percent !== undefined) {
+          download.percent = action.payload.percent
         }
       }
     },

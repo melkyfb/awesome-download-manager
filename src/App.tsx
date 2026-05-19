@@ -39,6 +39,7 @@ function AppContent() {
   const updateState = useUpdateCheck()
   const [updateError, setUpdateError] = useState<string | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [updateProgress, setUpdateProgress] = useState(0)
 
   useTauriEvents()
   useForegroundService()
@@ -94,11 +95,26 @@ function AppContent() {
           releaseNotes={updateState.releases[0]?.body}
           isUpdating={isUpdating}
           updateError={updateError}
+          updateProgress={updateProgress}
           onUpdate={updateState.update ? async () => {
             setIsUpdating(true)
             setUpdateError(null)
+            setUpdateProgress(0)
+            let totalBytes = 0
+            let downloadedBytes = 0
             try {
-              await updateState.update!.downloadAndInstall()
+              await updateState.update!.downloadAndInstall((event) => {
+                if (event.event === 'Started') {
+                  totalBytes = event.data.contentLength ?? 0
+                } else if (event.event === 'Progress') {
+                  downloadedBytes += event.data.chunkLength
+                  if (totalBytes > 0) {
+                    setUpdateProgress(Math.round(downloadedBytes / totalBytes * 100))
+                  }
+                } else if (event.event === 'Finished') {
+                  setUpdateProgress(100)
+                }
+              })
               dispatch(closeChangelog())
               await relaunch()
             } catch (e) {

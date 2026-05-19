@@ -1,6 +1,7 @@
 pub mod db;
 pub mod config;
 pub mod download;
+pub mod video;
 #[cfg(desktop)]
 pub mod tray;
 
@@ -180,6 +181,7 @@ pub fn run() {
             config::commands::save_ai_key_cmd,
             config::commands::delete_ai_key_cmd,
             config::commands::save_search_key_cmd,
+            video::commands::start_video_download,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

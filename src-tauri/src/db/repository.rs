@@ -50,6 +50,8 @@ pub struct DownloadRecord {
     pub chunks_json: Option<String>,
     pub created_at: String,
     pub completed_at: Option<String>,
+    pub download_type: Option<String>,
+    pub video_quality: Option<String>,
 }
 
 pub struct Repository<'a> {
@@ -71,6 +73,28 @@ impl<'a> Repository<'a> {
                 rec.total_bytes, rec.downloaded_bytes,
                 rec.status.to_string(), rec.sha256, rec.chunks_json,
             ],
+        )?;
+        Ok(())
+    }
+
+    pub fn insert_video_download(&self, rec: &DownloadRecord) -> Result<()> {
+        self.conn.execute(
+            "INSERT INTO downloads (id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, download_type, video_quality)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, datetime('now'), ?10, ?11)",
+            rusqlite::params![
+                rec.id, rec.url, rec.filename, rec.dest_path,
+                rec.total_bytes, rec.downloaded_bytes,
+                rec.status.to_string(), rec.sha256, rec.chunks_json,
+                rec.download_type, rec.video_quality,
+            ],
+        )?;
+        Ok(())
+    }
+
+    pub fn update_filename(&self, id: &str, filename: &str, dest_path: &str) -> Result<()> {
+        self.conn.execute(
+            "UPDATE downloads SET filename = ?1, dest_path = ?2 WHERE id = ?3",
+            rusqlite::params![filename, dest_path, id],
         )?;
         Ok(())
     }
@@ -101,7 +125,7 @@ impl<'a> Repository<'a> {
 
     pub fn get_download(&self, id: &str) -> Result<Option<DownloadRecord>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, completed_at FROM downloads WHERE id = ?1"
+            "SELECT id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, completed_at, download_type, video_quality FROM downloads WHERE id = ?1"
         )?;
         let mut rows = stmt.query(rusqlite::params![id])?;
         if let Some(row) = rows.next()? {
@@ -117,6 +141,8 @@ impl<'a> Repository<'a> {
                 chunks_json: row.get(8)?,
                 created_at: row.get(9)?,
                 completed_at: row.get(10)?,
+                download_type: row.get(11)?,
+                video_quality: row.get(12)?,
             }))
         } else {
             Ok(None)
@@ -125,7 +151,7 @@ impl<'a> Repository<'a> {
 
     pub fn list_downloads(&self) -> Result<Vec<DownloadRecord>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, completed_at FROM downloads ORDER BY created_at DESC"
+            "SELECT id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, completed_at, download_type, video_quality FROM downloads ORDER BY created_at DESC"
         )?;
         let rows = stmt.query_map([], |row| {
             Ok(DownloadRecord {
@@ -140,6 +166,8 @@ impl<'a> Repository<'a> {
                 chunks_json: row.get(8)?,
                 created_at: row.get(9)?,
                 completed_at: row.get(10)?,
+                download_type: row.get(11)?,
+                video_quality: row.get(12)?,
             })
         })?;
         rows.collect()
@@ -214,6 +242,8 @@ mod tests {
             chunks_json: None,
             created_at: String::new(),
             completed_at: None,
+            download_type: None,
+            video_quality: None,
         }
     }
 

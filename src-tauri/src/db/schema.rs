@@ -26,5 +26,11 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
             key             TEXT PRIMARY KEY,
             value           TEXT NOT NULL
         );
-    ")
+    ")?;
+
+    // Idempotent column additions — ignore "duplicate column name" errors
+    let _ = conn.execute_batch("ALTER TABLE downloads ADD COLUMN download_type TEXT");
+    let _ = conn.execute_batch("ALTER TABLE downloads ADD COLUMN video_quality TEXT");
+
+    Ok(())
 }

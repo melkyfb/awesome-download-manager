@@ -15,6 +15,9 @@ export interface Download {
   speed_bps?: number
   eta_seconds?: number | null
   chunk_speeds?: number[]
+  download_type?: 'http' | 'video'
+  video_quality?: string
+  percent?: number
 }
 
 export interface AiResult {
