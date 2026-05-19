@@ -4,6 +4,7 @@ import Chip from '@mui/material/Chip'
 import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
+import Avatar from '@mui/material/Avatar'
 import GitHubIcon from '@mui/icons-material/GitHub'
 import LinkedInIcon from '@mui/icons-material/LinkedIn'
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded'
@@ -35,6 +36,39 @@ function openLink(url: string) {
 export function AboutScreen() {
   return (
     <Box sx={{ maxWidth: 680, mx: 'auto', px: 2, py: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+      {/* Developer contact card — first */}
+      <Paper variant="outlined" sx={{ borderRadius: 3, p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Avatar
+            src="https://github.com/melkyfb.png"
+            sx={{ width: 72, height: 72, cursor: 'pointer' }}
+            onClick={() => openLink('https://github.com/melkyfb')}
+          />
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }}>Melky Salem</Typography>
+            <Typography variant="body2" color="text.secondary">Full Stack Developer</Typography>
+          </Box>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<GitHubIcon />}
+            onClick={() => openLink('https://github.com/melkyfb')}
+          >
+            melkyfb
+          </Button>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<LinkedInIcon />}
+            onClick={() => openLink('https://linkedin.com/in/devsalem')}
+          >
+            devsalem
+          </Button>
+        </Box>
+      </Paper>
 
       {/* Project header */}
       <Box>
@@ -93,37 +127,6 @@ export function AboutScreen() {
           ))}
         </Box>
       </Box>
-
-      <Divider />
-
-      {/* Developer contact card */}
-      <Paper variant="outlined" sx={{ borderRadius: 3, p: 2 }}>
-        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
-          Desenvolvedor
-        </Typography>
-        <Typography variant="body1" sx={{ fontWeight: 600 }}>Melky Salem</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Full Stack Developer
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<GitHubIcon />}
-            onClick={() => openLink('https://github.com/melkyfb')}
-          >
-            melkyfb
-          </Button>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<LinkedInIcon />}
-            onClick={() => openLink('https://linkedin.com/in/devsalem')}
-          >
-            devsalem
-          </Button>
-        </Box>
-      </Paper>
 
     </Box>
   )
