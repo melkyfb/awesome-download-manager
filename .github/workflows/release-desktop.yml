@@ -134,15 +134,16 @@ jobs:
           ls -la sigs/
 
           # Read signatures (strip trailing whitespace/newlines)
-          LINUX_SIG=$(cat sigs/*.AppImage.tar.gz.sig 2>/dev/null | tr -d '\n\r' || true)
-          WIN_SIG=$(cat sigs/*.msi.zip.sig 2>/dev/null | tr -d '\n\r' || true)
+          # Tauri v2 produces *.AppImage.sig and *.msi.sig (no .tar.gz/.zip wrapper)
+          LINUX_SIG=$(cat sigs/*.AppImage.sig 2>/dev/null | tr -d '\n\r' || true)
+          WIN_SIG=$(cat sigs/*.msi.sig 2>/dev/null | tr -d '\n\r' || true)
           MAC_SIG=$(cat sigs/*.app.tar.gz.sig 2>/dev/null | tr -d '\n\r' || true)
 
           # Derive asset filenames from .sig filenames, then URL-encode spaces
           url_encode() { python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$1"; }
 
-          LINUX_ASSET=$(basename "$(ls sigs/*.AppImage.tar.gz.sig | head -1)" .sig)
-          WIN_ASSET=$(basename "$(ls sigs/*.msi.zip.sig | head -1)" .sig)
+          LINUX_ASSET=$(basename "$(ls sigs/*.AppImage.sig | head -1)" .sig)
+          WIN_ASSET=$(basename "$(ls sigs/*.msi.sig | head -1)" .sig)
           MAC_ASSET=$(basename "$(ls sigs/*.app.tar.gz.sig | head -1)" .sig)
 
           LINUX_URL="${BASE_URL}/$(url_encode "${LINUX_ASSET}")"
