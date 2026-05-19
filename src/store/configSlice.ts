@@ -8,7 +8,7 @@ const initialState: Config = {
   ai_provider: null,
   search_provider: null,
   ai_enabled: false,
-  theme_id: 'dark-glass',
+  theme_id: 'cosmos',
   font_id: 'inter',
   language: 'pt',
   start_minimized: false,

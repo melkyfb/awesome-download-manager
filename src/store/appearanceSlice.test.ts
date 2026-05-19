@@ -4,7 +4,7 @@ import reducer, { setTheme, setFont, setLanguage, setAppearance } from './appear
 describe('appearanceSlice', () => {
   it('has correct initial state', () => {
     const s = reducer(undefined, { type: '@@init' })
-    expect(s.themeId).toBe('dark-glass')
+    expect(s.themeId).toBe('cosmos')
     expect(s.fontId).toBe('inter')
     expect(s.language).toBe('pt')
   })
@@ -34,12 +34,12 @@ describe('appearanceSlice', () => {
     const s = reducer(undefined, setAppearance({ fontId: 'pacifico', language: 'en' }))
     expect(s.fontId).toBe('pacifico')
     expect(s.language).toBe('en')
-    expect(s.themeId).toBe('dark-glass') // unchanged
+    expect(s.themeId).toBe('cosmos') // unchanged
   })
 
   it('setAppearance with empty payload changes nothing', () => {
     const s = reducer(undefined, setAppearance({}))
-    expect(s.themeId).toBe('dark-glass')
+    expect(s.themeId).toBe('cosmos')
     expect(s.fontId).toBe('inter')
     expect(s.language).toBe('pt')
   })

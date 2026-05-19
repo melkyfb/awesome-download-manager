@@ -1,24 +1,27 @@
 import { describe, it, expect } from 'vitest'
 import { THEMES, getTheme } from './index'
 
-describe('THEMES catalog', () => {
-  it('has at least 35 themes', () => {
-    expect(THEMES.length).toBeGreaterThanOrEqual(35)
+describe('THEMES', () => {
+  it('exports exactly 10 themes', () => {
+    expect(THEMES).toHaveLength(10)
   })
 
-  it('all themes have required fields', () => {
+  it('every theme has an id, name, and MUI theme with palette', () => {
     for (const t of THEMES) {
       expect(t.id).toBeTruthy()
-      expect(t.gradient).toBeTruthy()
-      expect(t.accentColor).toBeTruthy()
+      expect(t.name).toBeTruthy()
+      expect(t.theme.palette.primary.main).toBeTruthy()
+      expect(t.theme.palette.background?.default).toBeTruthy()
     }
   })
 
-  it('getTheme returns correct theme', () => {
-    expect(getTheme('dark-glass').name).toBe('Dark Glass')
+  it('getTheme returns cosmos for unknown id', () => {
+    const t = getTheme('old-dark-glass')
+    expect(t.palette.primary.main).toBe('#BB86FC') // cosmos primary
   })
 
-  it('getTheme falls back to first theme on unknown id', () => {
-    expect(getTheme('nonexistent').id).toBe('dark-glass')
+  it('getTheme returns correct theme by id', () => {
+    const t = getTheme('arctic')
+    expect(t.palette.mode).toBe('light')
   })
 })

@@ -7,7 +7,7 @@ interface AppearanceState {
 }
 
 const initialState: AppearanceState = {
-  themeId: 'dark-glass',
+  themeId: 'cosmos',
   fontId: 'inter',
   language: 'pt',
 }
