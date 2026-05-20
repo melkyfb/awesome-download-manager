@@ -6,6 +6,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import IconButton from '@mui/material/IconButton'
 import Chip from '@mui/material/Chip'
 import Collapse from '@mui/material/Collapse'
+import Tooltip from '@mui/material/Tooltip'
 import PauseRoundedIcon from '@mui/icons-material/PauseRounded'
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
@@ -17,8 +18,11 @@ import VideoLibraryRoundedIcon from '@mui/icons-material/VideoLibraryRounded'
 import AlbumRoundedIcon from '@mui/icons-material/AlbumRounded'
 import TerminalRoundedIcon from '@mui/icons-material/TerminalRounded'
 import InsertDriveFileRoundedIcon from '@mui/icons-material/InsertDriveFileRounded'
+import FolderOpenRoundedIcon from '@mui/icons-material/FolderOpenRounded'
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNew'
 import { useDispatch, useSelector } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
+import { revealItemInDir, openPath } from '@tauri-apps/plugin-opener'
 import { useTranslation } from 'react-i18next'
 import type { RootState, AppDispatch } from '../../store'
 import { setExpandedCard } from '../../store/uiSlice'
@@ -68,6 +72,7 @@ export function DownloadCard({ download }: { download: Download }) {
   const { t } = useTranslation()
 
   const isVideo = download.download_type === 'video'
+  const isPlaylistVideo = Boolean(download.playlist_group_id)
   const percent = isVideo && download.percent !== undefined
     ? Math.round(download.percent)
     : download.total_bytes
@@ -102,6 +107,36 @@ export function DownloadCard({ download }: { download: Download }) {
     } catch (e) { console.error('resume_download failed', e) }
   }
 
+  async function handleOpenFolder() {
+    try { await revealItemInDir(download.dest_path) }
+    catch (e) { console.error('revealItemInDir failed', e) }
+  }
+
+  async function handleOpenFile() {
+    try { await openPath(download.dest_path) }
+    catch (e) { console.error('openPath failed', e) }
+  }
+
+  function renderSubtitle() {
+    if (isVideo && download.status === 'complete') {
+      if (download.total_bytes) {
+        return <Typography variant="caption" color="text.secondary">{formatBytes(download.total_bytes)}</Typography>
+      }
+      return <Typography variant="caption" color="success.main">Concluído</Typography>
+    }
+    if (download.total_bytes) {
+      return (
+        <Typography variant="caption" color="text.secondary">
+          {formatBytes(download.total_bytes)}
+          {download.chunk_speeds && download.chunk_speeds.length > 1
+            ? ` · ${download.chunk_speeds.length} chunks`
+            : ''}
+        </Typography>
+      )
+    }
+    return null
+  }
+
   return (
     <Card
       sx={{ mb: 1.5, cursor: 'pointer' }}
@@ -120,7 +155,7 @@ export function DownloadCard({ download }: { download: Download }) {
               {isVideo && (
                 <Chip
                   icon={<VideoLibraryRoundedIcon sx={{ fontSize: '0.75rem !important' }} />}
-                  label="Vídeo"
+                  label={isPlaylistVideo ? 'Playlist' : 'Vídeo'}
                   size="small"
                   color="secondary"
                   sx={{ height: 20, fontSize: '0.7rem', flexShrink: 0 }}
@@ -133,14 +168,7 @@ export function DownloadCard({ download }: { download: Download }) {
                 sx={{ height: 20, fontSize: '0.7rem', flexShrink: 0 }}
               />
             </Box>
-            {download.total_bytes && (
-              <Typography variant="caption" color="text.secondary">
-                {formatBytes(download.total_bytes)}
-                {download.chunk_speeds && download.chunk_speeds.length > 1
-                  ? ` · ${download.chunk_speeds.length} chunks`
-                  : ''}
-              </Typography>
-            )}
+            {renderSubtitle()}
           </Box>
         </Box>
 
@@ -158,6 +186,22 @@ export function DownloadCard({ download }: { download: Download }) {
             {download.eta_seconds ? ` · ETA ${formatEta(download.eta_seconds)}` : ''}
           </Typography>
           <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
+            {download.status === 'complete' && (
+              <>
+                <Tooltip title="Abrir pasta">
+                  <IconButton size="small" onClick={handleOpenFolder} aria-label="Abrir pasta">
+                    <FolderOpenRoundedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                {!isPlaylistVideo && (
+                  <Tooltip title="Abrir arquivo">
+                    <IconButton size="small" onClick={handleOpenFile} aria-label="Abrir arquivo">
+                      <OpenInNewRoundedIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </>
+            )}
             {!isVideo && download.status === 'active' && (
               <IconButton size="small" onClick={handlePause} aria-label={t('card.pause')}>
                 <PauseRoundedIcon fontSize="small" />
