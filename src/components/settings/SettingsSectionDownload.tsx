@@ -7,6 +7,7 @@ import Paper from '@mui/material/Paper'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
+import Checkbox from '@mui/material/Checkbox'
 import FolderOpenRoundedIcon from '@mui/icons-material/FolderOpenRounded'
 import { useDispatch, useSelector } from 'react-redux'
 import { invoke } from '@tauri-apps/api/core'
@@ -28,12 +29,13 @@ export function SettingsSectionDownload() {
     if (selected && typeof selected === 'string') setDestFolder(selected)
   }
 
-  async function saveAll() {
+  async function saveAll(overrides?: Partial<typeof config>) {
     const newConfig = {
       ...config,
       dest_folder: destFolder,
       max_speed: Number(maxSpeedKbps) * 1024,
       chunks: Math.min(16, Math.max(1, Number(chunks))),
+      ...overrides,
     }
     await invoke('save_settings_cmd', { settings: newConfig }).catch(console.error)
     dispatch(setConfig(newConfig))
@@ -49,7 +51,7 @@ export function SettingsSectionDownload() {
               size="small"
               value={destFolder}
               onChange={e => setDestFolder(e.target.value)}
-              onBlur={saveAll}
+              onBlur={() => saveAll()}
               sx={{ width: 220 }}
             />
             <Button variant="outlined" size="small" onClick={pickFolder} sx={{ minWidth: 0, px: 1 }}>
@@ -59,12 +61,24 @@ export function SettingsSectionDownload() {
         </ListItem>
 
         <ListItem>
+          <Checkbox
+            checked={config.use_last_folder}
+            size="small"
+            onChange={e => saveAll({ use_last_folder: e.target.checked })}
+          />
+          <ListItemText
+            primary="Usar última pasta selecionada automaticamente"
+            secondary="O próximo download abrirá na última pasta escolhida"
+          />
+        </ListItem>
+
+        <ListItem>
           <ListItemText primary={t('settings.download.maxSpeed')} />
           <TextField
             size="small"
             value={maxSpeedKbps}
             onChange={e => setMaxSpeedKbps(e.target.value)}
-            onBlur={saveAll}
+            onBlur={() => saveAll()}
             onKeyDown={e => { if (e.key === 'Enter') saveAll() }}
             sx={{ width: 100, ml: 1 }}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +94,7 @@ export function SettingsSectionDownload() {
               size="small"
               value={chunks}
               onChange={e => setChunks(e.target.value)}
-              onBlur={saveAll}
+              onBlur={() => saveAll()}
               sx={{ width: 60 }}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               slotProps={{ input: { inputMode: 'numeric', style: { textAlign: 'center' } } as any }}

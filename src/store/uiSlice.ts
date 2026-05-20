@@ -1,5 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
+interface PlaylistGroup {
+  ids: string[]
+  generateFile: boolean
+  fileFormat: 'm3u' | 'pls'
+  name: string
+  destFolder: string
+}
+
 interface UiState {
   expandedCardId: string | null
   addModalOpen: boolean
@@ -9,6 +17,8 @@ interface UiState {
   prefillUrl: string
   downloadFilter: 'all' | 'active' | 'paused' | 'complete'
   aboutOpen: boolean
+  playlistGroups: Record<string, PlaylistGroup>
+  snackbar: { open: boolean; message: string }
 }
 
 const initialState: UiState = {
@@ -20,9 +30,11 @@ const initialState: UiState = {
   prefillUrl: '',
   downloadFilter: 'all',
   aboutOpen: false,
+  playlistGroups: {},
+  snackbar: { open: false, message: '' },
 }
 
-const uiSlice = createSlice({
+export const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
@@ -43,6 +55,19 @@ const uiSlice = createSlice({
     },
     openAbout(state) { state.aboutOpen = true },
     closeAbout(state) { state.aboutOpen = false },
+    registerPlaylistGroup(state, action: PayloadAction<{ groupId: string } & PlaylistGroup>) {
+      const { groupId, ...group } = action.payload
+      state.playlistGroups[groupId] = group
+    },
+    clearPlaylistGroup(state, action: PayloadAction<{ groupId: string }>) {
+      delete state.playlistGroups[action.payload.groupId]
+    },
+    showSnackbar(state, action: PayloadAction<string>) {
+      state.snackbar = { open: true, message: action.payload }
+    },
+    hideSnackbar(state) {
+      state.snackbar.open = false
+    },
   },
 })
 
@@ -55,5 +80,9 @@ export const {
   setPrefillUrl,
   setDownloadFilter,
   openAbout, closeAbout,
+  registerPlaylistGroup,
+  clearPlaylistGroup,
+  showSnackbar,
+  hideSnackbar,
 } = uiSlice.actions
 export default uiSlice.reducer

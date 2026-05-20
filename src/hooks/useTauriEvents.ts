@@ -3,9 +3,10 @@ import { listen } from '@tauri-apps/api/event'
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { useDispatch } from 'react-redux'
+import { store } from '../store'
 import type { AppDispatch } from '../store'
 import { updateProgress, completeDownload, setDownloadError } from '../store/downloadsSlice'
-import { openCloseDialog, openAddModal, openSettings, setPrefillUrl } from '../store/uiSlice'
+import { openCloseDialog, openAddModal, openSettings, setPrefillUrl, clearPlaylistGroup, showSnackbar } from '../store/uiSlice'
 
 interface ProgressPayload {
   id: string
@@ -20,11 +21,42 @@ interface ProgressPayload {
 interface CompletePayload {
   id: string
   sha256: string
+  bytes?: number | null
 }
 
 interface ErrorPayload {
   id: string
   error: string
+}
+
+async function checkPlaylistCompletion(dispatch: AppDispatch) {
+  const state = store.getState()
+  const { playlistGroups } = state.ui
+  const { items } = state.downloads
+
+  for (const [groupId, group] of Object.entries(playlistGroups)) {
+    if (!group.generateFile) continue
+    const allDone = group.ids.every(id => items[id]?.status === 'complete')
+    if (!allDone) continue
+
+    const paths = group.ids.map(id => items[id]?.dest_path ?? '').filter(Boolean)
+    const titles = group.ids.map(id => items[id]?.filename ?? 'video')
+
+    try {
+      const filePath = await invoke<string>('generate_playlist_file', {
+        paths,
+        titles,
+        format: group.fileFormat,
+        destFolder: group.destFolder,
+        name: group.name,
+      })
+      dispatch(showSnackbar(`Playlist salva: ${filePath}`))
+    } catch (e) {
+      dispatch(showSnackbar(`Erro ao gerar playlist: ${String(e)}`))
+    } finally {
+      dispatch(clearPlaylistGroup({ groupId }))
+    }
+  }
 }
 
 export function useTauriEvents() {
@@ -47,7 +79,9 @@ export function useTauriEvents() {
         dispatch(completeDownload({
           id: event.payload.id,
           sha256: event.payload.sha256,
+          bytes: event.payload.bytes,
         }))
+        setTimeout(() => checkPlaylistCompletion(dispatch), 0)
       }),
       listen<ErrorPayload>('download:error', (event) => {
         dispatch(setDownloadError({

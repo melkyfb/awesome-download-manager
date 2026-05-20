@@ -24,6 +24,8 @@ import { AddDownloadSheet } from './components/add/AddDownloadSheet'
 import { AddDownloadDialog } from './components/add/AddDownloadDialog'
 import { CloseDialog } from './components/CloseDialog'
 import { ChangelogModal } from './components/ChangelogModal'
+import Snackbar from '@mui/material/Snackbar'
+import { hideSnackbar } from './store/uiSlice'
 import type { Config, Download } from './types'
 
 function AppContent() {
@@ -33,6 +35,7 @@ function AppContent() {
   const changelogOpen = useSelector((s: RootState) => s.ui.changelogOpen)
   const aboutOpen = useSelector((s: RootState) => s.ui.aboutOpen)
   const closeDialogOpen = useSelector((s: RootState) => s.ui.closeDialogOpen)
+  const snackbar = useSelector((s: RootState) => s.ui.snackbar)
   const language = useSelector((s: RootState) => s.appearance.language)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
@@ -125,6 +128,13 @@ function AppContent() {
           } : undefined}
         />
       )}
+      <Snackbar
+        open={snackbar.open}
+        message={snackbar.message}
+        autoHideDuration={5000}
+        onClose={() => dispatch(hideSnackbar())}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </AppShell>
   )
 }

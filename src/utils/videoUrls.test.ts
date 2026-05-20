@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isVideoUrl } from './videoUrls'
+import { isVideoUrl, isPlaylistUrl } from './videoUrls'
 
 describe('isVideoUrl', () => {
   it('detects youtube.com', () => {
@@ -28,5 +28,23 @@ describe('isVideoUrl', () => {
   })
   it('ignores invalid URLs', () => {
     expect(isVideoUrl('not a url')).toBe(false)
+  })
+})
+
+describe('isPlaylistUrl', () => {
+  it('detects youtube.com playlist URL', () => {
+    expect(isPlaylistUrl('https://www.youtube.com/playlist?list=PLabc123')).toBe(true)
+  })
+  it('detects youtube.com watch URL with list param', () => {
+    expect(isPlaylistUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLabc123')).toBe(true)
+  })
+  it('returns false for single youtube video', () => {
+    expect(isPlaylistUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ')).toBe(false)
+  })
+  it('returns false for non-youtube URL', () => {
+    expect(isPlaylistUrl('https://tiktok.com/@user/video/123')).toBe(false)
+  })
+  it('returns false for invalid URL', () => {
+    expect(isPlaylistUrl('not a url')).toBe(false)
   })
 })

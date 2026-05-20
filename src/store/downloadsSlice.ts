@@ -50,12 +50,16 @@ export const downloadsSlice = createSlice({
         }
       }
     },
-    completeDownload: (state, action: PayloadAction<{ id: string; sha256: string }>) => {
+    completeDownload: (state, action: PayloadAction<{ id: string; sha256: string; bytes?: number | null }>) => {
       const download = state.items[action.payload.id]
       if (download) {
         download.status = 'complete'
         download.sha256 = action.payload.sha256
         download.completed_at = new Date().toISOString()
+        if (action.payload.bytes) {
+          download.total_bytes = action.payload.bytes
+          download.downloaded_bytes = action.payload.bytes
+        }
       }
     },
     setDownloadError: (state, action: PayloadAction<{ id: string; error: string }>) => {
