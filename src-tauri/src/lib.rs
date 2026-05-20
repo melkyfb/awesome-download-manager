@@ -44,6 +44,8 @@ pub struct AppState {
     pub tray_speed_bps: Arc<AtomicU64>,
     pub clipboard_monitor_enabled: Arc<AtomicBool>,
     pub pending_clipboard_url: Arc<Mutex<Option<String>>>,
+    /// Limits concurrent yt-dlp processes to avoid overwhelming the OS
+    pub video_semaphore: Arc<tokio::sync::Semaphore>,
 }
 
 #[cfg(target_os = "android")]
@@ -97,6 +99,7 @@ pub fn run() {
                 tray_speed_bps: Arc::new(AtomicU64::new(0)),
                 clipboard_monitor_enabled: Arc::new(AtomicBool::new(true)),
                 pending_clipboard_url: Arc::new(Mutex::new(None)),
+                video_semaphore: Arc::new(tokio::sync::Semaphore::new(3)),
             };
             app.manage(state);
             #[cfg(desktop)]

@@ -64,6 +64,7 @@ pub async fn spawn_video_task(
     quality: String,
     db_arc: Arc<std::sync::Mutex<rusqlite::Connection>>,
     downloads_arc: DownloadsMap,
+    semaphore: Arc<tokio::sync::Semaphore>,
     app: AppHandle,
 ) {
     let cancel = Arc::new(AtomicBool::new(false));
@@ -90,12 +91,18 @@ pub async fn spawn_video_task(
     cmd_args.push(url.clone());
 
     let abort_handle = tokio::spawn(async move {
-        let mut child = match tokio::process::Command::new(&yt_dlp)
-            .args(&cmd_args)
-            .stdout(std::process::Stdio::piped())
-            .stderr(std::process::Stdio::piped())
-            .spawn()
-        {
+        // Acquire a slot before spawning yt-dlp; released automatically when permit drops.
+        // This caps concurrent yt-dlp processes so large playlists don't freeze the OS.
+        let _permit = semaphore.acquire_owned().await;
+
+        let mut cmd = tokio::process::Command::new(&yt_dlp);
+        cmd.args(&cmd_args)
+           .stdout(std::process::Stdio::piped())
+           .stderr(std::process::Stdio::piped());
+        #[cfg(windows)]
+        cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+
+        let mut child = match cmd.spawn() {
             Ok(c) => c,
             Err(e) => {
                 let _ = app_arc.emit(
@@ -236,6 +243,7 @@ pub async fn start_video_download(
         quality,
         state.db.clone(),
         state.downloads.clone(),
+        state.video_semaphore.clone(),
         app,
     ).await;
 
@@ -246,8 +254,12 @@ pub async fn start_video_download(
 pub async fn get_video_formats(url: String) -> Result<Vec<String>, String> {
     let yt_dlp = resolve_yt_dlp();
 
-    let output = tokio::process::Command::new(&yt_dlp)
-        .args(&["--no-playlist", "-j", "--skip-download", &url])
+    let mut cmd = tokio::process::Command::new(&yt_dlp);
+    cmd.args(&["--no-playlist", "-j", "--skip-download", &url]);
+    #[cfg(windows)]
+    cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+
+    let output = cmd
         .output()
         .await
         .map_err(|e| format!("yt-dlp spawn error: {e}"))?;
@@ -290,8 +302,12 @@ pub async fn start_playlist_download(
 ) -> Result<Vec<PlaylistEntry>, String> {
     let yt_dlp = resolve_yt_dlp();
 
-    let output = tokio::process::Command::new(&yt_dlp)
-        .args(&["--flat-playlist", "-j", &url])
+    let mut flat_cmd = tokio::process::Command::new(&yt_dlp);
+    flat_cmd.args(&["--flat-playlist", "-j", &url]);
+    #[cfg(windows)]
+    flat_cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+
+    let output = flat_cmd
         .output()
         .await
         .map_err(|e| format!("yt-dlp spawn error: {e}"))?;
@@ -353,6 +369,7 @@ pub async fn start_playlist_download(
             quality.clone(),
             state.db.clone(),
             state.downloads.clone(),
+            state.video_semaphore.clone(),
             app.clone(),
         ).await;
 
