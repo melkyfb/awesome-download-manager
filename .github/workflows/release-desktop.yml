@@ -84,6 +84,16 @@ jobs:
                "src-tauri/binaries/yt-dlp-x86_64-apple-darwin"
           fi
 
+          # ffmpeg placeholder — satisfies Tauri externalBin check; desktop uses system ffmpeg via PATH
+          if [[ "${{ matrix.os }}" == "ubuntu-22.04" ]]; then
+            touch "src-tauri/binaries/ffmpeg-x86_64-unknown-linux-gnu"
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            touch "src-tauri/binaries/ffmpeg-x86_64-pc-windows-msvc.exe"
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            touch "src-tauri/binaries/ffmpeg-aarch64-apple-darwin"
+            touch "src-tauri/binaries/ffmpeg-x86_64-apple-darwin"
+          fi
+
       - name: Set version from git tag
         shell: bash
         run: |

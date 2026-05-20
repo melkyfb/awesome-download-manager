@@ -35,7 +35,7 @@ jobs:
             -v "$(pwd)/out:/out" \
             arm64v8/alpine:3.21 /bin/sh -c '
               set -ex
-              apk add --no-cache python3 py3-pip patchelf file binutils musl-utils
+              apk add --no-cache python3 py3-pip patchelf file binutils musl-utils scons gcc g++ musl-dev
               python3 -m venv /tmp/venv
               /tmp/venv/bin/pip install pyinstaller "$YTDLP_SPEC" staticx
               /tmp/venv/bin/pyinstaller --onefile --name yt-dlp --distpath /tmp/dist \
