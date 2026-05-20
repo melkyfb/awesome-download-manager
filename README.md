@@ -15,3 +15,21 @@
 - **Advanced Traffic Control**: Precise speed limiting powered by a TokenBucket algorithm.
 - **Persistent Tracking**: Full download history and state management using SQLite.
 - **Modern UI**: A clean, responsive interface built with React, Redux Toolkit, and Material UI.
+
+## 📦 User Guide
+
+### Installation
+The easiest way to get started is to download the latest release for your operating system.
+
+1. Go to the [Releases Page](https://github.com/melkyfb/awesome-download-manager/releases).
+2. Download the installer for your OS:
+    - **Windows**: `.msi` or `.exe`
+    - **macOS**: `.dmg`
+    - **Linux**: `.deb` or `.AppImage`
+3. Run the installer and follow the on-screen instructions.
+
+### Quick Start
+1. **Launch the App**: Open Awesome Download Manager.
+2. **Add a Download**: Click the "+" button or paste a URL into the input field.
+3. **Configure**: Set your preferred download folder and global speed limit in the settings.
+4. **Manage**: Monitor progress in real-time via the dashboard.
