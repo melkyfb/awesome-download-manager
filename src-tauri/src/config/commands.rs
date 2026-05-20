@@ -36,3 +36,10 @@ pub fn delete_ai_key_cmd() -> Result<(), String> {
 pub fn save_search_key_cmd(api_key: String) -> Result<(), String> {
     save_search_api_key(&api_key)
 }
+
+#[tauri::command]
+pub fn save_last_folder_cmd(folder: String, state: State<'_, AppState>) -> Result<(), String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    let repo = Repository::new(&db);
+    repo.set_setting("last_used_folder", &folder).map_err(|e| e.to_string())
+}

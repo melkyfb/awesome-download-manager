@@ -104,7 +104,7 @@ async fn spawn_download_task(
             Ok(sha256) => {
                 if let Ok(db) = db_arc.lock() {
                     let repo = Repository::new(&db);
-                    let _ = repo.complete_download(&id_spawn, &sha256);
+                    let _ = repo.complete_download(&id_spawn, &sha256, None);
                 }
                 let _ = app_arc.emit(
                     "download:complete",
@@ -167,6 +167,7 @@ pub async fn start_download(
             completed_at: None,
             download_type: None,
             video_quality: None,
+            playlist_group_id: None,
         })
         .map_err(|e| e.to_string())?;
     }

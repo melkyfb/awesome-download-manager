@@ -109,6 +109,16 @@ jobs:
         env:
           BUILD_VERSION: ${{ github.ref_name }}
 
+      - name: Extract tag body for release notes
+        id: tag_body
+        shell: bash
+        run: |
+          {
+            echo 'tag_body<<EOF'
+            git tag -l --format='%(contents:body)' "${{ github.ref_name }}"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build and publish release
         uses: tauri-apps/tauri-action@v0
         env:
@@ -118,6 +128,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'Awesome Download Manager ${{ github.ref_name }}'
+          releaseBody: ${{ steps.tag_body.outputs.tag_body }}
           releaseDraft: false
           prerelease: false
           target: ${{ matrix.target }}

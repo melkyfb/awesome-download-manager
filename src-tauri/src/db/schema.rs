@@ -31,6 +31,7 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
     // Idempotent column additions — ignore "duplicate column name" errors
     let _ = conn.execute_batch("ALTER TABLE downloads ADD COLUMN download_type TEXT");
     let _ = conn.execute_batch("ALTER TABLE downloads ADD COLUMN video_quality TEXT");
+    let _ = conn.execute_batch("ALTER TABLE downloads ADD COLUMN playlist_group_id TEXT");
 
     Ok(())
 }

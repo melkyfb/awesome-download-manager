@@ -52,6 +52,7 @@ pub struct DownloadRecord {
     pub completed_at: Option<String>,
     pub download_type: Option<String>,
     pub video_quality: Option<String>,
+    pub playlist_group_id: Option<String>,
 }
 
 pub struct Repository<'a> {
@@ -79,13 +80,13 @@ impl<'a> Repository<'a> {
 
     pub fn insert_video_download(&self, rec: &DownloadRecord) -> Result<()> {
         self.conn.execute(
-            "INSERT INTO downloads (id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, download_type, video_quality)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, datetime('now'), ?10, ?11)",
+            "INSERT INTO downloads (id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, download_type, video_quality, playlist_group_id)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, datetime('now'), ?10, ?11, ?12)",
             rusqlite::params![
                 rec.id, rec.url, rec.filename, rec.dest_path,
                 rec.total_bytes, rec.downloaded_bytes,
                 rec.status.to_string(), rec.sha256, rec.chunks_json,
-                rec.download_type, rec.video_quality,
+                rec.download_type, rec.video_quality, rec.playlist_group_id,
             ],
         )?;
         Ok(())
@@ -115,17 +116,23 @@ impl<'a> Repository<'a> {
         Ok(())
     }
 
-    pub fn complete_download(&self, id: &str, sha256: &str) -> Result<()> {
-        self.conn.execute(
-            "UPDATE downloads SET status = 'complete', sha256 = ?1, completed_at = datetime('now'), downloaded_bytes = COALESCE(total_bytes, downloaded_bytes) WHERE id = ?2",
-            rusqlite::params![sha256, id],
-        )?;
+    pub fn complete_download(&self, id: &str, sha256: &str, file_bytes: Option<i64>) -> Result<()> {
+        match file_bytes {
+            Some(bytes) => self.conn.execute(
+                "UPDATE downloads SET status = 'complete', sha256 = ?1, completed_at = datetime('now'), total_bytes = ?2, downloaded_bytes = ?2 WHERE id = ?3",
+                rusqlite::params![sha256, bytes, id],
+            )?,
+            None => self.conn.execute(
+                "UPDATE downloads SET status = 'complete', sha256 = ?1, completed_at = datetime('now'), downloaded_bytes = COALESCE(total_bytes, downloaded_bytes) WHERE id = ?2",
+                rusqlite::params![sha256, id],
+            )?,
+        };
         Ok(())
     }
 
     pub fn get_download(&self, id: &str) -> Result<Option<DownloadRecord>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, completed_at, download_type, video_quality FROM downloads WHERE id = ?1"
+            "SELECT id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, completed_at, download_type, video_quality, playlist_group_id FROM downloads WHERE id = ?1"
         )?;
         let mut rows = stmt.query(rusqlite::params![id])?;
         if let Some(row) = rows.next()? {
@@ -143,6 +150,7 @@ impl<'a> Repository<'a> {
                 completed_at: row.get(10)?,
                 download_type: row.get(11)?,
                 video_quality: row.get(12)?,
+                playlist_group_id: row.get(13)?,
             }))
         } else {
             Ok(None)
@@ -151,7 +159,7 @@ impl<'a> Repository<'a> {
 
     pub fn list_downloads(&self) -> Result<Vec<DownloadRecord>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, completed_at, download_type, video_quality FROM downloads ORDER BY created_at DESC"
+            "SELECT id, url, filename, dest_path, total_bytes, downloaded_bytes, status, sha256, chunks_json, created_at, completed_at, download_type, video_quality, playlist_group_id FROM downloads ORDER BY created_at DESC"
         )?;
         let rows = stmt.query_map([], |row| {
             Ok(DownloadRecord {
@@ -168,6 +176,7 @@ impl<'a> Repository<'a> {
                 completed_at: row.get(10)?,
                 download_type: row.get(11)?,
                 video_quality: row.get(12)?,
+                playlist_group_id: row.get(13)?,
             })
         })?;
         rows.collect()
@@ -244,6 +253,7 @@ mod tests {
             completed_at: None,
             download_type: None,
             video_quality: None,
+            playlist_group_id: None,
         }
     }
 
@@ -274,7 +284,7 @@ mod tests {
         let conn = make_repo_conn();
         let repo = Repository::new(&conn);
         repo.insert_download(&sample_record("dl-3")).unwrap();
-        repo.complete_download("dl-3", "abc123def").unwrap();
+        repo.complete_download("dl-3", "abc123def", None).unwrap();
         let got = repo.get_download("dl-3").unwrap().unwrap();
         assert_eq!(got.status, DownloadStatus::Complete);
         assert_eq!(got.sha256.as_deref(), Some("abc123def"));
@@ -323,5 +333,29 @@ mod tests {
         repo.update_status("dl-4", &DownloadStatus::Paused).unwrap();
         let got = repo.get_download("dl-4").unwrap().unwrap();
         assert_eq!(got.status, DownloadStatus::Paused);
+    }
+
+    #[test]
+    fn insert_video_download_with_group_id() {
+        let conn = make_repo_conn();
+        let repo = Repository::new(&conn);
+        let mut rec = sample_record("vdl-1");
+        rec.download_type = Some("video".to_string());
+        rec.playlist_group_id = Some("group-abc".to_string());
+        repo.insert_video_download(&rec).unwrap();
+        let got = repo.get_download("vdl-1").unwrap().unwrap();
+        assert_eq!(got.playlist_group_id.as_deref(), Some("group-abc"));
+    }
+
+    #[test]
+    fn complete_download_with_file_bytes() {
+        let conn = make_repo_conn();
+        let repo = Repository::new(&conn);
+        repo.insert_download(&sample_record("vdl-2")).unwrap();
+        repo.complete_download("vdl-2", "abc", Some(5_000_000)).unwrap();
+        let got = repo.get_download("vdl-2").unwrap().unwrap();
+        assert_eq!(got.status, DownloadStatus::Complete);
+        assert_eq!(got.total_bytes, Some(5_000_000));
+        assert_eq!(got.downloaded_bytes, 5_000_000);
     }
 }

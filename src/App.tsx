@@ -8,7 +8,7 @@ import type { RootState, AppDispatch } from './store'
 import { setConfig } from './store/configSlice'
 import { setAppearance } from './store/appearanceSlice'
 import { upsertDownload } from './store/downloadsSlice'
-import { openChangelog, closeChangelog } from './store/uiSlice'
+import { openChangelog, closeChangelog, showSnackbar, hideSnackbar } from './store/uiSlice'
 import { relaunch } from '@tauri-apps/plugin-process'
 import { useTauriEvents } from './hooks/useTauriEvents'
 import { useForegroundService } from './hooks/useForegroundService'
@@ -25,7 +25,6 @@ import { AddDownloadDialog } from './components/add/AddDownloadDialog'
 import { CloseDialog } from './components/CloseDialog'
 import { ChangelogModal } from './components/ChangelogModal'
 import Snackbar from '@mui/material/Snackbar'
-import { hideSnackbar } from './store/uiSlice'
 import type { Config, Download } from './types'
 
 function AppContent() {
@@ -43,6 +42,10 @@ function AppContent() {
   const [updateError, setUpdateError] = useState<string | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
   const [updateProgress, setUpdateProgress] = useState(0)
+  const [updateTotalBytes, setUpdateTotalBytes] = useState(0)
+  const [updateDownloadedBytes, setUpdateDownloadedBytes] = useState(0)
+  const [updateSpeedBps, setUpdateSpeedBps] = useState(0)
+  const [updateEtaSeconds, setUpdateEtaSeconds] = useState<number | null>(null)
 
   useTauriEvents()
   useForegroundService()
@@ -74,6 +77,15 @@ function AppContent() {
     init()
   }, [dispatch])
 
+  async function handleCheckForUpdate() {
+    const result = await updateState.checkNow()
+    if (result.hasUpdate) {
+      dispatch(openChangelog())
+    } else {
+      dispatch(showSnackbar('Você já tem a versão mais recente.'))
+    }
+  }
+
   const title = settingsOpen ? 'Configurações' : aboutOpen ? 'Sobre' : 'Downloads'
   const desktopActions = !settingsOpen && !aboutOpen && !isMobile ? <AddDownloadButton /> : undefined
 
@@ -82,7 +94,8 @@ function AppContent() {
       title={title}
       topBarActions={desktopActions}
       hasUpdate={updateState.hasUpdate}
-      onUpdate={() => dispatch(openChangelog())}
+      loadingUpdate={updateState.loading}
+      onCheckForUpdate={handleCheckForUpdate}
     >
       {settingsOpen ? <SettingsScreen /> : aboutOpen ? <AboutScreen /> : <DownloadList />}
 
@@ -95,27 +108,45 @@ function AppContent() {
           currentVersion={updateState.currentVersion}
           hasUpdate={updateState.hasUpdate}
           latestVersion={updateState.latestVersion}
-          releaseNotes={updateState.releases[0]?.body}
+          releases={updateState.releases}
           isUpdating={isUpdating}
           updateError={updateError}
           updateProgress={updateProgress}
+          totalBytes={updateTotalBytes}
+          downloadedBytes={updateDownloadedBytes}
+          speedBps={updateSpeedBps}
+          etaSeconds={updateEtaSeconds}
           onUpdate={updateState.update ? async () => {
             setIsUpdating(true)
             setUpdateError(null)
             setUpdateProgress(0)
+            setUpdateTotalBytes(0)
+            setUpdateDownloadedBytes(0)
+            setUpdateSpeedBps(0)
+            setUpdateEtaSeconds(null)
             let totalBytes = 0
             let downloadedBytes = 0
+            const startTime = Date.now()
             try {
               await updateState.update!.downloadAndInstall((event) => {
                 if (event.event === 'Started') {
                   totalBytes = event.data.contentLength ?? 0
+                  setUpdateTotalBytes(totalBytes)
                 } else if (event.event === 'Progress') {
                   downloadedBytes += event.data.chunkLength
+                  const elapsed = (Date.now() - startTime) / 1000
+                  const speed = elapsed > 0 ? Math.round(downloadedBytes / elapsed) : 0
+                  const remaining = totalBytes > 0 ? totalBytes - downloadedBytes : 0
+                  const eta = speed > 0 && remaining > 0 ? Math.round(remaining / speed) : null
+                  setUpdateDownloadedBytes(downloadedBytes)
+                  setUpdateSpeedBps(speed)
+                  setUpdateEtaSeconds(eta)
                   if (totalBytes > 0) {
                     setUpdateProgress(Math.round(downloadedBytes / totalBytes * 100))
                   }
                 } else if (event.event === 'Finished') {
                   setUpdateProgress(100)
+                  setUpdateEtaSeconds(null)
                 }
               })
               dispatch(closeChangelog())

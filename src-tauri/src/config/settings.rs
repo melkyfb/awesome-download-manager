@@ -19,6 +19,10 @@ pub struct Settings {
     pub start_minimized: bool,
     #[serde(default = "default_clipboard_monitor")]
     pub clipboard_monitor_enabled: bool,
+    #[serde(default)]
+    pub use_last_folder: bool,
+    #[serde(default)]
+    pub last_used_folder: String,
 }
 
 fn default_clipboard_monitor() -> bool { true }
@@ -37,6 +41,8 @@ impl Default for Settings {
             language: "pt".to_string(),
             start_minimized: false,
             clipboard_monitor_enabled: true,
+            use_last_folder: false,
+            last_used_folder: String::new(),
         }
     }
 }
@@ -74,6 +80,12 @@ pub fn load_settings(repo: &Repository<'_>) -> Settings {
     if let Ok(Some(v)) = repo.get_setting("clipboard_monitor_enabled") {
         s.clipboard_monitor_enabled = v == "true";
     }
+    if let Ok(Some(v)) = repo.get_setting("use_last_folder") {
+        s.use_last_folder = v == "true";
+    }
+    if let Ok(Some(v)) = repo.get_setting("last_used_folder") {
+        s.last_used_folder = v;
+    }
 
     // Check keyring for AI key existence — value never exposed to frontend
     s.ai_enabled = get_ai_key().is_some();
@@ -95,6 +107,8 @@ pub fn save_settings(repo: &Repository<'_>, settings: &Settings) -> rusqlite::Re
     repo.set_setting("language", &settings.language)?;
     repo.set_setting("start_minimized", if settings.start_minimized { "true" } else { "false" })?;
     repo.set_setting("clipboard_monitor_enabled", if settings.clipboard_monitor_enabled { "true" } else { "false" })?;
+    repo.set_setting("use_last_folder", if settings.use_last_folder { "true" } else { "false" })?;
+    repo.set_setting("last_used_folder", &settings.last_used_folder)?;
     Ok(())
 }
 
@@ -160,6 +174,8 @@ mod tests {
             language: "en".to_string(),
             start_minimized: false,
             clipboard_monitor_enabled: true,
+            use_last_folder: false,
+            last_used_folder: String::new(),
         };
         save_settings(&repo, &s).unwrap();
         let loaded = load_settings(&repo);
@@ -227,5 +243,27 @@ mod tests {
         save_settings(&repo, &s).unwrap();
         let loaded = load_settings(&repo);
         assert!(loaded.start_minimized);
+    }
+
+    #[test]
+    fn use_last_folder_defaults_false() {
+        let conn = make_repo_conn();
+        let repo = Repository::new(&conn);
+        let s = load_settings(&repo);
+        assert!(!s.use_last_folder);
+        assert_eq!(s.last_used_folder, "");
+    }
+
+    #[test]
+    fn use_last_folder_saved_and_loaded() {
+        let conn = make_repo_conn();
+        let repo = Repository::new(&conn);
+        let mut s = Settings::default();
+        s.use_last_folder = true;
+        s.last_used_folder = "/home/user/videos".to_string();
+        save_settings(&repo, &s).unwrap();
+        let loaded = load_settings(&repo);
+        assert!(loaded.use_last_folder);
+        assert_eq!(loaded.last_used_folder, "/home/user/videos");
     }
 }

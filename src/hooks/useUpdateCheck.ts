@@ -21,7 +21,7 @@ interface UpdateState {
 
 const REPO = 'melkyfb/awesome-download-manager'
 
-export function useUpdateCheck(): UpdateState {
+export function useUpdateCheck() {
   const [state, setState] = useState<UpdateState>({
     currentVersion: '',
     latestVersion: '',
@@ -31,32 +31,36 @@ export function useUpdateCheck(): UpdateState {
     update: null,
   })
 
-  useEffect(() => {
-    async function run() {
-      try {
-        const [current, updateResult, releasesRes] = await Promise.all([
-          getVersion(),
-          check().catch(() => null),
-          fetch(`https://api.github.com/repos/${REPO}/releases`).then(r => r.ok ? r.json() : []).catch(() => []),
-        ])
+  async function runCheck(): Promise<{ hasUpdate: boolean }> {
+    setState(s => ({ ...s, loading: true }))
+    try {
+      const [current, updateResult, releasesRes] = await Promise.all([
+        getVersion(),
+        check().catch(() => null),
+        fetch(`https://api.github.com/repos/${REPO}/releases`).then(r => r.ok ? r.json() : []).catch(() => []),
+      ])
 
-        const releases: GithubRelease[] = releasesRes
-        const latest = updateResult?.version ?? releases[0]?.tag_name?.replace(/^v/, '') ?? ''
+      const releases: GithubRelease[] = releasesRes
+      const latest = updateResult?.version ?? releases[0]?.tag_name?.replace(/^v/, '') ?? ''
+      const hasUpdate = updateResult?.available ?? false
 
-        setState({
-          currentVersion: current,
-          latestVersion: latest,
-          hasUpdate: updateResult?.available ?? false,
-          releases,
-          loading: false,
-          update: updateResult,
-        })
-      } catch {
-        setState(s => ({ ...s, loading: false }))
-      }
+      setState(s => ({
+        ...s,
+        currentVersion: current || s.currentVersion,
+        latestVersion: latest,
+        hasUpdate,
+        releases,
+        loading: false,
+        update: updateResult,
+      }))
+      return { hasUpdate }
+    } catch {
+      setState(s => ({ ...s, loading: false }))
+      return { hasUpdate: false }
     }
-    run()
-  }, [])
+  }
 
-  return state
+  useEffect(() => { runCheck() }, [])
+
+  return { ...state, checkNow: runCheck }
 }

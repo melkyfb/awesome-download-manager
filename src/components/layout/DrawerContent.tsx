@@ -5,6 +5,7 @@ import ListItemText from '@mui/material/ListItemText'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
+import CircularProgress from '@mui/material/CircularProgress'
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded'
 import TableChartRoundedIcon from '@mui/icons-material/TableChartRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
@@ -21,10 +22,11 @@ import { GlobalSpeedWidget } from '../common/GlobalSpeedWidget'
 interface Props {
   onNavigate?: () => void
   hasUpdate?: boolean
-  onUpdate?: () => void
+  loadingUpdate?: boolean
+  onCheckForUpdate?: () => void
 }
 
-export function DrawerContent({ onNavigate, hasUpdate, onUpdate: _onUpdate }: Props) {
+export function DrawerContent({ onNavigate, hasUpdate, loadingUpdate, onCheckForUpdate }: Props) {
   const dispatch = useDispatch<AppDispatch>()
   const settingsOpen = useSelector((s: RootState) => s.ui.settingsOpen)
   const aboutOpen = useSelector((s: RootState) => s.ui.aboutOpen)
@@ -66,6 +68,14 @@ export function DrawerContent({ onNavigate, hasUpdate, onUpdate: _onUpdate }: Pr
     onNavigate?.()
   }
 
+  function handleUpdateButton() {
+    if (hasUpdate) {
+      goUpdate()
+    } else {
+      onCheckForUpdate?.()
+    }
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', pt: 2 }}>
       <Typography variant="subtitle1" sx={{ px: 2, mb: 1, fontWeight: 700 }}>
@@ -92,18 +102,20 @@ export function DrawerContent({ onNavigate, hasUpdate, onUpdate: _onUpdate }: Pr
           <ListItemText primary={t('nav.settings')} />
         </ListItemButton>
 
-        {/* Separator before utility items */}
         <Divider sx={{ my: 1 }} />
 
-        {hasUpdate && (
-          <ListItemButton onClick={goUpdate}>
-            <ListItemIcon><UpdateRoundedIcon color="primary" /></ListItemIcon>
-            <ListItemText
-              primary="Atualizar"
-              slotProps={{ primary: { color: 'primary', sx: { fontWeight: 600 } } }}
-            />
-          </ListItemButton>
-        )}
+        <ListItemButton onClick={handleUpdateButton} disabled={loadingUpdate && !hasUpdate}>
+          <ListItemIcon>
+            {loadingUpdate && !hasUpdate
+              ? <CircularProgress size={20} />
+              : <UpdateRoundedIcon color={hasUpdate ? 'primary' : 'inherit'} />
+            }
+          </ListItemIcon>
+          <ListItemText
+            primary={hasUpdate ? 'Atualizar' : 'Buscar atualização'}
+            slotProps={hasUpdate ? { primary: { color: 'primary', sx: { fontWeight: 600 } } } : undefined}
+          />
+        </ListItemButton>
 
         <ListItemButton selected={aboutOpen} onClick={goAbout}>
           <ListItemIcon><InfoRoundedIcon /></ListItemIcon>
