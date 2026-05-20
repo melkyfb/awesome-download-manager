@@ -72,17 +72,51 @@ jobs:
           key: gradle-${{ hashFiles('src-tauri/gen/android/**/*.gradle*', 'src-tauri/gen/android/**/gradle-wrapper.properties') }}
           restore-keys: gradle-
 
-      - name: Download yt-dlp sidecar (Linux host)
+      - name: Download yt-dlp and FFmpeg for Android ABIs
+        shell: bash
         run: |
           mkdir -p src-tauri/binaries
+
+          # ---- yt-dlp ----
+          # aarch64: portable static binary built via build-android-yt-dlp.yml
+          curl -fL \
+            "https://github.com/melkyfb/awesome-download-manager/releases/download/android-binaries/yt-dlp-aarch64-linux-android" \
+            -o "src-tauri/binaries/yt-dlp-aarch64-linux-android"
+          chmod +x "src-tauri/binaries/yt-dlp-aarch64-linux-android"
+
+          # Linux host binary (needed by Tauri build tooling, not bundled in APK)
           curl -fL "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux" \
             -o "src-tauri/binaries/yt-dlp-x86_64-unknown-linux-gnu"
           chmod +x "src-tauri/binaries/yt-dlp-x86_64-unknown-linux-gnu"
-          # yt-dlp has no Android-native releases; create placeholders so Tauri's
-          # resource bundler doesn't abort the build. These files are never executed.
-          for abi in aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android; do
+
+          # armv7/x86/x86_64: empty placeholders (not yet supported on these ABIs)
+          for abi in armv7-linux-androideabi i686-linux-android x86_64-linux-android; do
             touch "src-tauri/binaries/yt-dlp-${abi}"
           done
+
+          # ---- FFmpeg ----
+          # All 4 Android ABIs from Khang-NT/ffmpeg-binary-android
+          # These are Android Bionic-native binaries (use /system/bin/linker, depend only on libm/libz/libc)
+          declare -A FFMPEG_ARCHIVES=(
+            [aarch64-linux-android]="arm64-v8a-lite"
+            [armv7-linux-androideabi]="armv7-a-lite"
+            [x86_64-linux-android]="x86_64-lite"
+            [i686-linux-android]="i686-lite"
+          )
+          FFMPEG_BASE="https://github.com/Khang-NT/ffmpeg-binary-android/releases/download/2018-07-31"
+          for abi in "${!FFMPEG_ARCHIVES[@]}"; do
+            archive="${FFMPEG_ARCHIVES[$abi]}"
+            curl -fL "${FFMPEG_BASE}/${archive}.tar.bz2" -o "/tmp/ffmpeg-${abi}.tar.bz2"
+            tar -xjf "/tmp/ffmpeg-${abi}.tar.bz2" -C /tmp
+            mv /tmp/ffmpeg "src-tauri/binaries/ffmpeg-${abi}"
+            chmod +x "src-tauri/binaries/ffmpeg-${abi}"
+          done
+
+          # FFmpeg placeholder for Linux host (not used at runtime, satisfies Tauri bundler)
+          touch "src-tauri/binaries/ffmpeg-x86_64-unknown-linux-gnu"
+
+          echo "--- Binary inventory ---"
+          ls -lh src-tauri/binaries/
 
       - name: Set version from git tag
         shell: bash
