@@ -99,3 +99,17 @@ The application uses Tauri's IPC mechanism for communication:
 - `download/`: The core engine handling HTTP/FTP streams and the TokenBucket speed limiter.
 - `db/`: Handles SQLite schema migrations and CRUD operations.
 - `config/`: Manages application settings and secure API key storage via the OS keyring.
+
+## 🤝 Contributing
+
+Contributions are welcome! To contribute:
+
+1. **Fork** the repository.
+2. **Create a Feature Branch**: `git checkout -b feature/your-feature-name`.
+3. **Commit Changes**: Follow the project's commit style (e.g., `feat: ...`, `fix: ...`).
+4. **Open a Pull Request**: Provide a clear description of your changes and how to test them.
+
+### Development Guidelines
+- Ensure all frontend tests pass before submitting a PR.
+- Rust changes should be verified with `cargo test`.
+- Maintain the existing project structure: `src/` for frontend, `src-tauri/` for backend.
