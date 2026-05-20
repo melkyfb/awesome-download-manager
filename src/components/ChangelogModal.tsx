@@ -103,7 +103,7 @@ export function ChangelogModal({
           releases.map((release, i) => (
             <Box key={release.tag_name}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                <Typography variant="subtitle2" fontWeight={600}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                   {release.name || release.tag_name}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
