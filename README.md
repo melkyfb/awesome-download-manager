@@ -80,3 +80,22 @@ Ensure you have the following installed:
   ```bash
   cd src-tauri && cargo test
   ```
+
+## 🏗 Technical Architecture
+
+The project follows a decoupled architecture combining a high-performance Rust backend with a flexible React frontend.
+
+### Stack
+- **Frontend**: React 19, Redux Toolkit, Material UI (MUI), Tailwind CSS.
+- **Backend**: Rust, Tauri v2.
+- **Database**: SQLite (via `rusqlite`) for persistent storage of downloads, AI cache, and settings.
+
+### Communication Bridge
+The application uses Tauri's IPC mechanism for communication:
+- **Frontend $\to$ Backend**: The frontend invokes Rust commands using `invoke('command_name', { args })`.
+- **Backend $\to$ Frontend**: The backend emits asynchronous events (e.g., `download:progress`, `download:complete`) which the frontend listens to via the `useTauriEvents` hook.
+
+### Key Backend Modules
+- `download/`: The core engine handling HTTP/FTP streams and the TokenBucket speed limiter.
+- `db/`: Handles SQLite schema migrations and CRUD operations.
+- `config/`: Manages application settings and secure API key storage via the OS keyring.
