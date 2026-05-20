@@ -92,6 +92,14 @@ impl<'a> Repository<'a> {
         Ok(())
     }
 
+    pub fn update_display_name(&self, id: &str, name: &str) -> Result<()> {
+        self.conn.execute(
+            "UPDATE downloads SET filename = ?1 WHERE id = ?2",
+            rusqlite::params![name, id],
+        )?;
+        Ok(())
+    }
+
     pub fn update_filename(&self, id: &str, filename: &str, dest_path: &str) -> Result<()> {
         self.conn.execute(
             "UPDATE downloads SET filename = ?1, dest_path = ?2 WHERE id = ?3",

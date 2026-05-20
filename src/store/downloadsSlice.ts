@@ -26,6 +26,7 @@ export const downloadsSlice = createSlice({
         eta_seconds?: number | null
         chunk_speeds?: number[]
         percent?: number
+        step?: string
       }>
     ) => {
       const download = state.items[action.payload.id]
@@ -48,7 +49,14 @@ export const downloadsSlice = createSlice({
         if (action.payload.percent !== undefined) {
           download.percent = action.payload.percent
         }
+        if (action.payload.step !== undefined) {
+          download.step = action.payload.step
+        }
       }
+    },
+    updateFilename: (state, action: PayloadAction<{ id: string; title: string }>) => {
+      const dl = state.items[action.payload.id]
+      if (dl) dl.filename = action.payload.title
     },
     completeDownload: (state, action: PayloadAction<{ id: string; sha256: string; bytes?: number | null }>) => {
       const download = state.items[action.payload.id]
@@ -79,6 +87,7 @@ export const downloadsSlice = createSlice({
 export const {
   upsertDownload,
   updateProgress,
+  updateFilename,
   completeDownload,
   setDownloadError,
   removeDownload,

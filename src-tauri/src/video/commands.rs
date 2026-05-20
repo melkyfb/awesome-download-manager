@@ -57,6 +57,28 @@ pub fn extract_path_from_line(line: &str) -> Option<String> {
 
 type DownloadsMap = Arc<tokio::sync::RwLock<HashMap<String, (tokio::task::AbortHandle, Arc<AtomicBool>)>>>;
 
+async fn fetch_video_title(yt_dlp: &PathBuf, url: &str) -> Option<String> {
+    let mut cmd = tokio::process::Command::new(yt_dlp);
+    cmd.args(&["--no-playlist", "--skip-download", "--print", "title", "--no-warnings", url]);
+    #[cfg(windows)]
+    cmd.creation_flags(0x08000000);
+    cmd.stdout(std::process::Stdio::piped());
+    cmd.stderr(std::process::Stdio::null());
+
+    let result = tokio::time::timeout(
+        std::time::Duration::from_secs(20),
+        cmd.output(),
+    ).await;
+
+    match result {
+        Ok(Ok(output)) if output.status.success() => {
+            let t = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            if !t.is_empty() && t != "NA" { Some(t) } else { None }
+        }
+        _ => None,
+    }
+}
+
 pub async fn spawn_video_task(
     id: String,
     url: String,
@@ -91,6 +113,18 @@ pub async fn spawn_video_task(
     cmd_args.push(url.clone());
 
     let abort_handle = tokio::spawn(async move {
+        // Pre-fetch title before acquiring semaphore — runs concurrently with queued downloads.
+        if let Some(title) = fetch_video_title(&yt_dlp, &url).await {
+            if let Ok(db) = db_arc.lock() {
+                let repo = Repository::new(&db);
+                let _ = repo.update_display_name(&id_spawn, &title);
+            }
+            let _ = app_arc.emit("download:metadata", serde_json::json!({
+                "id": id_spawn,
+                "title": title,
+            }));
+        }
+
         // Acquire a slot before spawning yt-dlp; released automatically when permit drops.
         // This caps concurrent yt-dlp processes so large playlists don't freeze the OS.
         let _permit = semaphore.acquire_owned().await;
@@ -121,34 +155,85 @@ pub async fn spawn_video_task(
         let stdout = child.stdout.take().unwrap();
         let mut lines = BufReader::new(stdout).lines();
         let mut final_path: Option<String> = None;
+        // Track which stream yt-dlp is currently downloading (video=1, audio=2)
+        let mut stream_count: u32 = 0;
+        let mut current_step = if is_audio { "downloading_audio" } else { "downloading_video" }.to_string();
 
         while let Ok(Some(line)) = lines.next_line().await {
             if cancel.load(Ordering::Relaxed) {
                 let _ = child.kill().await;
                 break;
             }
-            // Track the last known output path from any of three line types
-            if let Some(path) = extract_path_from_line(&line) {
-                final_path = Some(path);
-            }
-            // Parse progress percentage
-            if line.contains("[download]") && line.contains('%') {
+
+            if line.starts_with("[download] Destination:") {
+                stream_count += 1;
+                let new_step = if is_audio {
+                    "downloading_audio"
+                } else if stream_count == 1 {
+                    "downloading_video"
+                } else {
+                    "downloading_audio"
+                };
+                current_step = new_step.to_string();
+                // Track final path from destination line
+                if let Some(path) = extract_path_from_line(&line) {
+                    final_path = Some(path);
+                }
+                let _ = app_arc.emit("download:progress", serde_json::json!({
+                    "id": id_spawn,
+                    "downloaded_bytes": 0,
+                    "total_bytes": null,
+                    "speed_bps": 0,
+                    "eta_seconds": null,
+                    "chunk_speeds": [],
+                    "percent": 0.0,
+                    "step": current_step,
+                }));
+            } else if line.contains("[Merger] Merging formats into") {
+                current_step = "merging".to_string();
+                if let Some(path) = extract_path_from_line(&line) {
+                    final_path = Some(path);
+                }
+                let _ = app_arc.emit("download:progress", serde_json::json!({
+                    "id": id_spawn,
+                    "downloaded_bytes": 0,
+                    "total_bytes": null,
+                    "speed_bps": 0,
+                    "eta_seconds": null,
+                    "chunk_speeds": [],
+                    "percent": 100.0,
+                    "step": "merging",
+                }));
+            } else if line.starts_with("[ExtractAudio] Destination:") {
+                current_step = "converting".to_string();
+                if let Some(path) = extract_path_from_line(&line) {
+                    final_path = Some(path);
+                }
+                let _ = app_arc.emit("download:progress", serde_json::json!({
+                    "id": id_spawn,
+                    "downloaded_bytes": 0,
+                    "total_bytes": null,
+                    "speed_bps": 0,
+                    "eta_seconds": null,
+                    "chunk_speeds": [],
+                    "percent": 100.0,
+                    "step": "converting",
+                }));
+            } else if line.contains("[download]") && line.contains('%') {
                 if let Some(pct) = line.split_whitespace()
                     .find(|s| s.ends_with('%'))
                     .and_then(|s| s.trim_end_matches('%').parse::<f64>().ok())
                 {
-                    let _ = app_arc.emit(
-                        "download:progress",
-                        serde_json::json!({
-                            "id": id_spawn,
-                            "downloaded_bytes": 0,
-                            "total_bytes": null,
-                            "speed_bps": 0,
-                            "eta_seconds": null,
-                            "chunk_speeds": [],
-                            "percent": pct,
-                        }),
-                    );
+                    let _ = app_arc.emit("download:progress", serde_json::json!({
+                        "id": id_spawn,
+                        "downloaded_bytes": 0,
+                        "total_bytes": null,
+                        "speed_bps": 0,
+                        "eta_seconds": null,
+                        "chunk_speeds": [],
+                        "percent": pct,
+                        "step": current_step,
+                    }));
                 }
             }
         }

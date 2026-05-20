@@ -5,7 +5,7 @@ import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { useDispatch } from 'react-redux'
 import { store } from '../store'
 import type { AppDispatch } from '../store'
-import { updateProgress, completeDownload, setDownloadError } from '../store/downloadsSlice'
+import { updateProgress, updateFilename, completeDownload, setDownloadError } from '../store/downloadsSlice'
 import { openCloseDialog, openAddModal, openSettings, setPrefillUrl, clearPlaylistGroup, showSnackbar } from '../store/uiSlice'
 
 interface ProgressPayload {
@@ -16,6 +16,12 @@ interface ProgressPayload {
   eta_seconds: number | null
   chunk_speeds: number[]
   percent?: number
+  step?: string
+}
+
+interface MetadataPayload {
+  id: string
+  title: string
 }
 
 interface CompletePayload {
@@ -73,7 +79,11 @@ export function useTauriEvents() {
           eta_seconds: event.payload.eta_seconds,
           chunk_speeds: event.payload.chunk_speeds,
           percent: event.payload.percent,
+          step: event.payload.step,
         }))
+      }),
+      listen<MetadataPayload>('download:metadata', (event) => {
+        dispatch(updateFilename({ id: event.payload.id, title: event.payload.title }))
       }),
       listen<CompletePayload>('download:complete', (event) => {
         dispatch(completeDownload({

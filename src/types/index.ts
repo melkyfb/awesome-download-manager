@@ -18,6 +18,7 @@ export interface Download {
   download_type?: 'http' | 'video'
   video_quality?: string
   percent?: number
+  step?: string
   playlist_group_id?: string
 }
 

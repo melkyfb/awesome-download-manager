@@ -57,6 +57,13 @@ function fileIcon(filename: string) {
   return <InsertDriveFileRoundedIcon />
 }
 
+const STEP_LABELS: Record<string, string> = {
+  downloading_video: 'Baixando vídeo',
+  downloading_audio: 'Baixando áudio',
+  merging: 'Mesclando...',
+  converting: 'Convertendo...',
+}
+
 const STATUS_COLORS: Record<DownloadStatus, 'default' | 'primary' | 'success' | 'error' | 'warning'> = {
   active: 'primary',
   paused: 'warning',
@@ -73,6 +80,8 @@ export function DownloadCard({ download }: { download: Download }) {
 
   const isVideo = download.download_type === 'video'
   const isPlaylistVideo = Boolean(download.playlist_group_id)
+  const isPostProcessing = isVideo && download.status === 'active' &&
+    (download.step === 'merging' || download.step === 'converting')
   const percent = isVideo && download.percent !== undefined
     ? Math.round(download.percent)
     : download.total_bytes
@@ -124,6 +133,13 @@ export function DownloadCard({ download }: { download: Download }) {
       }
       return <Typography variant="caption" color="success.main">Concluído</Typography>
     }
+    if (isVideo && download.status === 'active' && download.step) {
+      return (
+        <Typography variant="caption" color="text.secondary">
+          {STEP_LABELS[download.step] ?? download.step}
+        </Typography>
+      )
+    }
     if (download.total_bytes) {
       return (
         <Typography variant="caption" color="text.secondary">
@@ -173,17 +189,31 @@ export function DownloadCard({ download }: { download: Download }) {
         </Box>
 
         <LinearProgress
-          variant={download.status === 'active' && !download.total_bytes && !isVideo ? 'indeterminate' : 'determinate'}
-          value={percent}
+          variant={
+            isPostProcessing
+              ? 'indeterminate'
+              : (download.status === 'active' && !download.total_bytes && !isVideo ? 'indeterminate' : 'determinate')
+          }
+          value={isPostProcessing ? undefined : percent}
           sx={{ borderRadius: 2, height: 6, mb: 1 }}
           color={download.status === 'error' ? 'error' : download.status === 'complete' ? 'success' : 'primary'}
         />
 
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Typography variant="caption" color="text.secondary">
-            {percent}% · {formatBytes(download.downloaded_bytes)}
-            {download.speed_bps ? ` · ${formatBytes(download.speed_bps)}/s` : ''}
-            {download.eta_seconds ? ` · ETA ${formatEta(download.eta_seconds)}` : ''}
+            {isPostProcessing
+              ? (STEP_LABELS[download.step!] ?? download.step)
+              : (
+                <>
+                  {percent}%
+                  {isVideo && download.step === 'downloading_video' ? ' (vídeo)' : ''}
+                  {isVideo && download.step === 'downloading_audio' ? ' (áudio)' : ''}
+                  {download.downloaded_bytes > 0 ? ` · ${formatBytes(download.downloaded_bytes)}` : ''}
+                  {download.speed_bps ? ` · ${formatBytes(download.speed_bps)}/s` : ''}
+                  {download.eta_seconds ? ` · ETA ${formatEta(download.eta_seconds)}` : ''}
+                </>
+              )
+            }
           </Typography>
           <Box sx={{ display: 'flex', gap: 0.5 }} onClick={e => e.stopPropagation()}>
             {download.status === 'complete' && (
