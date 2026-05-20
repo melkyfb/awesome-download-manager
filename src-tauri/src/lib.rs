@@ -178,6 +178,7 @@ pub fn run() {
             download::commands::resume_download,
             download::commands::restart_active_downloads,
             download::commands::delete_download,
+            download::commands::delete_finished_downloads,
             download::commands::list_downloads,
             config::commands::get_settings,
             config::commands::save_settings_cmd,

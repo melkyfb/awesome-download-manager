@@ -187,6 +187,19 @@ impl<'a> Repository<'a> {
         Ok(())
     }
 
+    pub fn delete_downloads_by_statuses(&self, statuses: &[&str]) -> Result<Vec<String>> {
+        let placeholders: Vec<String> = (1..=statuses.len()).map(|i| format!("?{}", i)).collect();
+        let sql = format!(
+            "DELETE FROM downloads WHERE status IN ({}) RETURNING id",
+            placeholders.join(", ")
+        );
+        let mut stmt = self.conn.prepare(&sql)?;
+        let params: Vec<&dyn rusqlite::ToSql> = statuses.iter().map(|s| s as &dyn rusqlite::ToSql).collect();
+        let ids = stmt.query_map(params.as_slice(), |row| row.get::<_, String>(0))?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+        Ok(ids)
+    }
+
     pub fn get_setting(&self, key: &str) -> Result<Option<String>> {
         let mut stmt = self.conn.prepare("SELECT value FROM settings WHERE key = ?1")?;
         let mut rows = stmt.query(rusqlite::params![key])?;

@@ -1,0 +1,74 @@
+name: Build Android yt-dlp Binary
+
+on:
+  workflow_dispatch:
+    inputs:
+      ytdlp_version:
+        description: 'yt-dlp version to install (empty = latest)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build-aarch64:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU for arm64 emulation
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Build portable yt-dlp inside arm64 Alpine container
+        run: |
+          mkdir -p out
+          YTDLP_PIN="${{ github.event.inputs.ytdlp_version }}"
+          YTDLP_SPEC="${YTDLP_PIN:+yt-dlp==$YTDLP_PIN}"
+          YTDLP_SPEC="${YTDLP_SPEC:-yt-dlp}"
+
+          docker run --rm --platform linux/arm64 \
+            -e YTDLP_SPEC="$YTDLP_SPEC" \
+            -v "$(pwd)/out:/out" \
+            arm64v8/alpine:3.21 /bin/sh -c '
+              set -ex
+              apk add --no-cache python3 py3-pip patchelf file binutils musl-utils
+              python3 -m venv /tmp/venv
+              /tmp/venv/bin/pip install pyinstaller "$YTDLP_SPEC" staticx
+              /tmp/venv/bin/pyinstaller --onefile --name yt-dlp --distpath /tmp/dist \
+                $(/tmp/venv/bin/python3 -c "import yt_dlp; import os; print(os.path.join(os.path.dirname(yt_dlp.__file__), '__main__.py'))")
+              /tmp/venv/bin/staticx /tmp/dist/yt-dlp /out/yt-dlp-aarch64-linux-android
+              echo "--- Verifying binary has no external lib deps ---"
+              readelf -d /out/yt-dlp-aarch64-linux-android | grep NEEDED || echo "No NEEDED entries — fully static OK"
+              chmod +x /out/yt-dlp-aarch64-linux-android
+              file /out/yt-dlp-aarch64-linux-android
+            '
+
+      - name: Show binary size
+        run: ls -lh out/yt-dlp-aarch64-linux-android
+
+      - name: Upload binary as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yt-dlp-android-aarch64
+          path: out/yt-dlp-aarch64-linux-android
+          retention-days: 90
+
+      - name: Upload to android-binaries release (creates release if needed)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Create the release if it doesn't exist yet
+          gh release view android-binaries 2>/dev/null || \
+            gh release create android-binaries \
+              --title "Android Binary Dependencies" \
+              --notes "Pre-built yt-dlp and other Android sidecar binaries. Do not delete." \
+              --prerelease
+
+          # Upload (overwrite if already exists)
+          gh release upload android-binaries \
+            out/yt-dlp-aarch64-linux-android \
+            --clobber

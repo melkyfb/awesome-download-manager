@@ -313,6 +313,13 @@ pub async fn delete_download(id: String, state: State<'_, AppState>) -> Result<(
 }
 
 #[tauri::command]
+pub async fn delete_finished_downloads(state: State<'_, AppState>) -> Result<Vec<String>, String> {
+    let db = state.db.lock().map_err(|e| e.to_string())?;
+    let repo = Repository::new(&db);
+    repo.delete_downloads_by_statuses(&["complete", "error"]).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn list_downloads(state: State<'_, AppState>) -> Result<Vec<DownloadRecord>, String> {
     let db = state.db.lock().map_err(|e| e.to_string())?;
     let repo = Repository::new(&db);
