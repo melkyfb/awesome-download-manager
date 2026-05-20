@@ -47,3 +47,36 @@ The easiest way to get started is to download the latest release for your operat
 - **Security Scan**: Every download can be automatically passed through the malware check engine before being marked as complete.
 
 *(Note: AI features must be enabled in the Settings menu to be accessible)*
+
+## 💻 Developer's Corner
+
+### Prerequisites
+Ensure you have the following installed:
+- [Node.js (LTS)](https://nodejs.org/) & npm
+- [Rust Toolchain](https://rustup.rs/) (cargo, rustc)
+- [Tauri CLI Dependencies](https://tauri.app/v2/guide/getting-started/prerequisites) (OS-specific build tools)
+
+### Getting Started
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/melkyfb/awesome-download-manager.git
+   cd awesome-download-manager
+   ```
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+3. **Run in Development Mode**:
+   ```bash
+   npm run tauri dev
+   ```
+
+### Testing
+- **Frontend Tests**:
+  ```bash
+  npx vitest run
+  ```
+- **Backend Tests**:
+  ```bash
+  cd src-tauri && cargo test
+  ```
