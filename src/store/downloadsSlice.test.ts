@@ -5,6 +5,7 @@ import downloadsReducer, {
   removeDownload,
   setDownloadError,
   completeDownload,
+  downloadsSlice,
 } from './downloadsSlice'
 import type { Download } from '../types'
 
@@ -68,5 +69,14 @@ describe('downloadsSlice', () => {
   it('ignores updateProgress for unknown id', () => {
     const state = downloadsReducer(undefined, updateProgress({ id: 'unknown', downloaded_bytes: 100 }))
     expect(state.items).toEqual({})
+  })
+
+  it('completeDownload updates bytes when provided', () => {
+    const state = { items: { 'dl-1': { id: 'dl-1', status: 'active' as const, total_bytes: null, downloaded_bytes: 0, url: '', filename: '', dest_path: '', sha256: null, chunks_json: null, created_at: '', completed_at: null } } }
+    const action = completeDownload({ id: 'dl-1', sha256: '', bytes: 5_000_000 })
+    const next = downloadsSlice.reducer(state, action)
+    expect(next.items['dl-1'].status).toBe('complete')
+    expect(next.items['dl-1'].total_bytes).toBe(5_000_000)
+    expect(next.items['dl-1'].downloaded_bytes).toBe(5_000_000)
   })
 })

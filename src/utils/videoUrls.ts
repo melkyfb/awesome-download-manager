@@ -18,6 +18,18 @@ export function isVideoUrl(url: string): boolean {
   }
 }
 
+export function isPlaylistUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    const isYoutube = ['youtube.com', 'www.youtube.com', 'm.youtube.com'].some(
+      host => parsed.hostname === host
+    )
+    return isYoutube && parsed.searchParams.has('list')
+  } catch {
+    return false
+  }
+}
+
 export const VIDEO_QUALITY_OPTIONS = [
   { value: 'best',  label: 'Melhor qualidade' },
   { value: '1080p', label: '1080p' },

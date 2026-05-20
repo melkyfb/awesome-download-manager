@@ -18,6 +18,7 @@ export interface Download {
   download_type?: 'http' | 'video'
   video_quality?: string
   percent?: number
+  playlist_group_id?: string
 }
 
 export interface AiResult {
@@ -35,7 +36,7 @@ export interface MirrorResult {
 
 export interface Config {
   dest_folder: string
-  max_speed: number        // bytes/s, 0 = unlimited (displayed as KB/s in UI)
+  max_speed: number
   chunks: number
   ai_provider: string | null
   search_provider: string | null
@@ -45,4 +46,6 @@ export interface Config {
   language: string
   start_minimized: boolean
   clipboard_monitor_enabled: boolean
+  use_last_folder: boolean
+  last_used_folder: string
 }

@@ -13,6 +13,8 @@ const initialState: Config = {
   language: 'pt',
   start_minimized: false,
   clipboard_monitor_enabled: true,
+  use_last_folder: false,
+  last_used_folder: '',
 }
 
 const configSlice = createSlice({
@@ -28,8 +30,11 @@ const configSlice = createSlice({
     setMaxSpeed(state, action: PayloadAction<number>) {
       state.max_speed = action.payload
     },
+    setLastUsedFolder(state, action: PayloadAction<string>) {
+      state.last_used_folder = action.payload
+    },
   },
 })
 
-export const { setConfig, setAiEnabled, setMaxSpeed } = configSlice.actions
+export const { setConfig, setAiEnabled, setMaxSpeed, setLastUsedFolder } = configSlice.actions
 export default configSlice.reducer
