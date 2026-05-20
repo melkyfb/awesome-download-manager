@@ -18,21 +18,40 @@ fn format_for_quality(quality: &str) -> (&'static str, bool) {
     }
 }
 
-fn resolve_yt_dlp() -> PathBuf {
-    if let Ok(exe) = std::env::current_exe() {
-        let name = if cfg!(windows) { "yt-dlp.exe" } else { "yt-dlp" };
-        let candidate = exe.parent()
-            .map(|d| d.join(name))
-            .unwrap_or_default();
-        if candidate.exists() {
-            return candidate;
-        }
+fn resolve_binary(name: &str, app: &AppHandle) -> PathBuf {
+    #[cfg(target_os = "android")]
+    {
+        let triple = env!("SIDECAR_TARGET_TRIPLE");
+        return app.path().resource_dir()
+            .unwrap_or_default()
+            .join(format!("{name}-{triple}"));
     }
-    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    #[cfg(not(target_os = "android"))]
+    resolve_binary_desktop(name)
+}
+
+fn resolve_binary_desktop(name: &str) -> PathBuf {
+    if let Ok(exe) = std::env::current_exe() {
+        let ext = if cfg!(windows) { ".exe" } else { "" };
+        let candidate = exe.parent()
+            .map(|d| d.join(format!("{name}{ext}")))
+            .unwrap_or_default();
+        if candidate.exists() { return candidate; }
+    }
     let triple = env!("SIDECAR_TARGET_TRIPLE");
-    PathBuf::from(manifest_dir)
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("binaries")
-        .join(format!("yt-dlp-{triple}"))
+        .join(format!("{name}-{triple}"))
+}
+
+#[cfg(target_os = "android")]
+fn ensure_executable(path: &PathBuf) {
+    use std::os::unix::fs::PermissionsExt;
+    if let Ok(meta) = std::fs::metadata(path) {
+        let mut perms = meta.permissions();
+        perms.set_mode(0o755);
+        let _ = std::fs::set_permissions(path, perms);
+    }
 }
 
 /// Extracts the final output path from a yt-dlp progress line.
@@ -92,7 +111,13 @@ pub async fn spawn_video_task(
     let cancel = Arc::new(AtomicBool::new(false));
     let cancel_for_map = cancel.clone();
     let (fmt, is_audio) = format_for_quality(&quality);
-    let yt_dlp = resolve_yt_dlp();
+    let yt_dlp = resolve_binary("yt-dlp", &app);
+    #[cfg(target_os = "android")]
+    ensure_executable(&yt_dlp);
+    #[cfg(target_os = "android")]
+    let ffmpeg_path = resolve_binary("ffmpeg", &app);
+    #[cfg(target_os = "android")]
+    ensure_executable(&ffmpeg_path);
     let app_arc = app.clone();
     let id_spawn = id.clone();
 
@@ -111,6 +136,11 @@ pub async fn spawn_video_task(
         ]);
     }
     cmd_args.push(url.clone());
+    #[cfg(target_os = "android")]
+    {
+        cmd_args.push("--ffmpeg-location".into());
+        cmd_args.push(ffmpeg_path.to_string_lossy().into_owned());
+    }
 
     let abort_handle = tokio::spawn(async move {
         // Pre-fetch title before acquiring semaphore — runs concurrently with queued downloads.
@@ -130,6 +160,12 @@ pub async fn spawn_video_task(
         let _permit = semaphore.acquire_owned().await;
 
         let mut cmd = tokio::process::Command::new(&yt_dlp);
+        #[cfg(target_os = "android")]
+        {
+            if let Ok(tmp) = app_arc.path().temp_dir() {
+                cmd.env("TMPDIR", tmp);
+            }
+        }
         cmd.args(&cmd_args)
            .stdout(std::process::Stdio::piped())
            .stderr(std::process::Stdio::piped());
@@ -336,10 +372,18 @@ pub async fn start_video_download(
 }
 
 #[tauri::command]
-pub async fn get_video_formats(url: String) -> Result<Vec<String>, String> {
-    let yt_dlp = resolve_yt_dlp();
+pub async fn get_video_formats(url: String, app: AppHandle) -> Result<Vec<String>, String> {
+    let yt_dlp = resolve_binary("yt-dlp", &app);
+    #[cfg(target_os = "android")]
+    ensure_executable(&yt_dlp);
 
     let mut cmd = tokio::process::Command::new(&yt_dlp);
+    #[cfg(target_os = "android")]
+    {
+        if let Ok(tmp) = app.path().temp_dir() {
+            cmd.env("TMPDIR", tmp);
+        }
+    }
     cmd.args(&["--no-playlist", "-j", "--skip-download", &url]);
     #[cfg(windows)]
     cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
@@ -385,10 +429,18 @@ pub async fn start_playlist_download(
     state: State<'_, AppState>,
     app: AppHandle,
 ) -> Result<Vec<PlaylistEntry>, String> {
-    let yt_dlp = resolve_yt_dlp();
+    let yt_dlp = resolve_binary("yt-dlp", &app);
+    #[cfg(target_os = "android")]
+    ensure_executable(&yt_dlp);
 
     let mut flat_cmd = tokio::process::Command::new(&yt_dlp);
     flat_cmd.args(&["--flat-playlist", "-j", &url]);
+    #[cfg(target_os = "android")]
+    {
+        if let Ok(tmp) = app.path().temp_dir() {
+            flat_cmd.env("TMPDIR", tmp);
+        }
+    }
     #[cfg(windows)]
     flat_cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
 
@@ -521,7 +573,15 @@ pub fn generate_playlist_file(
 
 #[cfg(test)]
 mod tests {
-    use super::{extract_path_from_line, generate_playlist_file_inner};
+    use super::{extract_path_from_line, generate_playlist_file_inner, resolve_binary_desktop};
+
+    #[test]
+    fn resolve_binary_desktop_returns_valid_path() {
+        let path = resolve_binary_desktop("yt-dlp");
+        assert!(path.to_str().is_some());
+        let s = path.to_string_lossy();
+        assert!(s.contains("yt-dlp"), "path should contain 'yt-dlp', got: {s}");
+    }
 
     #[test]
     fn extracts_destination_line() {
