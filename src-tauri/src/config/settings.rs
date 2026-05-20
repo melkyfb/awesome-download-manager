@@ -49,7 +49,7 @@ impl Default for Settings {
 
 #[cfg(target_os = "android")]
 fn default_download_dir() -> String {
-    "$DOWNLOAD".to_string()
+    "/sdcard/Download".to_string()
 }
 
 #[cfg(not(target_os = "android"))]
@@ -265,5 +265,18 @@ mod tests {
         let loaded = load_settings(&repo);
         assert!(loaded.use_last_folder);
         assert_eq!(loaded.last_used_folder, "/home/user/videos");
+    }
+
+    #[test]
+    fn android_default_dest_folder_is_sdcard() {
+        // On non-Android targets: verify the desktop default doesn't contain the literal "$DOWNLOAD"
+        // which would indicate the Android branch leaked into a desktop build.
+        let s = Settings::default();
+        assert!(!s.dest_folder.is_empty());
+        assert!(
+            !s.dest_folder.contains("$DOWNLOAD"),
+            "dest_folder must not contain literal '$DOWNLOAD': got {}",
+            s.dest_folder
+        );
     }
 }
