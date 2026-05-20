@@ -182,6 +182,9 @@ pub fn run() {
             config::commands::delete_ai_key_cmd,
             config::commands::save_search_key_cmd,
             video::commands::start_video_download,
+            video::commands::get_video_formats,
+            video::commands::start_playlist_download,
+            video::commands::generate_playlist_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

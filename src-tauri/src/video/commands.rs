@@ -242,9 +242,184 @@ pub async fn start_video_download(
     Ok(id)
 }
 
+#[tauri::command]
+pub async fn get_video_formats(url: String) -> Result<Vec<String>, String> {
+    let yt_dlp = resolve_yt_dlp();
+
+    let output = tokio::process::Command::new(&yt_dlp)
+        .args(&["--no-playlist", "-j", "--skip-download", &url])
+        .output()
+        .await
+        .map_err(|e| format!("yt-dlp spawn error: {e}"))?;
+
+    let json_str = String::from_utf8_lossy(&output.stdout);
+    let info: serde_json::Value = serde_json::from_str(&json_str)
+        .map_err(|e| format!("JSON parse error: {e}"))?;
+
+    let mut heights: std::collections::HashSet<u64> = std::collections::HashSet::new();
+    if let Some(formats) = info.get("formats").and_then(|f| f.as_array()) {
+        for fmt in formats {
+            if let Some(h) = fmt.get("height").and_then(|h| h.as_u64()) {
+                if h >= 480 {
+                    heights.insert(h);
+                }
+            }
+        }
+    }
+
+    let mut result: Vec<String> = heights.into_iter().map(|h| h.to_string()).collect();
+    result.sort_by_key(|s| s.parse::<u64>().unwrap_or(0));
+    Ok(result)
+}
+
+#[derive(serde::Serialize)]
+pub struct PlaylistEntry {
+    pub download_id: String,
+    pub title: String,
+    pub url: String,
+}
+
+#[tauri::command]
+pub async fn start_playlist_download(
+    url: String,
+    dest_folder: String,
+    quality: String,
+    playlist_group_id: String,
+    state: State<'_, AppState>,
+    app: AppHandle,
+) -> Result<Vec<PlaylistEntry>, String> {
+    let yt_dlp = resolve_yt_dlp();
+
+    let output = tokio::process::Command::new(&yt_dlp)
+        .args(&["--flat-playlist", "-j", &url])
+        .output()
+        .await
+        .map_err(|e| format!("yt-dlp spawn error: {e}"))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let mut entries: Vec<PlaylistEntry> = Vec::new();
+
+    for line in stdout.lines() {
+        let line = line.trim();
+        if line.is_empty() { continue; }
+        let Ok(info) = serde_json::from_str::<serde_json::Value>(line) else { continue };
+
+        let video_url = info.get("webpage_url")
+            .and_then(|u| u.as_str())
+            .map(|s| s.to_string())
+            .or_else(|| {
+                info.get("url").and_then(|u| u.as_str()).map(|u| {
+                    if u.starts_with("http") { u.to_string() }
+                    else { format!("https://www.youtube.com/watch?v={u}") }
+                })
+            })
+            .or_else(|| {
+                info.get("id").and_then(|i| i.as_str())
+                    .map(|id| format!("https://www.youtube.com/watch?v={id}"))
+            });
+
+        let Some(video_url) = video_url else { continue };
+        let title = info.get("title")
+            .and_then(|t| t.as_str())
+            .unwrap_or("video")
+            .to_string();
+        let id = Uuid::new_v4().to_string();
+
+        {
+            let db = state.db.lock().map_err(|e| e.to_string())?;
+            let repo = Repository::new(&db);
+            repo.insert_video_download(&DownloadRecord {
+                id: id.clone(),
+                url: video_url.clone(),
+                filename: title.clone(),
+                dest_path: dest_folder.clone(),
+                total_bytes: None,
+                downloaded_bytes: 0,
+                status: DownloadStatus::Active,
+                sha256: None,
+                chunks_json: None,
+                created_at: String::new(),
+                completed_at: None,
+                download_type: Some("video".to_string()),
+                video_quality: Some(quality.clone()),
+                playlist_group_id: Some(playlist_group_id.clone()),
+            }).map_err(|e| e.to_string())?;
+        }
+
+        spawn_video_task(
+            id.clone(),
+            video_url.clone(),
+            dest_folder.clone(),
+            quality.clone(),
+            state.db.clone(),
+            state.downloads.clone(),
+            app.clone(),
+        ).await;
+
+        entries.push(PlaylistEntry { download_id: id, title, url: video_url });
+    }
+
+    Ok(entries)
+}
+
+fn sanitize_filename(name: &str) -> String {
+    name.chars()
+        .map(|c| if c.is_alphanumeric() || c == ' ' || c == '-' || c == '_' { c } else { '_' })
+        .collect::<String>()
+        .trim()
+        .to_string()
+}
+
+pub fn generate_playlist_file_inner(
+    paths: &[String],
+    titles: &[String],
+    format: &str,
+    dest_folder: &str,
+    name: &str,
+) -> Result<String, String> {
+    let safe_name = sanitize_filename(name);
+    let file_path = format!("{}/{}.{}", dest_folder, safe_name, format);
+
+    let content = match format {
+        "m3u" => {
+            let mut s = String::from("#EXTM3U\n");
+            for (path, title) in paths.iter().zip(titles.iter()) {
+                s.push_str(&format!("#EXTINF:-1,{}\n{}\n", title, path));
+            }
+            s
+        }
+        "pls" => {
+            let mut s = String::from("[playlist]\n");
+            s.push_str(&format!("NumberOfEntries={}\n\n", paths.len()));
+            for (i, (path, title)) in paths.iter().zip(titles.iter()).enumerate() {
+                let n = i + 1;
+                s.push_str(&format!(
+                    "File{n}={path}\nTitle{n}={title}\nLength{n}=-1\n\n"
+                ));
+            }
+            s
+        }
+        other => return Err(format!("Unknown playlist format: {other}")),
+    };
+
+    std::fs::write(&file_path, &content).map_err(|e| e.to_string())?;
+    Ok(file_path)
+}
+
+#[tauri::command]
+pub fn generate_playlist_file(
+    paths: Vec<String>,
+    titles: Vec<String>,
+    format: String,
+    dest_folder: String,
+    name: String,
+) -> Result<String, String> {
+    generate_playlist_file_inner(&paths, &titles, &format, &dest_folder, &name)
+}
+
 #[cfg(test)]
 mod tests {
-    use super::extract_path_from_line;
+    use super::{extract_path_from_line, generate_playlist_file_inner};
 
     #[test]
     fn extracts_destination_line() {
@@ -277,5 +452,33 @@ mod tests {
     fn ignores_unrelated_line() {
         let line = "[download]  42.3% of 12.34MiB at 1.23MiB/s ETA 00:05";
         assert_eq!(extract_path_from_line(line), None);
+    }
+
+    #[test]
+    fn generates_m3u_file() {
+        let dir = std::env::temp_dir();
+        let dest = dir.to_string_lossy().to_string();
+        let paths = vec!["/tmp/video1.mp4".to_string(), "/tmp/video2.mp4".to_string()];
+        let titles = vec!["Video One".to_string(), "Video Two".to_string()];
+        let result = generate_playlist_file_inner(&paths, &titles, "m3u", &dest, "my-playlist").unwrap();
+        let content = std::fs::read_to_string(&result).unwrap();
+        assert!(content.starts_with("#EXTM3U"));
+        assert!(content.contains("#EXTINF:-1,Video One\n/tmp/video1.mp4"));
+        assert!(content.contains("#EXTINF:-1,Video Two\n/tmp/video2.mp4"));
+        std::fs::remove_file(result).ok();
+    }
+
+    #[test]
+    fn generates_pls_file() {
+        let dir = std::env::temp_dir();
+        let dest = dir.to_string_lossy().to_string();
+        let paths = vec!["/tmp/video1.mp4".to_string()];
+        let titles = vec!["My Video".to_string()];
+        let result = generate_playlist_file_inner(&paths, &titles, "pls", &dest, "my-playlist").unwrap();
+        let content = std::fs::read_to_string(&result).unwrap();
+        assert!(content.contains("[playlist]"));
+        assert!(content.contains("File1=/tmp/video1.mp4"));
+        assert!(content.contains("Title1=My Video"));
+        std::fs::remove_file(result).ok();
     }
 }
