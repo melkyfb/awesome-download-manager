@@ -33,3 +33,17 @@ The easiest way to get started is to download the latest release for your operat
 2. **Add a Download**: Click the "+" button or paste a URL into the input field.
 3. **Configure**: Set your preferred download folder and global speed limit in the settings.
 4. **Manage**: Monitor progress in real-time via the dashboard.
+
+## 🛠 Usage & Workflows
+
+### Core Download Flow
+- **Adding Links**: Simply paste a URL. The app automatically detects the protocol and file size.
+- **Speed Limiting**: Use the global speed limit slider to prevent the manager from consuming all your bandwidth.
+- **Queue Management**: Pause, resume, or prioritize downloads with a single click.
+
+### Leveraging AI Features
+- **Mirror Search**: When adding a link, use the AI Mirror Search to find a faster source for the same file.
+- **Pre-Download Analysis**: Right-click a pending download to run an AI analysis on the target file's metadata and content.
+- **Security Scan**: Every download can be automatically passed through the malware check engine before being marked as complete.
+
+*(Note: AI features must be enabled in the Settings menu to be accessible)*
