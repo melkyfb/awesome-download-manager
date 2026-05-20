@@ -113,3 +113,7 @@ Contributions are welcome! To contribute:
 - Ensure all frontend tests pass before submitting a PR.
 - Rust changes should be verified with `cargo test`.
 - Maintain the existing project structure: `src/` for frontend, `src-tauri/` for backend.
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
