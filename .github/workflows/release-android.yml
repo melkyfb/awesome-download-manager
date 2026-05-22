@@ -106,10 +106,13 @@ jobs:
           FFMPEG_BASE="https://github.com/Khang-NT/ffmpeg-binary-android/releases/download/2018-07-31"
           for abi in "${!FFMPEG_ARCHIVES[@]}"; do
             archive="${FFMPEG_ARCHIVES[$abi]}"
-            curl -fL "${FFMPEG_BASE}/${archive}.tar.bz2" -o "/tmp/ffmpeg-${abi}.tar.bz2"
-            tar -xjf "/tmp/ffmpeg-${abi}.tar.bz2" --no-same-owner --no-same-permissions -C /tmp
-            mv /tmp/ffmpeg "src-tauri/binaries/ffmpeg-${abi}"
-            chmod +x "src-tauri/binaries/ffmpeg-${abi}"
+                curl -fL "${FFMPEG_BASE}/${archive}.tar.bz2" -o "/tmp/ffmpeg-${abi}.tar.bz2"
+                EXTRACT_DIR="/tmp/ext-${abi}"
+                mkdir -p "$EXTRACT_DIR"
+                tar -xjf "/tmp/ffmpeg-${abi}.tar.bz2" -C "$EXTRACT_DIR"
+                mv "${EXTRACT_DIR}/ffmpeg" "src-tauri/binaries/ffmpeg-${abi}"
+                chmod +x "src-tauri/binaries/ffmpeg-${abi}"
+                rm -rf "$EXTRACT_DIR" "/tmp/ffmpeg-${abi}.tar.bz2"
           done
 
           # FFmpeg placeholder for Linux host (not used at runtime, satisfies Tauri bundler)
