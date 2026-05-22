@@ -107,7 +107,7 @@ jobs:
           for abi in "${!FFMPEG_ARCHIVES[@]}"; do
             archive="${FFMPEG_ARCHIVES[$abi]}"
             curl -fL "${FFMPEG_BASE}/${archive}.tar.bz2" -o "/tmp/ffmpeg-${abi}.tar.bz2"
-            tar -xjf "/tmp/ffmpeg-${abi}.tar.bz2" -C /tmp
+            tar -xjf "/tmp/ffmpeg-${abi}.tar.bz2" --no-same-owner --no-same-permissions -C /tmp
             mv /tmp/ffmpeg "src-tauri/binaries/ffmpeg-${abi}"
             chmod +x "src-tauri/binaries/ffmpeg-${abi}"
           done

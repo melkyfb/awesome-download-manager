@@ -39,7 +39,7 @@ jobs:
               python3 -m venv /tmp/venv
               /tmp/venv/bin/pip install pyinstaller "$YTDLP_SPEC" staticx
               /tmp/venv/bin/pyinstaller --onefile --name yt-dlp --distpath /tmp/dist \
-                $(/tmp/venv/bin/python3 -c "import yt_dlp; import os; print(os.path.join(os.path.dirname(yt_dlp.__file__), '__main__.py'))")
+                $(/tmp/venv/bin/python3 -c "import yt_dlp; import os; print(os.path.join(os.path.dirname(yt_dlp.__file__), \"__main__.py\"))")
               /tmp/venv/bin/staticx /tmp/dist/yt-dlp /out/yt-dlp-aarch64-linux-android
               echo "--- Verifying binary has no external lib deps ---"
               readelf -d /out/yt-dlp-aarch64-linux-android | grep NEEDED || echo "No NEEDED entries — fully static OK"
